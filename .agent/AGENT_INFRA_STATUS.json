@@ -1,0 +1,21 @@
+{
+  "project": "${PROJECT_NAME}",
+  "review_date": "2026-06-16",
+  "canonical_tree": ".claude",
+  "generated_tree": ".cursor",
+  "subsystems": {
+    "commands": ".claude/commands",
+    "skills": ".claude/skills",
+    "agents": ".claude/agents",
+    "rules": ".claude/rules",
+    "governance": ".agent",
+    "workflows": ".agent/workflows",
+    "memory": ".agent-memory",
+    "docs": "docs"
+  },
+  "watchlist": [
+    "Regenerate .cursor mirror after editing .claude (scripts/sync_assistant_trees.py)",
+    "Regenerate AGENTS.md MCP tool inventory when tools change",
+    "Ship .claude and .cursor changes in the same PR"
+  ]
+}

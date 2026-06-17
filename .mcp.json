@@ -1,0 +1,4 @@
+{
+  "_comment": "Project MCP servers for Claude Code. Define stdio/SSE servers here; secrets via env, never inline. Copy .cursor/mcp.example.json -> .cursor/mcp.json (gitignored) for Cursor. Naming convention: <scope>-<role>-* (e.g. myapp-be-data). Prefer a compact search+dispatch surface over many raw tools.",
+  "mcpServers": {}
+}

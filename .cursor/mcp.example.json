@@ -1,0 +1,11 @@
+{
+  "_comment": "Template for .cursor/mcp.json (gitignored). Copy this file to .cursor/mcp.json and fill in servers. Secrets via env only. User-level ~/.cursor/mcp.json should hold cross-repo tools; project keys live here. Example external-review server below is commented via _disabled — rename to enable.",
+  "mcpServers": {},
+  "_examples": {
+    "cli-review": {
+      "command": "node",
+      "args": ["../subagent-orchestrator/agent-orchestrator/dist/index.js"],
+      "env": { "WORKSPACE_ROOT": "${workspaceFolder}" }
+    }
+  }
+}

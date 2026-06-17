@@ -1,0 +1,75 @@
+# synthet-code-framework
+
+A generic, reusable **agentic-AI starting point** for new projects. It bundles the agent
+infrastructure that proved its worth across many repos — slash commands, skills, subagents, safety
+rules, an `.agent/` governance hub, a project-memory subsystem, and OKF docs tooling — stripped of
+all domain specifics so any new project starts mature instead of from scratch.
+
+## Seed a new project
+
+```bash
+python bootstrap.py --target ../my-app --name "My App" --stack python --desc "What it does"
+```
+
+This copies the scaffold into `../my-app`, substitutes `${PLACEHOLDER}` tokens, and leaves clearly
+marked `TODO(...)` for things only you know (board IDs, repo URL). Then:
+
+1. `cd ../my-app && git init`
+2. Fill in build/test/lint commands in `CLAUDE.md` + `AGENTS.md`.
+3. Replace `TODO(...)` markers once your GitHub Project board exists.
+4. Run `python scripts/sync_assistant_trees.py` whenever you edit `.claude/` assets.
+
+`--stack` accepts `python | node | go | generic` (sets default build/test/lint commands).
+
+## What's inside
+
+| Area | Path | What it gives you |
+|------|------|-------------------|
+| Orientation | `CLAUDE.md`, `AGENTS.md` | Project + agent contract templates |
+| Slash commands | `.claude/commands/` | `/spec /plan /implement /test-and-fix /pr-ready /release-notes`, wiki, memory, external-review, `/task-claim` |
+| Skills | `.claude/skills/` | agent-memory, commit-conventions, security-review, critical-commit-audit, subagent-review, backlog-queue, mcp-server-design, threat-modeling-agentic-tools |
+| Subagents | `.claude/agents/` | pr-ready-hygiene, critical-commit-audit, external-cli/codex/gemini reviewers |
+| Rules | `.claude/rules/` | Always-on safety + SDLC core |
+| Cursor mirror | `.cursor/` | **Generated** from `.claude/` by `scripts/sync_assistant_trees.py` |
+| Governance | `.agent/` | SAFETY, inventory, subagent role matrix, SDLC workflow playbooks |
+| Memory | `.agent-memory/` + `scripts/agent-memory/` | log → dream → promote → context (deterministic, no LLM) |
+| Docs tooling | `scripts/okf_lint.py`, `wiki_lint.py`, `docs/` | OKF-aligned knowledge bundle + linters |
+
+## Single source of truth
+
+Author agent assets under **`.claude/`** + **`.agent/`**; the **`.cursor/`** tree is generated.
+After editing `.claude/`, run:
+
+```bash
+python scripts/sync_assistant_trees.py          # regenerate .cursor/
+python scripts/sync_assistant_trees.py --check  # CI: fail if out of sync
+```
+
+## Optional dependency
+
+The external-CLI-review cluster (`subagent-review` skill, `/run-codex-review`, etc.) depends on a
+sibling **`subagent-orchestrator`** MCP server, which is **not bundled** here. See
+[`docs/EXTERNAL_CLI_REVIEWS.md`](docs/EXTERNAL_CLI_REVIEWS.md). The rest of the framework works
+without it.
+
+## Verify the framework itself
+
+```bash
+python scripts/okf_lint.py --profile project --exclude-prefix archive/ docs   # 0 errors/0 warnings
+python scripts/sync_assistant_trees.py --check                                # .cursor in sync
+python -m py_compile bootstrap.py scripts/*.py scripts/**/*.py                 # scripts compile
+```
+
+## Conventions
+
+- **Backlog as issues:** a GitHub Project board is the queue; `/task-claim` + the five-step contract.
+- **Safety first:** secrets in `secrets.json`/`.env`; never touch `.git/config`; write-capable tools
+  are opt-in. See [`.agent/SAFETY.md`](.agent/SAFETY.md).
+- **OKF docs:** `docs/` is an Open Knowledge Format bundle — markdown + YAML frontmatter, file path =
+  identity, links = graph. See [`docs/OKF_ADOPTION.md`](docs/OKF_ADOPTION.md).
+
+## Not in v0 (next steps)
+
+- A `cookiecutter` wrapper or GitHub "template repository" publishing.
+- Language-specific test/lint runner skills (each project supplies its own).
+- Auto-generating the MCP tool inventory (the marker convention ships; the generator does not).
