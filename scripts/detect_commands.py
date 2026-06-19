@@ -97,11 +97,10 @@ def detect_node_commands(target: Path) -> dict[str, str]:
     elif "typecheck" in scripts or "type-check" in scripts:
         result["LINT_CMD"] = "npm run " + ("typecheck" if "typecheck" in scripts else "type-check")
 
-    # Detect TypeScript noEmit check as lint fallback
+    # Detect TypeScript noEmit check as lint fallback when no lint/typecheck script exists
     dev_deps = {**(data.get("devDependencies") or {}), **(data.get("dependencies") or {})}
     if "typescript" in dev_deps and "LINT_CMD" not in result:
-        existing = result.get("LINT_CMD", "")
-        result["LINT_CMD"] = (existing + " && " if existing else "") + "npx tsc --noEmit"
+        result["LINT_CMD"] = "npx tsc --noEmit"
 
     return result
 
