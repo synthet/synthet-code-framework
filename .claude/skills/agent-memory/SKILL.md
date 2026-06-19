@@ -41,9 +41,12 @@ python scripts/agent-memory/context.py
 ## Dream review checklist
 
 1. Open `dreams/*-changelog.md` — scan **Uncertain / needs review**.
-2. Diff proposed `dreams/*.md` vs `memory.md`.
-3. Redact anything sensitive; reject promotion if secrets might be present.
-4. Promote only when the proposal is accurate and concise.
+2. Check **Stale / needs re-verification** — for each flagged item, confirm it still applies to
+   the current codebase. Either re-log it via `/log-session` (refreshes the date) or promote it
+   as `deprecated` category if it no longer applies.
+3. Diff proposed `dreams/*.md` vs `memory.md`.
+4. Redact anything sensitive; reject promotion if secrets might be present.
+5. Promote only when the proposal is accurate and concise.
 
 ## Relationship to Claude Code native memory
 

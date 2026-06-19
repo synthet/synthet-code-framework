@@ -14,10 +14,15 @@ from scripts.agent_memory import schema
 from scripts.agent_memory.paths import load_config
 
 _NORMALIZE_RE = re.compile(r"[^a-z0-9]+")
+_DATE_SUFFIX_RE = re.compile(r"\s*\(updated:\s*(\d{4}-\d{2}-\d{2})\)\s*$")
 
 
 def normalize_text(text: str) -> str:
     return _NORMALIZE_RE.sub(" ", text.lower()).strip()
+
+
+def _today() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
 @dataclass
@@ -26,6 +31,7 @@ class MemoryItem:
     section: str
     sources: list[str] = field(default_factory=list)
     confidence: str = "medium"
+    last_updated_at: str = ""
 
     @property
     def key(self) -> str:
@@ -45,10 +51,19 @@ def parse_memory_markdown(content: str) -> dict[str, list[MemoryItem]]:
                 current = None
             continue
         if current and line.startswith("- "):
-            text = line[2:].strip()
-            if not text or text == schema.PLACEHOLDER_NONE:
+            raw = line[2:].strip()
+            if not raw or raw == schema.PLACEHOLDER_NONE:
                 continue
-            sections[current].append(MemoryItem(text=text, section=current))
+            m = _DATE_SUFFIX_RE.search(raw)
+            if m:
+                last_updated_at = m.group(1)
+                text = raw[: m.start()].strip()
+            else:
+                last_updated_at = ""
+                text = raw
+            sections[current].append(
+                MemoryItem(text=text, section=current, last_updated_at=last_updated_at)
+            )
     return sections
 
 
@@ -86,6 +101,7 @@ def _item_from_candidate(
         section=section,
         sources=[session_name],
         confidence=cand.get("confidence") or "medium",
+        last_updated_at=_today(),
     )
 
 
@@ -106,7 +122,7 @@ def merge_sections(
         "deprecated": [],
         "uncertain": [],
     }
-    merged = {s: [MemoryItem(i.text, i.section, list(i.sources)) for i in items] for s, items in base.items()}
+    merged = {s: [MemoryItem(i.text, i.section, list(i.sources), i.confidence, i.last_updated_at) for i in items] for s, items in base.items()}
     index: dict[str, MemoryItem] = {}
     for section, items in merged.items():
         for item in items:
@@ -126,6 +142,7 @@ def merge_sections(
                 for src in new_item.sources:
                     if src not in existing.sources:
                         existing.sources.append(src)
+                existing.last_updated_at = _today()
                 continue
             # Contradiction: same normalized text in different section?
             cross = _find_cross_section_conflict(merged, new_item)
@@ -212,15 +229,43 @@ def merge_changelogs(*parts: dict[str, list[str]]) -> dict[str, list[str]]:
         "removed": [],
         "deprecated": [],
         "uncertain": [],
+        "stale": [],
     }
     seen: dict[str, set[str]] = {k: set() for k in out}
     for part in parts:
         for key, entries in part.items():
+            if key not in seen:
+                continue
             for e in entries:
                 if e not in seen[key]:
                     seen[key].add(e)
                     out[key].append(e)
     return out
+
+
+def find_stale_items(
+    sections: dict[str, list[MemoryItem]],
+    *,
+    staleness_days: int,
+) -> list[str]:
+    """Return changelog entries for items whose last_updated_at is older than staleness_days."""
+    today = datetime.now(timezone.utc).date()
+    entries: list[str] = []
+    for section, items in sections.items():
+        for item in items:
+            if not item.last_updated_at:
+                continue
+            try:
+                updated = datetime.strptime(item.last_updated_at, "%Y-%m-%d").date()
+            except ValueError:
+                continue
+            age = (today - updated).days
+            if age >= staleness_days:
+                entries.append(
+                    f"{item.text} (last updated: {item.last_updated_at}, {age} days ago)"
+                    f" [section: {section}]"
+                )
+    return entries
 
 
 def render_memory_markdown(
@@ -246,7 +291,8 @@ def render_memory_markdown(
             lines.append(f"- {schema.PLACEHOLDER_NONE}")
         else:
             for item in items:
-                lines.append(f"- {item.text}")
+                suffix = f" (updated: {item.last_updated_at})" if item.last_updated_at else ""
+                lines.append(f"- {item.text}{suffix}")
         lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 
@@ -258,6 +304,7 @@ def render_changelog(changelog: dict[str, list[str]]) -> str:
         "removed": "Removed",
         "deprecated": "Deprecated",
         "uncertain": "Uncertain / needs review",
+        "stale": "Stale / needs re-verification",
     }
     lines = ["# Dream changelog", ""]
     for key, title in titles.items():
@@ -277,6 +324,7 @@ def run_dream(
     repo_root: Path,
     *,
     max_sessions: int | None = None,
+    staleness_days: int | None = None,
 ) -> tuple[Path, Path]:
     """Generate dream + changelog paths. Never writes memory.md."""
     config = load_config(repo_root)
@@ -306,6 +354,10 @@ def run_dream(
     )
     struct_changelog = diff_against_base(base_sections, merged)
     changelog = merge_changelogs(cand_changelog, struct_changelog)
+
+    threshold = staleness_days if staleness_days is not None else config.get("staleness_threshold_days", 180)
+    stale = find_stale_items(merged, staleness_days=threshold)
+    changelog["stale"] = stale
 
     from scripts.agent_memory.limits import dream_timestamp_slug
 

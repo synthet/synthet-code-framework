@@ -50,6 +50,16 @@ Markdown with fixed H2 sections (order matters for parsing):
 
 Bullet lines use `- ` prefix. Empty section: `- (none yet)`.
 
+Items may carry an optional inline date suffix written by the consolidation engine:
+
+```
+- <text> (updated: YYYY-MM-DD)
+```
+
+The date is set when an item is first promoted and refreshed whenever a new session candidate
+confirms the item. Items whose date is older than `staleness_threshold_days` (config, default 180)
+are flagged in the dream changelog under `## Stale / needs re-verification` for human review.
+
 ## Dream proposal (`dreams/*.md`)
 
 YAML front matter between `---` delimiters:
