@@ -180,9 +180,6 @@ def main() -> int:
         if not target.is_dir():
             print(f"ERROR: target {target} is not a directory", file=sys.stderr)
             return 1
-        if not args.name and not args.detect_only:
-            print("ERROR: --name is required unless --detect-only is set", file=sys.stderr)
-            return 1
         stack = args.stack if args.stack in STACK_DEFAULTS else "generic"
         detected = _detect_commands(target, stack)
         if not detected:
