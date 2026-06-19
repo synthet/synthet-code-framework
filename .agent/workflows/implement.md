@@ -21,6 +21,8 @@ Use when the user has approved a plan or given a small, explicit task.
 
 ## Checklist
 
+- [ ] Test stubs written and **failing** before implementation began
+- [ ] Tests pass after implementation
 - [ ] No unrelated refactors
 - [ ] No secrets committed
 - [ ] [AGENTS.md](../../AGENTS.md) commands run (or documented why not)
