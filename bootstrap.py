@@ -26,6 +26,14 @@ import shutil
 import sys
 from pathlib import Path
 
+# Import lazily to avoid hard dependency when running --detect-only without full install
+def _detect_commands(target: Path, stack: str) -> dict[str, str]:
+    try:
+        from scripts.detect_commands import detect_commands
+        return detect_commands(target, stack)
+    except ImportError:
+        return {}
+
 FRAMEWORK_ROOT = Path(__file__).resolve().parent
 PLACEHOLDER_RE = re.compile(r"\$\{([A-Z0-9_]+)\}")
 
@@ -144,7 +152,7 @@ def project_readme(vals: dict[str, str]) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser(description="Seed a project from synthet-code-framework")
     ap.add_argument("--target", required=True, type=Path, help="Destination directory")
-    ap.add_argument("--name", required=True, help="Project display name")
+    ap.add_argument("--name", help="Project display name (required unless --detect-only)")
     ap.add_argument("--slug", help="Project slug (default: derived from name)")
     ap.add_argument("--desc", help="One-line description")
     ap.add_argument("--stack", default="generic", help="python|node|go|generic")
@@ -154,9 +162,40 @@ def main() -> int:
     ap.add_argument("--owner", help="GitHub owner")
     ap.add_argument("--repo", help="GitHub repo name (default: slug)")
     ap.add_argument("--force", action="store_true", help="Allow non-empty target")
+    ap.add_argument(
+        "--auto-detect",
+        action="store_true",
+        help="After seeding, probe target for build/test/lint commands and fill them in",
+    )
+    ap.add_argument(
+        "--detect-only",
+        action="store_true",
+        help="Only probe --target for commands (no seeding); useful for existing projects",
+    )
     args = ap.parse_args()
 
     target: Path = args.target.resolve()
+
+    if args.detect_only:
+        if not target.is_dir():
+            print(f"ERROR: target {target} is not a directory", file=sys.stderr)
+            return 1
+        if not args.name and not args.detect_only:
+            print("ERROR: --name is required unless --detect-only is set", file=sys.stderr)
+            return 1
+        stack = args.stack if args.stack in STACK_DEFAULTS else "generic"
+        detected = _detect_commands(target, stack)
+        if not detected:
+            print("No commands detected (no recognised config files found).")
+        else:
+            for key, value in detected.items():
+                print(f"{key}={value}")
+        return 0
+
+    if not args.name:
+        print("ERROR: --name is required", file=sys.stderr)
+        return 1
+
     if target.exists() and any(target.iterdir()) and not args.force:
         print(f"ERROR: target {target} is not empty (use --force)", file=sys.stderr)
         return 1
@@ -179,12 +218,56 @@ def main() -> int:
     (target / "README.md").write_text(project_readme(vals), encoding="utf-8")
 
     print(f"Seeded '{vals['PROJECT_NAME']}' into {target} ({count} files).")
-    print("Next steps:")
-    print("  1. cd into the target and `git init` (or push to your remote).")
-    print("  2. Fill in build/test/lint commands in CLAUDE.md + AGENTS.md.")
-    print("  3. Replace TODO(...) markers (board IDs, repo URL) once your Project board exists.")
-    print("  4. `python scripts/sync_assistant_trees.py` after editing .claude/ assets.")
+
+    if args.auto_detect:
+        stack = args.stack if args.stack in STACK_DEFAULTS else "generic"
+        detected = _detect_commands(target, stack)
+        if detected:
+            print(f"\nAuto-detected commands (stack: {stack}):")
+            _apply_detected_commands(target, detected, vals)
+            for key, value in detected.items():
+                print(f"  {key} = {value}")
+            missing = [k for k in ("BUILD_CMD", "TEST_CMD", "LINT_CMD") if k not in detected]
+            if missing:
+                print(f"  Still TODO: {', '.join(missing)}")
+        else:
+            print("\nAuto-detect: no recognised config files found — fill in commands manually.")
+
+    print("\nNext steps:")
+    if not args.auto_detect:
+        print("  1. cd into the target and `git init` (or push to your remote).")
+        print("  2. Fill in build/test/lint commands in CLAUDE.md + AGENTS.md.")
+        print("  3. Replace TODO(...) markers (board IDs, repo URL) once your Project board exists.")
+        print("  4. `python scripts/sync_assistant_trees.py` after editing .claude/ assets.")
+    else:
+        print("  1. cd into the target and `git init` (or push to your remote).")
+        print("  2. Review auto-detected commands in CLAUDE.md + AGENTS.md (marked # auto-detected).")
+        print("  3. Replace TODO(...) markers (board IDs, repo URL) once your Project board exists.")
+        print("  4. `python scripts/sync_assistant_trees.py` after editing .claude/ assets.")
     return 0
+
+
+def _apply_detected_commands(
+    target: Path, detected: dict[str, str], seeded_vals: dict[str, str]
+) -> None:
+    """Replace seeded stack-default command values in CLAUDE.md/AGENTS.md with detected ones.
+
+    Replaces the value that was substituted during seeding (e.g. 'pip install -e .') with the
+    detected value (e.g. 'poetry install  # auto-detected'). Only replaces when the detected
+    value actually differs from the default.
+    """
+    for filename in ("CLAUDE.md", "AGENTS.md"):
+        path = target / filename
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for key, new_value in detected.items():
+            old_value = seeded_vals.get(key, "")
+            if old_value and old_value != new_value:
+                text = text.replace(old_value, f"{new_value}  # auto-detected")
+            elif not old_value:
+                text = text.replace(f"TODO({key})", f"{new_value}  # auto-detected")
+        path.write_text(text, encoding="utf-8")
 
 
 if __name__ == "__main__":
