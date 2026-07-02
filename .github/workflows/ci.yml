@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    name: Framework self-checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dev dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Compile all scripts
+        run: |
+          python -m py_compile bootstrap.py
+          find scripts -name '*.py' -print0 | xargs -0 python -m py_compile
+
+      - name: Assistant tree drift check (.claude -> .cursor)
+        run: python scripts/sync_assistant_trees.py --check
+
+      - name: OKF docs lint
+        run: python scripts/okf_lint.py --profile project --exclude-prefix archive/ docs
+
+      - name: Agent frontmatter contract
+        run: python scripts/ci/check_agent_frontmatter.py
+
+      - name: Committed-secrets scan
+        run: python scripts/ci/check_secrets.py
+
+      - name: Tests
+        run: python -m pytest tests -q

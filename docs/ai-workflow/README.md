@@ -33,6 +33,20 @@ okf_version: 0.1
 /spec  →  /plan  →  /implement  →  /test-and-fix  →  /pr-ready  →  (optional) /subagent-review  →  /release-notes
 ```
 
+### Phase gates
+
+Each phase produces an artifact that gates the next one. Do not skip a gate silently — if a phase
+is unnecessary (trivial fix), say so explicitly.
+
+| Phase | Artifact produced | Gate to pass before the next phase |
+|-------|-------------------|-------------------------------------|
+| `/spec` | Spec with EARS `AC-n` acceptance criteria | User approves; no criterion is AMBIGUOUS |
+| `/plan` | Implementation plan (files, approach, tests, rollback) | User approves the plan |
+| `/implement` | Minimal-diff change set with tests | Lint + narrowest tests green |
+| `/test-and-fix` | Green test run (or written blocker); RCA log entry for non-obvious failures | Tests pass or blocker documented |
+| `validate-implementation` (skill) | Per-AC Verified/Failed/Unknown report with evidence | Every AC Verified, or open items accepted by the user |
+| `/pr-ready` | Definition-of-done report + paste-ready PR text | Checks green, `Closes #<N>`, card in `Stage = Review` |
+
 - **Backlog first:** pick and claim work via the [backlog contract](../project/00-backlog-workflow.md) (`/task-claim`).
 - **Review:** `/critical-commit-audit` for high-severity bug hunts; `/check-subagents` +
   `/run-codex-review` / `/run-gemini-review` for external second opinions.

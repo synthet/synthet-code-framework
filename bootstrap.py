@@ -37,11 +37,14 @@ def _detect_commands(target: Path, stack: str) -> dict[str, str]:
 FRAMEWORK_ROOT = Path(__file__).resolve().parent
 PLACEHOLDER_RE = re.compile(r"\$\{([A-Z0-9_]+)\}")
 
-# Paths (relative to framework root) NOT copied into a seeded project.
+# Paths (relative to framework root) NOT copied into a seeded project (framework-only assets).
 EXCLUDE = {
     ".git",
+    ".github",          # framework CI (tests bootstrap.py, which is not shipped)
+    "tests",            # framework self-tests
     "bootstrap.py",
     "README.md",        # framework README; replaced with a minimal project README
+    "CHANGELOG.md",     # framework history; replaced with a fresh skeleton
 }
 EXCLUDE_DIR_NAMES = {"__pycache__", ".agent-runs"}
 # Working dirs: copy the dir (and .gitkeep) but not their contents.
@@ -116,7 +119,7 @@ def substitute(text: str, vals: dict[str, str]) -> str:
 
 
 def is_text(path: Path) -> bool:
-    return path.suffix in TEXT_SUFFIXES or path.name == ".gitignore"
+    return path.suffix in TEXT_SUFFIXES or path.name in {".gitignore", "env.example"}
 
 
 def iter_sources() -> list[Path]:
@@ -128,8 +131,8 @@ def iter_sources() -> list[Path]:
             continue
         if rel.parts and rel.parts[0] in EXCLUDE or str(rel) in EXCLUDE:
             continue
-        # Skip contents of working dirs except .gitkeep
-        if any(_under(rel, d) and rel.name != ".gitkeep" for d in EMPTY_KEEP_DIRS) and p.is_file():
+        # Skip contents of working dirs (files and local subdirs) except .gitkeep
+        if any(_under(rel, d) and rel.name != ".gitkeep" for d in EMPTY_KEEP_DIRS):
             continue
         out.append(p)
     return out
@@ -137,6 +140,18 @@ def iter_sources() -> list[Path]:
 
 def _under(rel: Path, base: Path) -> bool:
     return rel != base and str(rel).replace("\\", "/").startswith(str(base).replace("\\", "/") + "/")
+
+
+def project_changelog(vals: dict[str, str]) -> str:
+    return (
+        f"# Changelog — {vals['PROJECT_NAME']}\n\n"
+        "All notable changes to this project are documented here. Format follows\n"
+        "[Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow\n"
+        "[Semantic Versioning](https://semver.org/).\n\n"
+        "## [Unreleased]\n\n"
+        "### Added\n\n"
+        "- Project seeded from synthet-code-framework.\n"
+    )
 
 
 def project_readme(vals: dict[str, str]) -> str:
@@ -172,6 +187,7 @@ def main() -> int:
         action="store_true",
         help="Only probe --target for commands (no seeding); useful for existing projects",
     )
+    ap.add_argument("--dry-run", action="store_true", help="Print planned files without writing")
     args = ap.parse_args()
 
     target: Path = args.target.resolve()
@@ -193,11 +209,25 @@ def main() -> int:
         print("ERROR: --name is required", file=sys.stderr)
         return 1
 
+    vals = build_values(args)
+
+    if args.dry_run:
+        files = sorted(
+            src.relative_to(FRAMEWORK_ROOT).as_posix() for src in iter_sources() if src.is_file()
+        )
+        print(f"DRY RUN: would seed '{vals['PROJECT_NAME']}' into {target}")
+        print("Substitutions:")
+        for key in sorted(vals):
+            print(f"  {key} = {vals[key]}")
+        print(f"Files ({len(files)} + generated README.md, CHANGELOG.md):")
+        for f in files:
+            print(f"  {f}")
+        return 0
+
     if target.exists() and any(target.iterdir()) and not args.force:
         print(f"ERROR: target {target} is not empty (use --force)", file=sys.stderr)
         return 1
 
-    vals = build_values(args)
     count = 0
     for src in iter_sources():
         rel = src.relative_to(FRAMEWORK_ROOT)
@@ -213,6 +243,7 @@ def main() -> int:
         count += 1
 
     (target / "README.md").write_text(project_readme(vals), encoding="utf-8")
+    (target / "CHANGELOG.md").write_text(project_changelog(vals), encoding="utf-8")
 
     print(f"Seeded '{vals['PROJECT_NAME']}' into {target} ({count} files).")
 

@@ -4,9 +4,14 @@
 
 Use when implementation is complete and you want a merge-ready PR.
 
+This is the **definition-of-done** check: merge readiness (checks green, hygiene, issue linkage).
+Spec satisfaction is a separate question — run the `validate-implementation` skill first for
+per-criterion verification; do not conflate "meets spec" with "mergeable".
+
 ## Inputs
 
 - Diff or branch state; **AGENTS.md**; optional issue link.
+- Validation report from `validate-implementation` if a spec with acceptance criteria exists.
 
 ## Output
 
@@ -20,6 +25,13 @@ Use when implementation is complete and you want a merge-ready PR.
 
 - Scan diff for **debug code**, **TODOs** that should be issues, and **accidental files**.
 - Confirm no secrets or large binaries.
+
+## Definition of done
+
+- Lint/test commands from **AGENTS.md** ran and are green (state actual results; never "probably green").
+- Spec ACs are Verified per `validate-implementation`, or open Unknowns/Failures are listed explicitly.
+- PR references its issue (`Closes #<N>`) and the board card is in `Stage = Review`.
+- Diff is clean: no debug code, secrets, large binaries, or unrelated refactors.
 
 ## Done when
 

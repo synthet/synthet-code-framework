@@ -27,7 +27,7 @@ marked `TODO(...)` for things only you know (board IDs, repo URL). Then:
 |------|------|-------------------|
 | Orientation | `CLAUDE.md`, `AGENTS.md` | Project + agent contract templates |
 | Slash commands | `.claude/commands/` | `/spec /plan /implement /test-and-fix /pr-ready /release-notes`, wiki, memory, external-review, `/task-claim` |
-| Skills | `.claude/skills/` | agent-memory, commit-conventions, security-review, critical-commit-audit, subagent-review, backlog-queue, mcp-server-design, threat-modeling-agentic-tools |
+| Skills | `.claude/skills/` | agent-memory, commit-conventions, security-review, critical-commit-audit, subagent-review, backlog-queue, mcp-server-design, threat-modeling-agentic-tools, validate-implementation, release-bump |
 | Subagents | `.claude/agents/` | pr-ready-hygiene, critical-commit-audit, external-cli/codex/gemini reviewers |
 | Rules | `.claude/rules/` | Always-on safety + SDLC core |
 | Cursor mirror | `.cursor/` | **Generated** from `.claude/` by `scripts/sync_assistant_trees.py` |
@@ -58,7 +58,13 @@ without it.
 python scripts/okf_lint.py --profile project --exclude-prefix archive/ docs   # 0 errors/0 warnings
 python scripts/sync_assistant_trees.py --check                                # .cursor in sync
 python -m py_compile bootstrap.py scripts/*.py scripts/**/*.py                 # scripts compile
+python scripts/ci/check_agent_frontmatter.py                                  # asset frontmatter contract
+python scripts/ci/check_secrets.py                                            # no committed secrets
+python -m pytest tests -q                                                      # bootstrap test suite
 ```
+
+The same checks run in CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+Dev dependencies: `pip install -r requirements-dev.txt`.
 
 ## Conventions
 

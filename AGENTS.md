@@ -75,6 +75,16 @@ knows exactly which suite "E2E" means:
   inventing API paths / config keys / schema names (check
   [`docs/CANONICAL_SOURCES.md`](docs/CANONICAL_SOURCES.md)).
 
+## RCA / Failure Log
+
+Append-only record of **non-obvious failures** and their root causes, so the next agent does not
+re-debug them. Add an entry after `/test-and-fix` (or any debugging session) uncovers something
+that was not obvious from the error message. Keep entries short: date, symptom, root cause, fix.
+
+| Date | Symptom | Root cause | Fix / guard |
+|------|---------|------------|-------------|
+| _(none yet)_ | | | |
+
 ## AI workspace assets
 
 | Asset | Location |
