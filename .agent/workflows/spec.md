@@ -15,12 +15,14 @@ Use when starting non-trivial work. Produce a **spec** the user can review befor
     - **Users / stakeholders**: Who benefits.
     - **Non-goals**: What is explicitly out of scope.
     - **User stories**: Short "As a ... I want ... so that ..." bullets.
-    - **Acceptance criteria**: Checkable bullets in "Given/When/Then" or "When X → assert Y" form.
-      Each criterion must be concrete enough to become a failing test stub without further interpretation.
+    - **Acceptance criteria**: One **EARS-form** sentence per criterion, numbered `AC-1`, `AC-2`, …
+      (When/While/If/Where … the system shall …). Flag vague verbs, multi-`shall` sentences, or
+      unclear subjects as **AMBIGUOUS** and rewrite before approval.
     - **Open questions**: Unknowns and decisions needed from humans.
 3. **Present to User** for approval before moving to `/plan`.
 
 ## Done when
 
-- Every criterion is directly translatable to a runnable test assertion (no intent-reading required).
+- Every criterion is one EARS sentence with a stable `AC-n` ID; none are AMBIGUOUS.
 - Non-goals prevent scope creep.
+- The `AC-n` list is the contract later checked by the `validate-implementation` skill.

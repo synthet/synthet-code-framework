@@ -14,6 +14,7 @@ Use when CI is red, tests fail locally, or the user asks for a test pass.
 1. Run the **unit test** command from AGENTS.md (then integration/E2E if relevant).
 2. For each failure: locate root cause, fix **minimal** code or test expectation.
 3. Re-run until green or blocked; if blocked, document what is needed (data, env, flaky test).
+4. If the root cause was non-obvious, append a row to the **RCA / Failure Log** in AGENTS.md.
 
 ## Done when
 
