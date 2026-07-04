@@ -31,7 +31,14 @@ Maintain practical agent skills for lightweight CLI tools on Windows, WSL2, macO
 
 **Net-new router (13th CLI skill):** `search-tool-selection` — when to pick fd → rg → ast-grep (and fff MCP when connected).
 
-Shared references live under `cli-tools-overview/references/` (install blocks, bounded output, confirmation gates, Windows/WSL split).
+Shared references live under `cli-tools-overview/references/`:
+
+- `install-blocks.md` — winget / apt / Homebrew install blocks
+- `install-tiers.md` — Tier 0 → Block A → Block B → deferred; install scopes
+- `agent-environment.md` — PATH contract, Cursor restart, smoke tests
+- `bounded-output-patterns.md` — bounded search/read/git patterns
+- `commands-requiring-confirmation.md` — destructive / auto-fix gates
+- `windows-wsl-split.md` — Windows host vs WSL2 workloads
 
 ## Skill file requirements
 
@@ -74,6 +81,25 @@ Native Windows is enough for: simple search, editing, GitHub CLI, Python with `u
 
 Prefer WSL2 for: Bash-heavy repos, Docker Compose, monorepos, MCP servers expecting Unix paths, CI-like test reproduction.
 
+## Install tier model
+
+Human provisioning follows a fixed order (see `cli-tools-overview/references/install-tiers.md`):
+
+| Tier | Contents |
+|------|----------|
+| **Tier 0** | `git`, `rg`, `fd`, `jq`, `node` — router core |
+| **Block A** | Canonical tools in `install-blocks.md` |
+| **Block B** | Child-skill extensions (`yq`, `just`, `mise`, `direnv`, `eza`, `shellcheck`, `trivy`, `hadolint`) |
+| **Deferred** | Optional per skill (`fzf`, `semgrep`, `hyperfine`, `gitleaks`, `fff-mcp`, …) |
+
+**Install scopes:** Core only (Tier 0 + missing Block A) / Recommended (Block A + B) / Everything missing (+ deferred).
+
+After winget/uv/npm installs, operators must **restart Cursor** and smoke-test PATH — see `agent-environment.md`.
+
+## Agent environment
+
+Shell CLIs are discovered via PATH in the agent shell (no separate Cursor registry). MCP tools require project or user `.cursor/mcp.json`. IDE built-ins (Grep, SemanticSearch, Glob) need no install.
+
 ## MCP tiers (mcp-code-intelligence)
 
 ```text
@@ -94,7 +120,7 @@ python scripts/sync_assistant_trees.py --check
 python scripts/ci/check_agent_frontmatter.py
 ```
 
-Validator checks: all 13 CLI dirs exist, required headings, platform install subsections, no repo-root `skills/` directory.
+Validator checks: all 13 CLI dirs exist, required headings, platform install subsections, all 6 `cli-tools-overview/references/` files present, no repo-root `skills/` directory.
 
 ## Quality bar
 

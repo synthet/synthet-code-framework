@@ -22,6 +22,8 @@ Package managers: `winget`, `apt`, or `brew`.
 
 ## Install
 
+Choose an install scope first — see [install-tiers.md](../cli-tools-overview/references/install-tiers.md) (Core only / Recommended / Everything missing).
+
 Install blocks are shared — See [install-blocks.md](../cli-tools-overview/references/install-blocks.md).
 
 ### Windows PowerShell
@@ -44,7 +46,8 @@ Copy full blocks from [install-blocks.md](../cli-tools-overview/references/insta
 ## Agent-Safe Patterns
 
 - User executes install blocks interactively.
-- After install, verify with `--version` commands only.
+- After install, **restart Cursor** and run the smoke test in [agent-environment.md](../cli-tools-overview/references/agent-environment.md).
+- Verify with `--version` commands only.
 
 ## Commands Requiring Confirmation
 
@@ -70,4 +73,6 @@ All install/uninstall commands require user initiation. See [commands-requiring-
 - [ ] `git --version`, `rg --version`, `fd --version`, `jq --version`, `gh --version`
 - [ ] `node --version`, `pnpm --version` if JS repo
 - [ ] `uv --version` if Python repo
+- [ ] Block B (Recommended scope): `yq --version`, `just --version`, `shellcheck --version`
+- [ ] Cursor restarted; smoke test passes per [agent-environment.md](../cli-tools-overview/references/agent-environment.md)
 

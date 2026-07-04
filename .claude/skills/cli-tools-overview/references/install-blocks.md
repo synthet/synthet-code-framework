@@ -2,6 +2,8 @@
 
 Run these on a **workstation** when setting up an agent environment. Agents should not bulk-install without user approval.
 
+For tier order and Block B extensions, see [install-tiers.md](install-tiers.md).
+
 ## Windows PowerShell (winget)
 
 ```powershell

@@ -33,7 +33,7 @@ Thirteen skills under `.claude/skills/` cover agent-safe CLI usage (see [`.agent
 
 | Skill | Role |
 |-------|------|
-| `cli-tools-overview` | Router + shared references |
+| `cli-tools-overview` | Router + shared references (install-tiers, agent-environment) |
 | `search-tool-selection` | **Start here for search** — fd → rg → ast-grep |
 | `safe-command-patterns` | Bounded output, git hygiene |
 | `search-and-navigation` | rg, fd, bat, tree |
@@ -47,6 +47,8 @@ Thirteen skills under `.claude/skills/` cover agent-safe CLI usage (see [`.agent
 | `windows-agent-tooling` / `wsl2-agent-tooling` | Platform split |
 
 Validate after changes: `python scripts/validate_cli_skills.py`.
+
+**Install tiers:** Human provisioning order (Tier 0 → Block A → Block B → deferred) and operator scopes live in `cli-tools-overview/references/install-tiers.md`. After installs, restart Cursor and smoke-test PATH per `agent-environment.md`.
 
 **Downstream pattern:** Cursor-first forks (e.g. image-scoring-gallery) may consolidate into `agent-cli-hub` + topic skills; cherry-pick individual flat skills from this framework as needed.
 
