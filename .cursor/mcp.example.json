@@ -1,10 +1,16 @@
 {
-  "_comment": "Template for .cursor/mcp.json (gitignored). Copy this file to .cursor/mcp.json and fill in servers. Secrets via env only. User-level ~/.cursor/mcp.json should hold cross-repo tools; project keys live here. Example external-review server below is commented via _disabled — rename to enable.",
+  "_comment": "Template for .cursor/mcp.json (gitignored). Copy this file to .cursor/mcp.json and fill in servers. Secrets via env only. User-level ~/.cursor/mcp.json should hold cross-repo tools; project keys live here. Examples below are opt-in — copy from _examples into mcpServers to enable.",
   "mcpServers": {},
   "_examples": {
     "cli-review": {
       "command": "node",
       "args": ["../subagent-orchestrator/agent-orchestrator/dist/index.js"],
+      "env": { "WORKSPACE_ROOT": "${workspaceFolder}" }
+    },
+    "fff-mcp": {
+      "_comment": "Optional fast file search — https://github.com/dmtrKovalenko/fff . Install fff-mcp binary; on Windows often %LOCALAPPDATA%\\fff-mcp\\bin\\fff-mcp.exe",
+      "command": "fff-mcp",
+      "args": [],
       "env": { "WORKSPACE_ROOT": "${workspaceFolder}" }
     }
   }

@@ -19,7 +19,12 @@ ${TEST_CMD}                                # tests (see AGENTS.md)
 
 ```bash
 python scripts/sync_assistant_trees.py     # regenerate .cursor/ mirror from .claude/
+python scripts/validate_cli_skills.py      # CLI skill structure (when CLI skills changed)
 ```
+
+## Optional MCP (fff)
+
+Fast indexed repo search: install [fff-mcp](https://github.com/dmtrKovalenko/fff), copy `_examples.fff-mcp` from `.cursor/mcp.example.json` into gitignored `.cursor/mcp.json`, reload MCP. See [`AGENTS.md`](../AGENTS.md).
 
 ## Known pitfalls
 

@@ -22,6 +22,8 @@ question.
 | Status / state enums | `<path to the enum definition>` |
 | Domain vocabulary | `<path to a terminology doc>` |
 | Build / test / lint commands | [`../AGENTS.md`](../AGENTS.md) |
+| Optional file-search MCP (fff) | [fff repo](https://github.com/dmtrKovalenko/fff); template keys `fff-mcp` / `${MCP_PREFIX}-fff` in [`.cursor/mcp.example.json`](../.cursor/mcp.example.json) |
+| CLI tooling skills spec | [`.agent/cli-tools-skills-spec.md`](../.agent/cli-tools-skills-spec.md) |
 | Agent assets (rules/commands/skills/agents) | [`ai-workflow/README.md`](ai-workflow/README.md) |
 | Safety rules | [`../.agent/SAFETY.md`](../.agent/SAFETY.md) |
 | Wiki conventions | [`WIKI_SCHEMA.md`](WIKI_SCHEMA.md) |

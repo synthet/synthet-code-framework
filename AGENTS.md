@@ -33,11 +33,23 @@ ${LINT_CMD}      # lint / typecheck / format
 - **Secrets via env only**, never CLI args. Reload the MCP client after changing keys.
 - User-level `~/.cursor/mcp.json` holds cross-repo tools; project keys live in this repo.
 
+### Optional: fff file-search MCP
+
+[fff](https://github.com/dmtrKovalenko/fff) provides fast indexed repo search via MCP (`ffgrep`, `fffind`, `fff-multi-grep`). **Opt-in** — clones work without it.
+
+1. Install `fff-mcp` from fff releases (Windows: `%LOCALAPPDATA%\fff-mcp\bin\fff-mcp.exe`; add to PATH).
+2. Copy the `fff-mcp` entry from [`.cursor/mcp.example.json`](.cursor/mcp.example.json) `_examples` into gitignored `.cursor/mcp.json`, or register at user level as `fff`.
+3. Rename server key to `${MCP_PREFIX}-fff` in bootstrapped projects if desired.
+4. Reload MCP in Cursor (Settings → MCP, or restart IDE).
+5. Agents: prefer fff for repeated repo-wide search when connected; one-off probes may still use `rg`/`fd` (see `search-tool-selection` skill).
+
 ## Available tools
 
 <!-- BEGIN MCP TOOL INVENTORY -->
 <!-- Auto-generated; do not edit by hand. Regenerate when your MCP tools change. -->
-_(none yet)_
+| Server (example key) | Tools (when fff-mcp connected) | Notes |
+|----------------------|--------------------------------|-------|
+| `fff-mcp` / `${MCP_PREFIX}-fff` | `ffgrep`, `fffind`, `fff-multi-grep` | Opt-in; see `.cursor/mcp.example.json` |
 <!-- END MCP TOOL INVENTORY -->
 
 ## Common workflows
