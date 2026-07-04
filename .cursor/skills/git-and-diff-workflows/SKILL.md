@@ -1,0 +1,80 @@
+---
+name: git-and-diff-workflows
+description: Safe git and GitHub CLI workflows — status, diff, log, branch, PR operations with inspect-before-commit patterns.
+---
+
+# Git and diff workflows
+
+## Purpose
+
+Repository operations with bounded diffs and explicit confirmation for history rewrites.
+
+## When to Use
+
+- Before/after edits (`status`, `diff`)
+- PR/issue work (`gh`)
+- Secret scanning (`gitleaks` read-only)
+
+## Required Tools
+
+`git`, `gh`; optional `delta`, `gitleaks`, `git-filter-repo` (human-only).
+
+## Install
+
+Install blocks are shared — See [install-blocks.md](../cli-tools-overview/references/install-blocks.md).
+
+### Windows PowerShell
+
+Use winget blocks from the reference when provisioning a new machine.
+
+### WSL2 Ubuntu
+
+Use apt/curl blocks from the reference; symlink `fdfind` → `fd` if needed.
+
+### macOS
+
+Use Homebrew blocks from the reference.
+
+
+## Common Commands
+
+```bash
+git status --short
+git diff --stat
+git diff -- path/to/file
+git log --oneline -n 20
+gh pr view 123 --json title,state,url
+gh issue list --limit 20
+gitleaks detect --source . --no-git -v 2>/dev/null | head -50
+```
+
+## Agent-Safe Patterns
+
+- Always `git status --short` before staging.
+- Show `git diff --stat` before commit messages.
+- See [bounded-output-patterns.md](../cli-tools-overview/references/bounded-output-patterns.md).
+
+## Commands Requiring Confirmation
+
+See [commands-requiring-confirmation.md](../cli-tools-overview/references/commands-requiring-confirmation.md). — especially reset, clean, force-push, filter-repo.
+
+## Troubleshooting
+
+- Detached HEAD: ask user before checkout.
+- `gh` auth: user runs `gh auth login`.
+
+## Windows Notes
+
+- Line endings: watch for CRLF noise in diffs.
+- See [windows-wsl-split.md](../cli-tools-overview/references/windows-wsl-split.md).
+
+## WSL2 Notes
+
+- Commit from same environment as tests ran.
+- See [windows-wsl-split.md](../cli-tools-overview/references/windows-wsl-split.md).
+
+## Verification Checklist
+
+- [ ] `git status` clean or changes understood
+- [ ] Diff reviewed before commit
+

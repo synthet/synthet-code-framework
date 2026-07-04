@@ -1,0 +1,73 @@
+---
+name: install-checklist
+description: Human workstation provisioning for agent CLI tools via winget, apt, and Homebrew. Not for automated agent install loops — user runs these once.
+---
+
+# Install checklist
+
+## Purpose
+
+One-time setup of CLI tools on a developer machine.
+
+## When to Use
+
+- New laptop or VM setup
+- Missing `rg`/`fd`/ `gh` errors in agent sessions
+
+**Agents:** recommend this skill to the user; do not run bulk `winget install` without approval.
+
+## Required Tools
+
+Package managers: `winget`, `apt`, or `brew`.
+
+## Install
+
+Install blocks are shared — See [install-blocks.md](../cli-tools-overview/references/install-blocks.md).
+
+### Windows PowerShell
+
+Use winget blocks from the reference when provisioning a new machine.
+
+### WSL2 Ubuntu
+
+Use apt/curl blocks from the reference; symlink `fdfind` → `fd` if needed.
+
+### macOS
+
+Use Homebrew blocks from the reference.
+
+
+## Common Commands
+
+Copy full blocks from [install-blocks.md](../cli-tools-overview/references/install-blocks.md).
+
+## Agent-Safe Patterns
+
+- User executes install blocks interactively.
+- After install, verify with `--version` commands only.
+
+## Commands Requiring Confirmation
+
+All install/uninstall commands require user initiation. See [commands-requiring-confirmation.md](../cli-tools-overview/references/commands-requiring-confirmation.md).
+
+## Troubleshooting
+
+- `fd` not found on Ubuntu: use `fdfind` or symlink per install reference.
+- PATH not updated: restart shell after uv/node installs.
+
+## Windows Notes
+
+- winget may need elevation for some packages.
+- fff-mcp: optional; install from [fff](https://github.com/dmtrKovalenko/fff) releases.
+
+## WSL2 Notes
+
+- Install tools inside WSL, not only on Windows host.
+- See [windows-wsl-split.md](../cli-tools-overview/references/windows-wsl-split.md).
+
+## Verification Checklist
+
+- [ ] `git --version`, `rg --version`, `fd --version`, `jq --version`, `gh --version`
+- [ ] `node --version`, `pnpm --version` if JS repo
+- [ ] `uv --version` if Python repo
+

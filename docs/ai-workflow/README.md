@@ -4,7 +4,7 @@ title: AI Workflow & Asset Map
 description: Where every agent asset lives (rules, commands, skills, agents, memory, workflows) and the SDLC loop they support.
 resource: ai-workflow/README.md
 tags: [docs, agents, workflow]
-timestamp: 2026-06-16T00:00:00Z
+timestamp: 2026-07-03T00:00:00Z
 okf_version: 0.1
 ---
 
@@ -26,6 +26,33 @@ okf_version: 0.1
 
 **Single source of truth:** edit assets under `.claude/` + `.agent/`, then run
 `python scripts/sync_assistant_trees.py` to regenerate the `.cursor/` mirror.
+
+## CLI tooling skills
+
+Thirteen skills under `.claude/skills/` cover agent-safe CLI usage (see [`.agent/cli-tools-skills-spec.md`](../../.agent/cli-tools-skills-spec.md)):
+
+| Skill | Role |
+|-------|------|
+| `cli-tools-overview` | Router + shared references |
+| `search-tool-selection` | **Start here for search** — fd → rg → ast-grep |
+| `safe-command-patterns` | Bounded output, git hygiene |
+| `search-and-navigation` | rg, fd, bat, tree |
+| `structural-code-search` | ast-grep, semgrep |
+| `git-and-diff-workflows` | git, gh |
+| `data-config-tools` | jq, yq, curl |
+| `task-env-package-tools` | Task runners, framework quality gates |
+| `lint-format-security` | ruff, eslint, trivy |
+| `mcp-code-intelligence` | MCP tiers (incl. optional fff) |
+| `install-checklist` | Human workstation provisioning |
+| `windows-agent-tooling` / `wsl2-agent-tooling` | Platform split |
+
+Validate after changes: `python scripts/validate_cli_skills.py`.
+
+**Downstream pattern:** Cursor-first forks (e.g. image-scoring-gallery) may consolidate into `agent-cli-hub` + topic skills; cherry-pick individual flat skills from this framework as needed.
+
+## Optional MCP (fff)
+
+[fff](https://github.com/dmtrKovalenko/fff) optional file-search MCP (`ffgrep`, `fffind`, `fff-multi-grep`). Opt-in template in `.cursor/mcp.example.json` → copy to gitignored `.cursor/mcp.json`. See [`AGENTS.md`](../../AGENTS.md).
 
 ## The SDLC loop
 
