@@ -27,6 +27,17 @@ CLI_SKILL_NAMES = [
     "wsl2-agent-tooling",
 ]
 
+OVERVIEW_REFERENCES = [
+    "install-blocks.md",
+    "install-tiers.md",
+    "agent-environment.md",
+    "bounded-output-patterns.md",
+    "commands-requiring-confirmation.md",
+    "windows-wsl-split.md",
+]
+
+OVERVIEW_REFS_DIR = SKILLS_DIR / "cli-tools-overview" / "references"
+
 REQUIRED_HEADINGS = [
     "## Purpose",
     "## When to Use",
@@ -71,12 +82,20 @@ def validate_skill(name: str, errors: list[str]) -> None:
                 )
 
 
+def validate_overview_references(errors: list[str]) -> None:
+    for name in OVERVIEW_REFERENCES:
+        path = OVERVIEW_REFS_DIR / name
+        if not path.is_file():
+            errors.append(f"missing {path.relative_to(ROOT).as_posix()}")
+
+
 def main() -> int:
     errors: list[str] = []
     if ROOT_SKILLS.exists():
         errors.append(
             f"repo-root skills/ still exists ({ROOT_SKILLS}) — migrate to .claude/skills/ and remove"
         )
+    validate_overview_references(errors)
     for name in CLI_SKILL_NAMES:
         validate_skill(name, errors)
     if errors:

@@ -15,6 +15,7 @@ commands or edit code/config as part of its procedure.
 | agent-memory | Log sessions, dream consolidation, promote memory, load context | L2 | 2026-07-01 |
 | backlog-queue | GitHub Project board as canonical queue; Stage transitions | L2 | 2026-07-01 |
 | commit-conventions | Conventional Commits and PR title wording | L1 | 2026-07-01 |
+| commit-and-push | Stage, commit, and push with git safety rules; pairs with release-bump | L2 | 2026-07-04 |
 | critical-commit-audit | Deep post-commit hunt for high-severity bugs | L2 | 2026-07-01 |
 | eval | Capture task quality signals to agent memory | L2 | 2026-07-01 |
 | mcp-server-design | Design MCP servers with safe transport and validation | L1 | 2026-07-01 |
@@ -32,7 +33,7 @@ commands or edit code/config as part of its procedure.
 | safe-command-patterns | Bounded output, inspect-before-edit, confirmation gates | L1 | 2026-07-03 |
 | search-and-navigation | rg, fd, bat, tree, navigation | L1 | 2026-07-03 |
 | git-and-diff-workflows | git, gh, bounded diffs | L1 | 2026-07-03 |
-| cli-tools-overview | Router for CLI skills + shared references | L1 | 2026-07-03 |
+| cli-tools-overview | Router for CLI skills + shared references (install-tiers, agent-environment) | L1 | 2026-07-04 |
 | task-env-package-tools | Task runners, sync/frontmatter/pytest gates | L1 | 2026-07-03 |
 | structural-code-search | ast-grep, semgrep, ctags | L1 | 2026-07-03 |
 | data-config-tools | jq, yq, curl, sqlite | L1 | 2026-07-03 |

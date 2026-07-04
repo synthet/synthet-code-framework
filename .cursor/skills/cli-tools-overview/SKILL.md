@@ -21,6 +21,19 @@ Index of CLI tooling skills and shared references for coding agents on Windows, 
 
 Varies by topic skill; core: `git`, `rg`, `fd`, `jq`.
 
+## Install tiers
+
+Install in order — see [install-tiers.md](../cli-tools-overview/references/install-tiers.md):
+
+1. **Tier 0:** `git`, `rg`, `fd`, `jq`, `node`
+2. **Block A:** canonical block in [install-blocks.md](../cli-tools-overview/references/install-blocks.md)
+3. **Block B:** child-skill extensions (`yq`, `just`, `mise`, …)
+4. **Deferred:** optional tools per skill (`fzf`, `semgrep`, …)
+
+## Agent environment
+
+After installing CLI tools, **restart Cursor** and verify PATH — see [agent-environment.md](../cli-tools-overview/references/agent-environment.md).
+
 ## Install
 
 Install blocks are shared — See [install-blocks.md](../cli-tools-overview/references/install-blocks.md).
@@ -54,6 +67,17 @@ Benchmark/watch helpers (human): `hyperfine`, `entr`, `watchexec` — use for pe
 - Load `safe-command-patterns` before destructive or broad commands.
 - Load `search-tool-selection` before repo-wide search.
 - See [bounded-output-patterns.md](../cli-tools-overview/references/bounded-output-patterns.md).
+
+## Shared references
+
+| Reference | Topic |
+|-----------|-------|
+| [install-blocks.md](../cli-tools-overview/references/install-blocks.md) | Winget / apt / Homebrew install blocks |
+| [install-tiers.md](../cli-tools-overview/references/install-tiers.md) | Tier 0 → Block A → Block B → deferred |
+| [agent-environment.md](../cli-tools-overview/references/agent-environment.md) | PATH contract, Cursor restart, smoke tests |
+| [bounded-output-patterns.md](../cli-tools-overview/references/bounded-output-patterns.md) | Bounded search/read/git patterns |
+| [commands-requiring-confirmation.md](../cli-tools-overview/references/commands-requiring-confirmation.md) | Destructive / auto-fix gates |
+| [windows-wsl-split.md](../cli-tools-overview/references/windows-wsl-split.md) | Windows host vs WSL2 workloads |
 
 ## See also
 
