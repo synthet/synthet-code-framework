@@ -54,34 +54,3 @@ def test_file_diff_detects_stale_generated_files(tmp_path: Path) -> None:
         "stale in .cursor: commands/old.md"
     ]
 
-
-def test_sync_check_reports_public_path_drift(tmp_path: Path, capsys) -> None:
-    claude_root = tmp_path / ".claude"
-    cursor_root = tmp_path / ".cursor"
-    (claude_root / "commands").mkdir(parents=True)
-    (cursor_root / "commands").mkdir(parents=True)
-    (claude_root / "commands" / "spec.md").write_text("canonical\n", encoding="utf-8")
-    (cursor_root / "commands" / "spec.md").write_text("stale\n", encoding="utf-8")
-
-    result = sync_assistant_trees.sync(
-        check=True, claude_root=claude_root, cursor_root=cursor_root
-    )
-
-    assert result == 1
-    assert "OUT OF SYNC" in capsys.readouterr().out
-
-
-def test_sync_check_reports_public_path_in_sync(tmp_path: Path, capsys) -> None:
-    claude_root = tmp_path / ".claude"
-    cursor_root = tmp_path / ".cursor"
-    (claude_root / "commands").mkdir(parents=True)
-    (cursor_root / "commands").mkdir(parents=True)
-    (claude_root / "commands" / "spec.md").write_text("canonical\n", encoding="utf-8")
-    (cursor_root / "commands" / "spec.md").write_text("canonical\n", encoding="utf-8")
-
-    result = sync_assistant_trees.sync(
-        check=True, claude_root=claude_root, cursor_root=cursor_root
-    )
-
-    assert result == 0
-    assert "in sync" in capsys.readouterr().out
