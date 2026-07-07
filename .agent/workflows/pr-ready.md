@@ -9,19 +9,22 @@ separately by the `validate-implementation` skill — do not conflate the two.
 
 - Diff or branch state; [AGENTS.md](../../AGENTS.md).
 - Validation report from `validate-implementation` when the work has a spec with `AC-n` criteria.
+- Optional sanitized JSONL trace artifact; see [Agent observability](../../docs/agent-observability.md).
 
 ## Output (PR Ready Report)
 
 1. **Summary** — User-facing description of the change (not the commit list).
 2. **Risk / rollout** — Breaking changes, migrations, config.
 3. **Testing** — Commands run and results.
-4. **Suggested commit message** — Prefer Conventional Commits.
-5. **PR description** — Paste-ready Markdown.
+4. **Trace evidence (optional)** — Link to any sanitized JSONL trace artifact that supports the validation story.
+5. **Suggested commit message** — Prefer Conventional Commits.
+6. **PR description** — Paste-ready Markdown.
 
 ## Definition of done
 
 - Lint/test commands ran and are green (actual results, not "probably green").
 - Spec ACs Verified per `validate-implementation`, or open Unknowns/Failures listed explicitly.
+- Optional trace artifacts are sanitized, referenced by path, and summarized rather than pasted wholesale.
 - PR references its issue (`Closes #<N>`); board card in `Stage = Review`.
 - Diff clean: no debug code, secrets, large binaries, or unrelated refactors.
 
