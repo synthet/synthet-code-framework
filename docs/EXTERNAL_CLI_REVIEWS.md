@@ -36,5 +36,6 @@ framework). Check it out alongside this repo and build it once, then expose it a
 ## Safety
 
 - Review-only: never set `allowWrites: true`.
+- External review exports source, prompts, and context to another provider; obtain explicit approval before each export and scope files narrowly.
 - Never include secrets, `.env`, or a full `config.json` in the task/files/context.
 - Outputs land in `.agent-runs/` (gitignored); treat as sensitive. See [`../.agent/SAFETY.md`](../.agent/SAFETY.md).

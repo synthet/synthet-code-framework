@@ -52,6 +52,15 @@ ${LINT_CMD}      # lint / typecheck / format
 | `fff-mcp` / `${MCP_PREFIX}-fff` | `ffgrep`, `fffind`, `fff-multi-grep` | Opt-in; see `.cursor/mcp.example.json` |
 <!-- END MCP TOOL INVENTORY -->
 
+
+## Default tool permissions
+
+- **Default mode is read-only.** The active Claude Code allowlist in [`.claude/settings.json`](.claude/settings.json) permits only read-oriented operations: `git status`, `git diff:*`, `git log:*`, and `WebSearch`.
+- **Opt into local writes intentionally.** When a maintainer wants an agent to stage or commit local repository changes, copy [`.claude/settings.write.example.json`](.claude/settings.write.example.json) to a local/user settings file or otherwise merge only the needed entries (`Bash(git add:*)`, `Bash(git commit:*)`) into the active allowlist. Do not broaden permissions by default.
+- **Remote writes are higher risk than local writes.** `gh pr:*`, `gh issue:*`, and `gh project:*` can mutate GitHub state and notify collaborators. Enable them only for a specific task and verify the target repo/project before use.
+- **External export requires explicit approval.** Sending source, prompts, logs, artifacts, or review bundles to external services/providers is not covered by local-write approval; get explicit approval for the export and exclude secrets.
+- **Seeded projects inherit this safer default.** Because `.claude/settings.json` is part of the scaffold, newly bootstrapped projects start in read-only mode unless a maintainer deliberately opts into write permissions.
+
 ## Common workflows
 
 `/spec → /plan → /implement → /test-and-fix → /pr-ready`. See
