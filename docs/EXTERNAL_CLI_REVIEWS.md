@@ -38,3 +38,9 @@ framework). Check it out alongside this repo and build it once, then expose it a
 - Review-only: never set `allowWrites: true`.
 - Never include secrets, `.env`, or a full `config.json` in the task/files/context.
 - Outputs land in `.agent-runs/` (gitignored); treat as sensitive. See [`../.agent/SAFETY.md`](../.agent/SAFETY.md).
+- Optional JSONL trace artifacts can be used as validation evidence for review-only runs. Record sanitized events for `tool_calls`, `policy_checks`, `validation_status`, and whether `sensitive_export_blocked` was triggered; see [`agent-observability.md`](agent-observability.md).
+
+
+## Trace evidence
+
+External review summaries may reference a sanitized JSONL trace artifact as optional validation evidence. The trace should show that review-only mode was used, writes were disabled, sensitive inputs were excluded or blocked, and the review result was summarized without pasting large or secret-bearing payloads. See the example trace in [`docs/examples/agent-workflow-trace.jsonl`](examples/agent-workflow-trace.jsonl).
