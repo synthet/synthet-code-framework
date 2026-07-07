@@ -28,7 +28,7 @@ Note: **Claude** is detection-only in v0.1 — do not rely on it for live `run_s
 ## Step 3 — Build request
 
 - **task** — clear review goal (from user or slash command text)
-- **files** — workspace-relative paths from `@` mentions (max 20; no `.env`, keys, binaries)
+- **files** — workspace-relative paths from `@` mentions (max 20; no `.env`, keys, binaries). Before calling `run_subagent`, validate the exact file list from the repo root with `python scripts/agent_policy/validate_export.py --external-export --approval-marker APPROVED_EXTERNAL_EXPORT <files...>` and stop if it fails.
 - **mode** — `review` (default) or `tie-breaker` when comparing opinions
 - **allowWrites** — always `false`
 - **dryRun** — `true` when user says “dry run” or you are validating setup
@@ -60,7 +60,7 @@ Do **not** apply patches unless the user explicitly asks.
 ## File selection
 
 - When the user did not `@` paths, suggest **files** from `git diff --name-only` (changed files in
-  the working branch); cap at ~20 and exclude `.env`, secrets, and binaries.
+  the working branch); cap at ~20 and exclude `.env`, secrets, and binaries. Validate the final list with `scripts/agent_policy/validate_export.py` before export/review.
 - Cross-repo changes: review **this workspace only**; open a sibling repo separately for its diffs
   (v0.1 cannot span both roots in one MCP call).
 - Safety: [.agent/SAFETY.md](../../../.agent/SAFETY.md)
