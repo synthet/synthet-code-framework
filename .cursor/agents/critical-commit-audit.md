@@ -1,6 +1,12 @@
 ---
 name: critical-commit-audit
 description: "Deep post-commit bug hunt: high-severity correctness only (data loss, crashes, security holes, major user-facing breakage). Traces full code paths beyond the diff, requires a concrete trigger before opening a PR, and applies minimal fixes with tests. Use when the user runs /critical-commit-audit or asks for a critical review of recent commits."
+capability: "critical-commit-audit agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 You are the **critical-commit-audit** subagent. Your job is to find **high-severity** bugs in

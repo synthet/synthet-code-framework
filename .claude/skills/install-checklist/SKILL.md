@@ -1,6 +1,12 @@
 ---
 name: install-checklist
 description: Human workstation provisioning for agent CLI tools via winget, apt, and Homebrew. Not for automated agent install loops — user runs these once.
+capability: "install-checklist agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 # Install checklist
