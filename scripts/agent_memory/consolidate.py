@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import hashlib
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-import yaml
+from scripts.agent_memory import yaml_compat as yaml
 
 from scripts.agent_memory import schema
 from scripts.agent_memory.paths import load_config
@@ -32,27 +33,80 @@ class MemoryItem:
     sources: list[str] = field(default_factory=list)
     confidence: str = "medium"
     last_updated_at: str = ""
+    id: str = ""
+    source_hint: str = ""
+    verified_at: str = ""
+    verification_status: str = "unverified"
+    stale_after: str = ""
+    related_paths: list[str] = field(default_factory=list)
+    related_tasks: list[str] = field(default_factory=list)
+
+    @property
+    def summary(self) -> str:
+        return self.text
 
     @property
     def key(self) -> str:
         return f"{self.section}::{normalize_text(self.text)}"
 
 
+def _stable_id(section: str, text: str) -> str:
+    identity = f"{section}\0{normalize_text(text)}".encode("utf-8")
+    digest = hashlib.sha1(identity).hexdigest()[:12]
+    return f"mem-{digest}"
+
+
+def _as_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(v) for v in value if str(v).strip()]
+    return [str(value)] if str(value).strip() else []
+
+
+def _apply_metadata(item: MemoryItem, metadata: dict[str, Any]) -> None:
+    item.id = str(metadata.get("id") or item.id or _stable_id(item.section, item.text))
+    item.source_hint = str(metadata.get("source_hint") or item.source_hint or "")
+    item.confidence = str(metadata.get("confidence") or item.confidence or "medium")
+    item.verified_at = str(metadata.get("verified_at") or item.verified_at or "")
+    item.verification_status = str(
+        metadata.get("verification_status") or item.verification_status or "unverified"
+    )
+    item.stale_after = str(metadata.get("stale_after") or item.stale_after or "")
+    item.related_paths = _merge_unique(item.related_paths, _as_list(metadata.get("related_paths")))
+    item.related_tasks = _merge_unique(item.related_tasks, _as_list(metadata.get("related_tasks")))
+
+
 def parse_memory_markdown(content: str) -> dict[str, list[MemoryItem]]:
-    """Parse H2 sections into lists of MemoryItem."""
+    """Parse H2 sections into lists of MemoryItem, including indented YAML metadata blocks."""
     sections: dict[str, list[MemoryItem]] = {s: [] for s in schema.SECTION_ORDER}
     current: str | None = None
+    last_item: MemoryItem | None = None
+    meta_lines: list[str] = []
+
+    def flush_meta() -> None:
+        nonlocal meta_lines, last_item
+        if last_item and meta_lines:
+            try:
+                metadata = yaml.safe_load("\n".join(meta_lines)) or {}
+            except yaml.YAMLError:
+                metadata = {}
+            if isinstance(metadata, dict):
+                _apply_metadata(last_item, metadata)
+        meta_lines = []
+
     for line in content.splitlines():
         if line.startswith("## "):
+            flush_meta()
             title = line[3:].strip()
-            if title in sections:
-                current = title
-            else:
-                current = None
+            current = title if title in sections else None
+            last_item = None
             continue
         if current and line.startswith("- "):
+            flush_meta()
             raw = line[2:].strip()
             if not raw or raw == schema.PLACEHOLDER_NONE:
+                last_item = None
                 continue
             m = _DATE_SUFFIX_RE.search(raw)
             if m:
@@ -61,9 +115,15 @@ def parse_memory_markdown(content: str) -> dict[str, list[MemoryItem]]:
             else:
                 last_updated_at = ""
                 text = raw
-            sections[current].append(
-                MemoryItem(text=text, section=current, last_updated_at=last_updated_at)
-            )
+            last_item = MemoryItem(text=text, section=current, last_updated_at=last_updated_at)
+            last_item.id = _stable_id(current, text)
+            sections[current].append(last_item)
+            continue
+        if current and last_item and line.startswith("  ") and line.strip():
+            meta_lines.append(line[2:])
+            continue
+        flush_meta()
+    flush_meta()
     return sections
 
 
@@ -96,12 +156,23 @@ def _item_from_candidate(
     text = (cand.get("text") or "").strip()
     if not text:
         return None
+    source_hint = str(cand.get("source_hint") or session_name)
+    verified_at = str(cand.get("verified_at") or _today())
     return MemoryItem(
-        text=text,
+        text=str(cand.get("summary") or text),
         section=section,
         sources=[session_name],
         confidence=cand.get("confidence") or "medium",
         last_updated_at=_today(),
+        id=str(cand.get("id") or _stable_id(section, text)),
+        source_hint=source_hint,
+        verified_at=verified_at,
+        verification_status=str(cand.get("verification_status") or "verified"),
+        stale_after=str(cand.get("stale_after") or ""),
+        related_paths=_as_list(cand.get("related_paths")),
+        related_tasks=_as_list(
+            cand.get("related_tasks") or cand.get("related_issues") or cand.get("related_prs")
+        ),
     )
 
 
@@ -122,7 +193,26 @@ def merge_sections(
         "deprecated": [],
         "uncertain": [],
     }
-    merged = {s: [MemoryItem(i.text, i.section, list(i.sources), i.confidence, i.last_updated_at) for i in items] for s, items in base.items()}
+    merged = {
+        section: [
+            MemoryItem(
+                i.text,
+                i.section,
+                list(i.sources),
+                i.confidence,
+                i.last_updated_at,
+                i.id,
+                i.source_hint,
+                i.verified_at,
+                i.verification_status,
+                i.stale_after,
+                list(i.related_paths),
+                list(i.related_tasks),
+            )
+            for i in items
+        ]
+        for section, items in base.items()
+    }
     index: dict[str, MemoryItem] = {}
     for section, items in merged.items():
         for item in items:
@@ -142,6 +232,7 @@ def merge_sections(
                 for src in new_item.sources:
                     if src not in existing.sources:
                         existing.sources.append(src)
+                _merge_item_metadata(existing, new_item)
                 existing.last_updated_at = _today()
                 continue
             # Contradiction: same normalized text in different section?
@@ -177,6 +268,40 @@ def merge_sections(
                 changelog["removed"].append(f"{d.text} (truncated: section limit)")
 
     return merged, changelog
+
+
+def _merge_unique(left: list[str], right: list[str]) -> list[str]:
+    out = list(left)
+    for value in right:
+        if value and value not in out:
+            out.append(value)
+    return out
+
+
+def _merge_item_metadata(existing: MemoryItem, new_item: MemoryItem) -> None:
+    if not existing.id:
+        existing.id = new_item.id
+    if (
+        new_item.source_hint
+        and new_item.source_hint not in existing.source_hint.split("; ")
+    ):
+        existing.source_hint = "; ".join(
+            [v for v in [existing.source_hint, new_item.source_hint] if v]
+        )
+    if schema.confidence_rank(new_item.confidence) > schema.confidence_rank(
+        existing.confidence
+    ):
+        existing.confidence = new_item.confidence
+    if new_item.verified_at and new_item.verified_at > existing.verified_at:
+        existing.verified_at = new_item.verified_at
+    if new_item.verification_status == "verified":
+        existing.verification_status = new_item.verification_status
+    if new_item.stale_after and (
+        not existing.stale_after or new_item.stale_after > existing.stale_after
+    ):
+        existing.stale_after = new_item.stale_after
+    existing.related_paths = _merge_unique(existing.related_paths, new_item.related_paths)
+    existing.related_tasks = _merge_unique(existing.related_tasks, new_item.related_tasks)
 
 
 def _find_cross_section_conflict(
@@ -260,11 +385,21 @@ def find_stale_items(
             except ValueError:
                 continue
             age = (today - updated).days
-            if age >= staleness_days:
-                entries.append(
-                    f"{item.text} (last updated: {item.last_updated_at}, {age} days ago)"
-                    f" [section: {section}]"
+            explicit_stale = False
+            if item.stale_after:
+                try:
+                    explicit_stale = today >= datetime.strptime(
+                        item.stale_after, "%Y-%m-%d"
+                    ).date()
+                except ValueError:
+                    explicit_stale = False
+            if age >= staleness_days or explicit_stale:
+                reason = (
+                    f"stale after: {item.stale_after}"
+                    if explicit_stale
+                    else f"last updated: {item.last_updated_at}, {age} days ago"
                 )
+                entries.append(f"{item.text} ({reason}) [section: {section}]")
     return entries
 
 
@@ -291,8 +426,27 @@ def render_memory_markdown(
             lines.append(f"- {schema.PLACEHOLDER_NONE}")
         else:
             for item in items:
+                if not item.id:
+                    item.id = _stable_id(item.section, item.text)
                 suffix = f" (updated: {item.last_updated_at})" if item.last_updated_at else ""
                 lines.append(f"- {item.text}{suffix}")
+                metadata = {
+                    "id": item.id,
+                    "summary": item.summary,
+                    "source_hint": item.source_hint,
+                    "confidence": item.confidence,
+                    "verified_at": item.verified_at,
+                    "verification_status": item.verification_status,
+                    "stale_after": item.stale_after,
+                    "related_paths": item.related_paths,
+                    "related_tasks": item.related_tasks,
+                }
+                rendered = (
+                    yaml.safe_dump(metadata, sort_keys=False, default_flow_style=False)
+                    .rstrip()
+                    .splitlines()
+                )
+                lines.extend(f"  {line}" for line in rendered)
         lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 
