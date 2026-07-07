@@ -13,7 +13,7 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-import yaml  # noqa: E402
+from scripts.agent_memory import yaml_compat as yaml  # noqa: E402
 
 from scripts.agent_memory.limits import prune_old_sessions, session_timestamp_slug  # noqa: E402
 from scripts.agent_memory.paths import ensure_dirs, find_repo_root, load_config  # noqa: E402
