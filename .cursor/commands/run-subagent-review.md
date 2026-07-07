@@ -1,3 +1,12 @@
+---
+capability: "run-subagent-review agent asset workflow"
+side_effect_level: external_export
+approval_required: true
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: high
+---
+
 # /run-subagent-review — Run external sub-agent review (MCP)
 
 Delegate a **review-only** task to one or more external CLIs via **subagent-orchestrator** MCP.

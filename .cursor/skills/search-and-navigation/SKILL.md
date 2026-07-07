@@ -1,6 +1,12 @@
 ---
 name: search-and-navigation
 description: Fast repo navigation with ripgrep, fd, bat, tree, eza, zoxide, and delta. Use for text search and file discovery — see search-tool-selection for tool choice.
+capability: "search-and-navigation agent asset workflow"
+side_effect_level: read_only
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: low
 ---
 
 # Search and navigation

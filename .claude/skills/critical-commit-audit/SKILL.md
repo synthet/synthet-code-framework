@@ -2,6 +2,12 @@
 name: critical-commit-audit
 description: >-
   Deep bug-finding on recent commits: high-severity correctness only (data loss, crashes, security, major breakage). Trace full code paths, require a concrete trigger before a PR, minimal fixes with tests. Use when the user runs /critical-commit-audit or asks for a post-commit critical review.
+capability: "critical-commit-audit agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 # critical-commit-audit

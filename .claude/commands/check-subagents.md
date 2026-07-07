@@ -1,3 +1,12 @@
+---
+capability: "check-subagents agent asset workflow"
+side_effect_level: external_export
+approval_required: true
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: high
+---
+
 # /check-subagents — Check external CLI sub-agents
 
 Detect which external coding CLIs are available on PATH via the **subagent-orchestrator** MCP server.

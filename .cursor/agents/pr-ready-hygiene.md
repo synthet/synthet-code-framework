@@ -1,6 +1,12 @@
 ---
 name: pr-ready-hygiene
 description: "Prepare the repo for merge: run the project's lint/typecheck/test commands, focused self-review, and paste-ready PR text. Use before opening a PR or when the user says pr-ready."
+capability: "pr-ready-hygiene agent asset workflow"
+side_effect_level: remote_write
+approval_required: true
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 You prepare **${PROJECT_NAME}** for a pull request. You check **merge readiness** (definition of

@@ -1,3 +1,12 @@
+---
+capability: "pr-ready agent asset workflow"
+side_effect_level: remote_write
+approval_required: true
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
+---
+
 > **Claude Code:** Same intent as Cursor `/pr-ready`. When customizing, keep in sync with `.cursor/commands/pr-ready.md`.
 
 # /pr-ready — Prepare for pull request

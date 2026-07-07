@@ -1,6 +1,12 @@
 ---
 name: validate-implementation
 description: Verify an implementation against its spec's acceptance criteria, marking each AC Verified, Failed, or Unknown with concrete evidence. Use after /implement or /test-and-fix, before /pr-ready, or when the user asks whether the spec is actually satisfied.
+capability: "validate-implementation agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 # Validate implementation against spec

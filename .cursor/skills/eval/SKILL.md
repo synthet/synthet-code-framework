@@ -3,6 +3,12 @@ name: eval
 description: Capture task quality signals and log them to agent memory to build a feedback loop.
   Use at the end of each implemented task or merged PR, or whenever a task required more than one
   agent iteration.
+capability: "eval agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 # eval
