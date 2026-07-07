@@ -41,6 +41,28 @@ def test_tree_diff_detects_nested_missing_and_stale_files(tmp_path: Path) -> Non
     ]
 
 
+def test_tree_diff_detects_missing_empty_directory(tmp_path: Path) -> None:
+    src = tmp_path / ".claude" / "skills"
+    dst = tmp_path / ".cursor" / "skills"
+    (src / "demo" / "empty").mkdir(parents=True)
+    (dst / "demo").mkdir(parents=True)
+
+    assert sync_assistant_trees._diff(src, dst, "tree") == [
+        "missing in .cursor: skills/demo/empty/"
+    ]
+
+
+def test_tree_diff_detects_stale_empty_directory(tmp_path: Path) -> None:
+    src = tmp_path / ".claude" / "skills"
+    dst = tmp_path / ".cursor" / "skills"
+    (src / "demo").mkdir(parents=True)
+    (dst / "demo" / "empty").mkdir(parents=True)
+
+    assert sync_assistant_trees._diff(src, dst, "tree") == [
+        "stale in .cursor: skills/demo/empty/"
+    ]
+
+
 def test_file_diff_detects_stale_generated_files(tmp_path: Path) -> None:
     src = tmp_path / ".claude" / "commands"
     dst = tmp_path / ".cursor" / "commands"
