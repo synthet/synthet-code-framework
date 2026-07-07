@@ -6,11 +6,13 @@ description: Provider-oriented backlog queue. Use whenever picking work, claimin
 # Backlog queue
 
 The canonical task queue is the project's configured **backlog provider**, not ad hoc `TODO.md`
-notes. Provider docs live in [`.agent/backlog/`](../../../.agent/backlog/README.md):
+notes. Provider docs live in [`.agent/backlog/`](../../../.agent/backlog/README.md). Resolve the
+provider in this order:
 
-1. Local Markdown — default for generic/offline projects.
-2. GitHub Issues — default for GitHub-hosted repos without a board.
-3. GitHub Projects — optional board provider when the project explicitly adopts it.
+1. Use the provider explicitly named by the user or project docs.
+2. Otherwise use GitHub Issues for GitHub-hosted repos with issue tracking enabled.
+3. Otherwise use Local Markdown for generic/offline projects.
+4. Use GitHub Projects only when the project explicitly adopts that optional board provider.
 
 ## When to use
 
@@ -34,7 +36,8 @@ is empty, stop and ask the maintainer to promote or create work. **Do not invent
 ### 2. Claim the item
 
 Use `/task-claim <item-ref>` (preferred) or the provider-specific claim flow. Claiming must record an
-owner/assignee before work begins.
+owner/assignee before work begins. Do not require GitHub Projects IDs unless GitHub Projects is the
+selected provider.
 
 ### 3. Mark in progress on first commit
 
@@ -63,6 +66,7 @@ review/done state according to that provider's rules.
 - **Don't** silently abandon a claimed or in-progress item — mark it blocked with the unblock condition.
 - **Don't** open a PR without a backlog reference.
 - **Don't** embed provider-specific IDs or board commands in generic workflow docs; put them under `.agent/backlog/providers/`.
+- **Don't** treat missing optional-provider IDs (for example GitHub Projects field IDs) as setup blockers for Local Markdown or GitHub Issues.
 
 ## Mirrors
 

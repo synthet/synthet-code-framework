@@ -74,7 +74,7 @@ is unnecessary (trivial fix), say so explicitly.
 | `/implement` | Minimal-diff change set with tests | Lint + narrowest tests green |
 | `/test-and-fix` | Green test run (or written blocker); RCA log entry for non-obvious failures | Tests pass or blocker documented |
 | `validate-implementation` (skill) | Per-AC Verified/Failed/Unknown report with evidence | Every AC Verified, or open items accepted by the user |
-| `/pr-ready` | Definition-of-done report + paste-ready PR text | Checks green, provider-specific backlog reference present, review-ready status set when the provider tracks status |
+| `/pr-ready` | Definition-of-done report + paste-ready PR text | Checks green, provider-specific backlog reference present, review-ready status set only when the provider tracks status |
 
 - **Backlog first:** pick and claim work via the [backlog contract](../project/00-backlog-workflow.md) (`/task-claim`); default to Local Markdown or GitHub Issues unless a provider doc opts into GitHub Projects.
 - **Review:** `/critical-commit-audit` for high-severity bug hunts; `/check-subagents` +
