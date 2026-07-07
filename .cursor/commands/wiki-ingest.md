@@ -1,3 +1,12 @@
+---
+capability: "wiki-ingest agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
+---
+
 > **Cursor:** Same intent as Claude `/wiki-ingest`. When customizing, keep in sync with `.cursor/commands/wiki-ingest.md`.
 
 # /wiki-ingest — Process a source into the wiki

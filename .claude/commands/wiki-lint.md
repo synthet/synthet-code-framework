@@ -1,3 +1,12 @@
+---
+capability: "wiki-lint agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
+---
+
 > **Cursor:** Same intent as Claude `/wiki-lint`. When customizing, keep in sync with `.cursor/commands/wiki-lint.md`.
 
 # /wiki-lint — Health-check the docs wiki

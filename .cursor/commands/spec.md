@@ -1,3 +1,12 @@
+---
+capability: "spec agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
+---
+
 > **Claude Code:** Same intent as Cursor `/spec`. When customizing, keep in sync with `.cursor/commands/spec.md`.
 
 # /spec — Feature or change specification

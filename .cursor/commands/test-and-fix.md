@@ -1,3 +1,12 @@
+---
+capability: "test-and-fix agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
+---
+
 > **Claude Code:** Same intent as Cursor `/test-and-fix`. When customizing, keep in sync with `.cursor/commands/test-and-fix.md`.
 
 # /test-and-fix — Run tests and repair failures
