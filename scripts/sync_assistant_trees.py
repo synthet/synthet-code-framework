@@ -39,11 +39,17 @@ def _reset_dir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
 
-def sync(check: bool = False) -> int:
+def sync(
+    check: bool = False,
+    claude_root: Path | None = None,
+    cursor_root: Path | None = None,
+) -> int:
+    claude_root = claude_root or CLAUDE
+    cursor_root = cursor_root or CURSOR
     changes: list[str] = []
     for src_name, dst_name, mode in SUBDIRS:
-        src = CLAUDE / src_name
-        dst = CURSOR / dst_name
+        src = claude_root / src_name
+        dst = cursor_root / dst_name
         if not src.is_dir():
             continue
         if check:
