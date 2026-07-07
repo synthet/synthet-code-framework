@@ -99,15 +99,38 @@ def _compare_file_sets(
     return out
 
 
+def _tree_paths(root: Path) -> tuple[dict[str, Path], set[str]]:
+    if not root.is_dir():
+        return {}, set()
+
+    files: dict[str, Path] = {}
+    dirs: set[str] = set()
+    for path in root.rglob("*"):
+        relative = str(path.relative_to(root))
+        if path.is_file():
+            files[relative] = path
+        elif path.is_dir():
+            dirs.add(relative)
+    return files, dirs
+
+
+def _compare_dir_sets(src_dirs: set[str], dst_dirs: set[str], dst_label: str) -> list[str]:
+    out: list[str] = []
+    for name in sorted(src_dirs - dst_dirs):
+        out.append(f"missing in .cursor: {dst_label}/{name}/")
+    for name in sorted(dst_dirs - src_dirs):
+        out.append(f"stale in .cursor: {dst_label}/{name}/")
+    return out
+
+
 def _diff(src: Path, dst: Path, mode: str) -> list[str]:
     if mode == "tree":
-        src_files = {str(p.relative_to(src)): p for p in src.rglob("*") if p.is_file()}
-        dst_files = (
-            {str(p.relative_to(dst)): p for p in dst.rglob("*") if p.is_file()}
-            if dst.is_dir()
-            else {}
-        )
-        return _compare_file_sets(src_files, dst_files, dst.name)
+        src_files, src_dirs = _tree_paths(src)
+        dst_files, dst_dirs = _tree_paths(dst)
+        return [
+            *_compare_dir_sets(src_dirs, dst_dirs, dst.name),
+            *_compare_file_sets(src_files, dst_files, dst.name),
+        ]
 
     src_files = {_expected_name(f, mode): f for f in sorted(src.glob("*.md"))}
     dst_pattern = "*.mdc" if mode == "rules" else "*.md"
