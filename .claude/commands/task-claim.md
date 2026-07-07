@@ -1,91 +1,58 @@
 > **Claude Code:** Same intent as Cursor `/task-claim`. When customizing, keep in sync with `.cursor/commands/task-claim.md`.
 
-# /task-claim — claim a board issue and move it to Stage=Claimed
+# /task-claim — claim a backlog item
 
-Use when starting work on a backlog item. `$ARGUMENTS` is the issue number (and optional repo).
+Use when starting work on a backlog item. `$ARGUMENTS` is a provider-specific item reference.
 
 **Usage:**
-```
-/task-claim <issue-number> [--repo <repo>]
+```text
+/task-claim <item-ref> [--provider local-markdown|github-issues|github-projects] [--repo <owner/repo>]
 ```
 
-If `--repo` is omitted, default to the current repo.
-
-> **Setup:** fill the placeholders below from your GitHub Project before first use, then commit.
-> See [`docs/project/00-backlog-workflow.md`](../../docs/project/00-backlog-workflow.md) for how to
-> read the project/field/option IDs (`gh project field-list <N> --owner <OWNER>`).
+If `--provider` is omitted, prefer the project's configured provider. For generic projects, default
+to **Local Markdown** or **GitHub Issues**. Use **GitHub Projects** only when the project explicitly
+adopts the board provider and has filled in the IDs in
+[`.agent/backlog/providers/github-projects.md`](../../.agent/backlog/providers/github-projects.md).
 
 ## Action
 
-Run the steps in order. Stop and report on any failure — do not proceed to the next step.
+Run the provider-specific claim flow and stop on any failure.
 
-### 1. Resolve repo + verify the issue is claimable
+### Local Markdown (default for generic/offline projects)
+
+1. Open the active local backlog file (usually `.agent/backlog/items.md`).
+2. Find the requested item, confirm it is `Ready` and unowned.
+3. Set `Owner` to yourself and `Status` to `Claimed`.
+4. Report the item ID/title and remind the user to move it to `In Progress` on the first commit.
+
+See [`.agent/backlog/providers/local-markdown.md`](../../.agent/backlog/providers/local-markdown.md).
+
+### GitHub Issues (default for GitHub-hosted repos without a board)
 
 ```bash
-OWNER="${PROJECT_OWNER}"
-REPO="${PROJECT_REPO}"           # override via --repo
+OWNER_REPO="<owner/repo>"  # current repo unless --repo is provided
 N="<issue-number>"
 
-# Confirm the issue exists, isn't closed, and isn't already assigned to someone else.
-gh issue view "$N" --repo "$OWNER/$REPO" --json number,state,assignees,title
+gh issue view "$N" --repo "$OWNER_REPO" --json number,state,assignees,title,labels
+gh issue edit "$N" --repo "$OWNER_REPO" --add-assignee @me --add-label status:claimed
 ```
 
-If `state == "CLOSED"`, abort: report "issue is closed".
-If `assignees` is non-empty and you are not in it, abort: report who has it (require explicit override).
+If the issue is closed, abort. If it is assigned to someone else, abort unless the maintainer gives
+an explicit handoff. See [`.agent/backlog/providers/github-issues.md`](../../.agent/backlog/providers/github-issues.md).
 
-### 2. Assign yourself
+### GitHub Projects (optional board provider)
 
-```bash
-gh issue edit "$N" --repo "$OWNER/$REPO" --add-assignee @me
-```
+Use the GitHub Projects claim commands and ID table in
+[`.agent/backlog/providers/github-projects.md`](../../.agent/backlog/providers/github-projects.md). Do
+not treat missing project/field/option IDs as a blocker unless this provider is explicitly selected.
 
-### 3. Find the project item id
+## Done when
 
-```bash
-ITEM_ID=$(gh project item-list ${PROJECT_NUMBER} --owner "$OWNER" --format json --limit 200 \
-  | jq -r --argjson n "$N" --arg repo "$REPO" '
-      .items[]
-      | select(.content.number == $n)
-      | select((.content.repository // "") | endswith($repo))
-      | .id')
+Report back with:
 
-if [ -z "$ITEM_ID" ]; then
-  echo "ERROR: issue #$N is not on the Project board"
-  exit 1
-fi
-```
-
-### 4. Move the card to `Stage = Claimed`
-
-```bash
-gh project item-edit \
-  --id "$ITEM_ID" \
-  --project-id ${PROJECT_NODE_ID} \
-  --field-id ${STAGE_FIELD_ID} \
-  --single-select-option-id ${STAGE_CLAIMED_ID}
-```
-
-### 5. Confirm + remind
-
-Report back to the user:
-
-- Issue URL: `https://github.com/$OWNER/$REPO/issues/$N`
-- Title (from step 1)
-- "Claimed. Move to `Stage = In Progress` (option id `${STAGE_IN_PROGRESS_ID}`) on your first commit.
-  PR description must include `Closes #$N`."
-
-## Reference IDs (fill in per project)
-
-| Thing | ID |
-|-------|----|
-| Project node id | `${PROJECT_NODE_ID}` |
-| Stage field id | `${STAGE_FIELD_ID}` |
-| Backlog | `${STAGE_BACKLOG_ID}` |
-| Ready | `${STAGE_READY_ID}` |
-| Claimed | `${STAGE_CLAIMED_ID}` |
-| In Progress | `${STAGE_IN_PROGRESS_ID}` |
-| Blocked | `${STAGE_BLOCKED_ID}` |
-| Review | `${STAGE_REVIEW_ID}` |
-| Done | `${STAGE_DONE_ID}` |
+- Provider and item reference.
+- Title/summary.
+- Confirmation that the item is claimed.
+- The provider-specific PR reference to use (`Refs <ID>` or `Closes #<N>`).
 
 Full contract: [`docs/project/00-backlog-workflow.md`](../../docs/project/00-backlog-workflow.md).

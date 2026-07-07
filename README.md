@@ -12,11 +12,11 @@ python bootstrap.py --target ../my-app --name "My App" --stack python --desc "Wh
 ```
 
 This copies the scaffold into `../my-app`, substitutes `${PLACEHOLDER}` tokens, and leaves clearly
-marked `TODO(...)` for things only you know (board IDs, repo URL). Then:
+marked `TODO(...)` for things only you know (repo URL, optional provider IDs). Then:
 
 1. `cd ../my-app && git init`
 2. Fill in build/test/lint commands in `CLAUDE.md` + `AGENTS.md`.
-3. Replace `TODO(...)` markers once your GitHub Project board exists.
+3. Choose a backlog provider; fill optional GitHub Projects `TODO(...)` markers only if you use that provider.
 4. Run `python scripts/sync_assistant_trees.py` whenever you edit `.claude/` assets.
 
 `--stack` accepts `python | node | go | generic` (sets default build/test/lint commands).
@@ -68,7 +68,7 @@ Dev dependencies: `pip install -r requirements-dev.txt`.
 
 ## Conventions
 
-- **Backlog as issues:** a GitHub Project board is the queue; `/task-claim` + the five-step contract.
+- **Backlog provider:** default to Local Markdown or GitHub Issues; GitHub Projects is optional; `/task-claim` + the five-step contract.
 - **Safety first:** secrets in `secrets.json`/`.env`; never touch `.git/config`; write-capable tools
   are opt-in. See [`.agent/SAFETY.md`](.agent/SAFETY.md).
 - **OKF docs:** `docs/` is an Open Knowledge Format bundle — markdown + YAML frontmatter, file path =

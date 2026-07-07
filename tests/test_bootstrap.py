@@ -100,11 +100,16 @@ def test_seed_stack(tmp_path: Path, stack: str) -> None:
     assert "Demo App" in claude_md
 
 
-def test_board_ids_become_todo_markers(tmp_path: Path) -> None:
+def test_github_projects_ids_are_optional_provider_todo_markers(tmp_path: Path) -> None:
     target = run_bootstrap(tmp_path, "python")
-    backlog = (target / "docs/project/00-backlog-workflow.md").read_text(encoding="utf-8")
-    assert "TODO(PROJECT_BOARD_URL)" in backlog
-    assert not unresolved_placeholders(backlog)
+    workflow = (target / "docs/project/00-backlog-workflow.md").read_text(encoding="utf-8")
+    projects_provider = (target / ".agent/backlog/providers/github-projects.md").read_text(encoding="utf-8")
+
+    assert "TODO(PROJECT_BOARD_URL)" not in workflow
+    assert "TODO(PROJECT_BOARD_URL)" in projects_provider
+    assert "Missing GitHub Projects board IDs are not mandatory" in workflow
+    assert not unresolved_placeholders(workflow)
+    assert not unresolved_placeholders(projects_provider)
 
 
 def test_claude_cursor_trees_consistent(tmp_path: Path) -> None:

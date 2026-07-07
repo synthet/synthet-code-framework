@@ -22,7 +22,7 @@ separately by the `validate-implementation` skill — do not conflate the two.
 
 - Lint/test commands ran and are green (actual results, not "probably green").
 - Spec ACs Verified per `validate-implementation`, or open Unknowns/Failures listed explicitly.
-- PR references its issue (`Closes #<N>`); board card in `Stage = Review`.
+- PR references its backlog item (`Refs <ID>` or `Closes #<N>`); provider status is review-ready when applicable.
 - Diff clean: no debug code, secrets, large binaries, or unrelated refactors.
 
 ## Done when
