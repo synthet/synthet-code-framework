@@ -13,7 +13,7 @@ commands or edit code/config as part of its procedure.
 | Skill | Purpose | Risk | Last reviewed |
 |-------|---------|------|---------------|
 | agent-memory | Log sessions, dream consolidation, promote memory, load context | L2 | 2026-07-01 |
-| backlog-queue | GitHub Project board as canonical queue; Stage transitions | L2 | 2026-07-01 |
+| backlog-queue | Provider-oriented backlog queue; local markdown, GitHub Issues, optional GitHub Projects | L2 | 2026-07-01 |
 | commit-conventions | Conventional Commits and PR title wording | L1 | 2026-07-01 |
 | commit-and-push | Stage, commit, and push with git safety rules; pairs with release-bump | L2 | 2026-07-04 |
 | critical-commit-audit | Deep post-commit hunt for high-severity bugs | L2 | 2026-07-01 |
