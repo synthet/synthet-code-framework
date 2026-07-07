@@ -1,12 +1,29 @@
 {
-  "_comment": "Project MCP servers for Claude Code. Define stdio/SSE servers here; secrets via env, never inline. Copy .cursor/mcp.example.json -> .cursor/mcp.json (gitignored) for Cursor. Naming convention: <scope>-<role>-* (e.g. myapp-be-data). Prefer a compact search+dispatch surface over many raw tools.",
+  "_comment": "Project MCP servers for Claude Code. Define local stdio and approved remote HTTP servers here; secrets via env, never inline. Copy .cursor/mcp.example.json -> .cursor/mcp.json (gitignored) for Cursor. Naming convention: <scope>-<ro|rw>-<purpose> (ro/read = read-only, rw/write = write-capable). Prefer a compact search+dispatch surface over many raw tools.",
   "mcpServers": {},
   "_examples": {
-    "fff-mcp": {
-      "_comment": "Optional — https://github.com/dmtrKovalenko/fff . Tools: ffgrep, fffind, fff-multi-grep",
+    "proj-ro-fff": {
+      "_comment": "Optional local stdio read-only file search — https://github.com/dmtrKovalenko/fff . Tools: ffgrep, fffind, fff-multi-grep",
+      "side_effects": "read-only",
       "command": "fff-mcp",
       "args": [],
       "env": { "WORKSPACE_ROOT": "${workspaceFolder}" }
+    },
+    "proj-ro-docs": {
+      "_comment": "Example remote HTTP read-only MCP server. Remote examples are disabled by default; set enabled=true only after review.",
+      "side_effects": "read-only",
+      "enabled": false,
+      "url": "https://mcp.example.com/docs",
+      "headers": { "Authorization": "Bearer ${MCP_DOCS_TOKEN}" }
+    },
+    "proj-rw-issues": {
+      "_comment": "Example remote HTTP write-capable MCP server. All auth uses env references only; write tools require human approval before side effects.",
+      "side_effects": "write-capable",
+      "approval_required": true,
+      "approval_note": "Required before creating, updating, deleting, or dispatching issue tracker actions.",
+      "enabled": false,
+      "url": "https://mcp.example.com/issues",
+      "headers": { "Authorization": "Bearer ${MCP_ISSUES_TOKEN}" }
     }
   }
 }
