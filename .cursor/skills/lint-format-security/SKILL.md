@@ -1,6 +1,12 @@
 ---
 name: lint-format-security
 description: Run linters and security scanners with bounded scope — ruff, prettier, eslint, shellcheck, trivy, hadolint.
+capability: "lint-format-security agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 # Lint, format, and security

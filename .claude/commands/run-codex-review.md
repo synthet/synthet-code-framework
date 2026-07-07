@@ -1,3 +1,12 @@
+---
+capability: "run-codex-review agent asset workflow"
+side_effect_level: external_export
+approval_required: true
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: high
+---
+
 # /run-codex-review — Run Codex review (MCP)
 
 Delegate a **review-only** task to **Codex** through the **subagent-orchestrator** MCP server. Do **not** run `codex exec` directly in the terminal unless the user explicitly asks to bypass the orchestrator.

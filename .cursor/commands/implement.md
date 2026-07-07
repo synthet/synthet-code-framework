@@ -1,3 +1,12 @@
+---
+capability: "implement agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
+---
+
 > **Claude Code:** Same intent as Cursor `/implement`. When customizing, keep in sync with `.cursor/commands/implement.md`.
 
 # /implement — Execute an approved plan

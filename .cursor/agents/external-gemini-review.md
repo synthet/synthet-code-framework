@@ -1,6 +1,12 @@
 ---
 name: external-gemini-review
 description: Use Gemini CLI through the subagent-orchestrator MCP server for review-only external CLI feedback in ${PROJECT_NAME}.
+capability: "external-gemini-review agent asset workflow"
+side_effect_level: external_export
+approval_required: true
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: high
 ---
 
 # External Gemini Review

@@ -4,6 +4,12 @@ description: >-
   Stage intended changes, write a Conventional Commit message, commit, and push
   to origin. Use when the user asks to commit and push, ship changes, or publish
   a release commit after release-bump.
+capability: "commit-and-push agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 # Commit and push
