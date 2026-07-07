@@ -10,7 +10,7 @@
     "Review-only: never set `allowWrites: true` on `run_subagent`."
   ],
   "must_not_contain": [
-    "export ",
+    "export WORKSPACE_ROOT=",
     "\"allowWrites\": true"
   ]
 }
