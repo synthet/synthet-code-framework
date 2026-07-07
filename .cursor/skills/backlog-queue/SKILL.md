@@ -23,6 +23,10 @@ provider in this order:
 - The user mentions a provider status such as Ready, Claimed, In Progress, Blocked, Review, or Done.
 - An agent picks up a task without a corresponding backlog item — stop and file one first.
 
+Treat Ready/Claimed/In Progress/Blocked/Review/Done as logical states. Map them to the selected
+provider's fields, labels, table columns, or workflow statuses instead of assuming a GitHub Projects
+`Stage` field exists.
+
 ## Generic five-step contract
 
 Every contributor (human or AI) follows the same five steps. Do **all** of them; skipping a step

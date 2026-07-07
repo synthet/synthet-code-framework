@@ -106,6 +106,13 @@ def test_seed_stack(tmp_path: Path, stack: str) -> None:
     assert "Demo App" in claude_md
 
 
+def test_backlog_skill_maps_logical_states_to_selected_provider() -> None:
+    skill = (REPO_ROOT / ".claude/skills/backlog-queue/SKILL.md").read_text(encoding="utf-8")
+
+    assert "Treat Ready/Claimed/In Progress/Blocked/Review/Done as logical states" in skill
+    assert "instead of assuming a GitHub Projects" in skill
+
+
 def test_backlog_skill_does_not_require_github_projects_ids_by_default() -> None:
     skill = (REPO_ROOT / ".claude/skills/backlog-queue/SKILL.md").read_text(encoding="utf-8")
 
