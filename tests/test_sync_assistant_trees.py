@@ -53,4 +53,3 @@ def test_file_diff_detects_stale_generated_files(tmp_path: Path) -> None:
     assert sync_assistant_trees._diff(src, dst, "files") == [
         "stale in .cursor: commands/old.md"
     ]
-
