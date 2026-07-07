@@ -35,6 +35,7 @@ framework). Check it out alongside this repo and build it once, then expose it a
 
 ## Safety
 
+- Before passing any file list or context to an external review/export, run `python scripts/agent_policy/validate_export.py --external-export --approval-marker APPROVED_EXTERNAL_EXPORT <files...>` from the repo root. The validator enforces `agent-policy.yaml` path, glob, count, byte, and approval rules; do not proceed if it fails.
 - Review-only: never set `allowWrites: true`.
 - Never include secrets, `.env`, or a full `config.json` in the task/files/context.
 - Outputs land in `.agent-runs/` (gitignored); treat as sensitive. See [`../.agent/SAFETY.md`](../.agent/SAFETY.md).
