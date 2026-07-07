@@ -30,7 +30,7 @@ per-criterion verification; do not conflate "meets spec" with "mergeable".
 
 - Lint/test commands from **AGENTS.md** ran and are green (state actual results; never "probably green").
 - Spec ACs are Verified per `validate-implementation`, or open Unknowns/Failures are listed explicitly.
-- PR references its backlog item (`Refs <ID>` or `Closes #<N>`) and the provider status is review-ready when applicable.
+- PR references its backlog item using the selected provider's convention (`Refs <ID>` or `Closes #<N>`); if the provider tracks status, the item is marked review-ready.
 - Diff is clean: no debug code, secrets, large binaries, or unrelated refactors.
 
 ## Done when
