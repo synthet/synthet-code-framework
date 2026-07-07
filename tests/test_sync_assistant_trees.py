@@ -75,3 +75,31 @@ def test_file_diff_detects_stale_generated_files(tmp_path: Path) -> None:
     assert sync_assistant_trees._diff(src, dst, "files") == [
         "stale in .cursor: commands/old.md"
     ]
+
+
+def test_rules_diff_detects_stale_md_file(tmp_path: Path) -> None:
+    src = tmp_path / ".claude" / "rules"
+    dst = tmp_path / ".cursor" / "rules"
+    src.mkdir(parents=True)
+    dst.mkdir(parents=True)
+    (src / "style.md").write_text("canonical\n", encoding="utf-8")
+    (dst / "style.mdc").write_text("canonical\n", encoding="utf-8")
+    (dst / "old.md").write_text("stale\n", encoding="utf-8")
+
+    assert sync_assistant_trees._diff(src, dst, "rules") == [
+        "stale in .cursor: rules/old.md"
+    ]
+
+
+def test_file_diff_detects_stale_unexpected_extension(tmp_path: Path) -> None:
+    src = tmp_path / ".claude" / "commands"
+    dst = tmp_path / ".cursor" / "commands"
+    src.mkdir(parents=True)
+    dst.mkdir(parents=True)
+    (src / "spec.md").write_text("canonical\n", encoding="utf-8")
+    (dst / "spec.md").write_text("canonical\n", encoding="utf-8")
+    (dst / "unexpected.txt").write_text("stale\n", encoding="utf-8")
+
+    assert sync_assistant_trees._diff(src, dst, "files") == [
+        "stale in .cursor: commands/unexpected.txt"
+    ]
