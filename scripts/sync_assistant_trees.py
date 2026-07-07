@@ -79,29 +79,49 @@ def _expected_name(p: Path, mode: str) -> str:
     return f"{p.stem}.mdc" if mode == "rules" else p.name
 
 
-def _diff(src: Path, dst: Path, mode: str) -> list[str]:
+def _read(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
+def _compare_file_sets(
+    src_files: dict[str, Path], dst_files: dict[str, Path], dst_label: str
+) -> list[str]:
     out: list[str] = []
-    if mode == "tree":
-        src_names = {c.name for c in src.iterdir()}
-        dst_names = {c.name for c in dst.iterdir()} if dst.is_dir() else set()
-        for name in sorted(src_names - dst_names):
-            out.append(f"missing in .cursor: {dst.name}/{name}")
-        for name in sorted(dst_names - src_names):
-            out.append(f"stale in .cursor: {dst.name}/{name}")
-        return out
-    pat = "*.md"
-    for f in sorted(src.glob(pat)):
-        target = dst / _expected_name(f, mode)
-        if not target.exists():
-            out.append(f"missing in .cursor: {dst.name}/{target.name}")
-        elif target.read_text(encoding="utf-8") != f.read_text(encoding="utf-8"):
-            out.append(f"differs: {dst.name}/{target.name}")
+    src_names = set(src_files)
+    dst_names = set(dst_files)
+    for name in sorted(src_names - dst_names):
+        out.append(f"missing in .cursor: {dst_label}/{name}")
+    for name in sorted(dst_names - src_names):
+        out.append(f"stale in .cursor: {dst_label}/{name}")
+    for name in sorted(src_names & dst_names):
+        if _read(src_files[name]) != _read(dst_files[name]):
+            out.append(f"differs: {dst_label}/{name}")
     return out
+
+
+def _diff(src: Path, dst: Path, mode: str) -> list[str]:
+    if mode == "tree":
+        src_files = {str(p.relative_to(src)): p for p in src.rglob("*") if p.is_file()}
+        dst_files = (
+            {str(p.relative_to(dst)): p for p in dst.rglob("*") if p.is_file()}
+            if dst.is_dir()
+            else {}
+        )
+        return _compare_file_sets(src_files, dst_files, dst.name)
+
+    src_files = {_expected_name(f, mode): f for f in sorted(src.glob("*.md"))}
+    dst_pattern = "*.mdc" if mode == "rules" else "*.md"
+    dst_files = (
+        {f.name: f for f in sorted(dst.glob(dst_pattern))} if dst.is_dir() else {}
+    )
+    return _compare_file_sets(src_files, dst_files, dst.name)
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Sync .cursor/ from .claude/")
-    ap.add_argument("--check", action="store_true", help="Report drift without writing (CI gate)")
+    ap.add_argument(
+        "--check", action="store_true", help="Report drift without writing (CI gate)"
+    )
     args = ap.parse_args()
     return sync(check=args.check)
 
