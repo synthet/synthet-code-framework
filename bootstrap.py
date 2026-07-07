@@ -41,6 +41,7 @@ PLACEHOLDER_RE = re.compile(r"\$\{([A-Z0-9_]+)\}")
 EXCLUDE = {
     ".git",
     ".github",          # framework CI (tests bootstrap.py, which is not shipped)
+    ".github-template",  # starter CI templates copied to .github/workflows when enabled
     "tests",            # framework self-tests
     "bootstrap.py",
     "README.md",        # framework README; replaced with a minimal project README
@@ -138,6 +139,13 @@ def iter_sources() -> list[Path]:
     return out
 
 
+def iter_ci_templates() -> list[Path]:
+    template_root = FRAMEWORK_ROOT / ".github-template" / "workflows"
+    if not template_root.is_dir():
+        return []
+    return sorted(p for p in template_root.glob("*") if p.is_file())
+
+
 def _under(rel: Path, base: Path) -> bool:
     return rel != base and str(rel).replace("\\", "/").startswith(str(base).replace("\\", "/") + "/")
 
@@ -187,6 +195,20 @@ def main() -> int:
         action="store_true",
         help="Only probe --target for commands (no seeding); useful for existing projects",
     )
+    ci_group = ap.add_mutually_exclusive_group()
+    ci_group.add_argument(
+        "--include-ci",
+        dest="include_ci",
+        action="store_true",
+        default=True,
+        help="Include starter GitHub Actions workflows (default)",
+    )
+    ci_group.add_argument(
+        "--no-include-ci",
+        dest="include_ci",
+        action="store_false",
+        help="Skip starter GitHub Actions workflows",
+    )
     ap.add_argument("--dry-run", action="store_true", help="Print planned files without writing")
     args = ap.parse_args()
 
@@ -215,6 +237,9 @@ def main() -> int:
         files = sorted(
             src.relative_to(FRAMEWORK_ROOT).as_posix() for src in iter_sources() if src.is_file()
         )
+        if args.include_ci:
+            files.extend(f".github/workflows/{src.name}" for src in iter_ci_templates())
+            files.sort()
         print(f"DRY RUN: would seed '{vals['PROJECT_NAME']}' into {target}")
         print("Substitutions:")
         for key in sorted(vals):
@@ -241,6 +266,16 @@ def main() -> int:
         else:
             shutil.copy2(src, dst)
         count += 1
+
+    if args.include_ci:
+        for src in iter_ci_templates():
+            dst = target / ".github" / "workflows" / src.name
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            if is_text(src):
+                dst.write_text(substitute(src.read_text(encoding="utf-8"), vals), encoding="utf-8")
+            else:
+                shutil.copy2(src, dst)
+            count += 1
 
     (target / "README.md").write_text(project_readme(vals), encoding="utf-8")
     (target / "CHANGELOG.md").write_text(project_changelog(vals), encoding="utf-8")
