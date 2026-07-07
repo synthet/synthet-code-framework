@@ -68,7 +68,7 @@ Dev dependencies: `pip install -r requirements-dev.txt`.
 
 ## Conventions
 
-- **Backlog provider:** default to Local Markdown for generic/offline projects or GitHub Issues for GitHub-hosted repos; GitHub Projects is optional and its board IDs live under `.agent/backlog/providers/github-projects.md`; use `/task-claim` + the five-step contract.
+- **Backlog provider:** default to Local Markdown for generic/offline projects or GitHub Issues for GitHub-hosted repos; GitHub Projects is optional, and board/card requirements apply only when that provider is selected; its IDs live under `.agent/backlog/providers/github-projects.md`; use `/task-claim` + the five-step contract.
 - **Safety first:** secrets in `secrets.json`/`.env`; never touch `.git/config`; write-capable tools
   are opt-in. See [`.agent/SAFETY.md`](.agent/SAFETY.md).
 - **OKF docs:** `docs/` is an Open Knowledge Format bundle — markdown + YAML frontmatter, file path =

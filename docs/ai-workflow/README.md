@@ -76,7 +76,7 @@ is unnecessary (trivial fix), say so explicitly.
 | `validate-implementation` (skill) | Per-AC Verified/Failed/Unknown report with evidence | Every AC Verified, or open items accepted by the user |
 | `/pr-ready` | Definition-of-done report + paste-ready PR text | Checks green, provider-specific backlog reference present, review-ready status set only when the provider tracks status |
 
-- **Backlog first:** pick and claim work via the [backlog contract](../project/00-backlog-workflow.md) (`/task-claim`); default to Local Markdown or GitHub Issues unless a provider doc opts into GitHub Projects.
+- **Backlog first:** pick and claim work via the [backlog contract](../project/00-backlog-workflow.md) (`/task-claim`); default to Local Markdown or GitHub Issues unless project docs explicitly opt into GitHub Projects.
 - **Review:** `/critical-commit-audit` for high-severity bug hunts; `/check-subagents` +
   `/run-codex-review` / `/run-gemini-review` for external second opinions.
 - **Docs:** `/wiki-ingest`, `/wiki-lint`, `/wiki-query` keep `docs/` healthy (see [WIKI_SCHEMA](../WIKI_SCHEMA.md)).
