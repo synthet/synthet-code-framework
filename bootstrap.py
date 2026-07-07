@@ -161,7 +161,8 @@ def project_readme(vals: dict[str, str]) -> str:
         "Seeded from **synthet-code-framework**. Agent scaffolding lives in `.claude/`, `.cursor/`,\n"
         "`.agent/`, and `.agent-memory/`. Start with [`CLAUDE.md`](CLAUDE.md) and [`AGENTS.md`](AGENTS.md).\n\n"
         "Fill in build/test/lint commands in `CLAUDE.md` + `AGENTS.md`, choose a backlog provider,\n"
-        "and fill optional provider IDs only when that provider needs them (search for `TODO(` markers).\n"
+        "and fill optional provider IDs (for example, GitHub Projects IDs) only when that provider needs them\n"
+        "(search for `TODO(` markers).\n"
     )
 
 

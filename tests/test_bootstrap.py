@@ -106,12 +106,20 @@ def test_seed_stack(tmp_path: Path, stack: str) -> None:
     assert "Demo App" in claude_md
 
 
+def test_backlog_skill_does_not_require_github_projects_ids_by_default() -> None:
+    skill = (REPO_ROOT / ".claude/skills/backlog-queue/SKILL.md").read_text(encoding="utf-8")
+
+    assert "Do not require GitHub Projects IDs unless GitHub Projects is the" in skill
+    assert "selected provider" in skill
+
+
 def test_project_readme_points_to_backlog_provider_choice(tmp_path: Path) -> None:
     target = run_bootstrap(tmp_path, "python")
     readme = (target / "README.md").read_text(encoding="utf-8")
 
     assert "choose a backlog provider" in readme
     assert "optional provider IDs" in readme
+    assert "GitHub Projects" in readme
 
 
 def test_github_projects_ids_are_optional_provider_todo_markers(tmp_path: Path) -> None:
