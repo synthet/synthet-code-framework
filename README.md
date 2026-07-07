@@ -31,7 +31,7 @@ marked `TODO(...)` for things only you know (repo URL, optional provider IDs). T
 | Subagents | `.claude/agents/` | pr-ready-hygiene, critical-commit-audit, external-cli/codex/gemini reviewers |
 | Rules | `.claude/rules/` | Always-on safety + SDLC core |
 | Cursor mirror | `.cursor/` | **Generated** from `.claude/` by `scripts/sync_assistant_trees.py` |
-| Governance | `.agent/` | SAFETY, inventory, subagent role matrix, SDLC workflow playbooks |
+| Governance | `.agent/` | SAFETY, provider-oriented backlog docs, inventory, subagent role matrix, SDLC workflow playbooks |
 | Memory | `.agent-memory/` + `scripts/agent-memory/` | log → dream → promote → context (deterministic, no LLM) |
 | Docs tooling | `scripts/okf_lint.py`, `wiki_lint.py`, `docs/` | OKF-aligned knowledge bundle + linters |
 
@@ -68,7 +68,7 @@ Dev dependencies: `pip install -r requirements-dev.txt`.
 
 ## Conventions
 
-- **Backlog provider:** default to Local Markdown or GitHub Issues; GitHub Projects is optional; `/task-claim` + the five-step contract.
+- **Backlog provider:** default to Local Markdown or GitHub Issues; GitHub Projects is optional and its board IDs live under `.agent/backlog/providers/github-projects.md`; use `/task-claim` + the five-step contract.
 - **Safety first:** secrets in `secrets.json`/`.env`; never touch `.git/config`; write-capable tools
   are opt-in. See [`.agent/SAFETY.md`](.agent/SAFETY.md).
 - **OKF docs:** `docs/` is an Open Knowledge Format bundle — markdown + YAML frontmatter, file path =
