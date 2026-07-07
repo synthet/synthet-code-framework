@@ -58,7 +58,7 @@ def test_inline_secret_rejected(tmp_path: Path) -> None:
                 "side_effects": "read-only",
                 "enabled": False,
                 "url": "https://mcp.example.com/docs",
-                "headers": {"Authorization": "Bearer sk-liveInlineToken1234567890"},
+                "headers": {"Authorization": "Bearer inline-token-value-1234567890"},
             }
         },
     )
