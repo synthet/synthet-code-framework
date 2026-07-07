@@ -106,6 +106,14 @@ def test_seed_stack(tmp_path: Path, stack: str) -> None:
     assert "Demo App" in claude_md
 
 
+def test_project_readme_points_to_backlog_provider_choice(tmp_path: Path) -> None:
+    target = run_bootstrap(tmp_path, "python")
+    readme = (target / "README.md").read_text(encoding="utf-8")
+
+    assert "choose a backlog provider" in readme
+    assert "optional provider IDs" in readme
+
+
 def test_github_projects_ids_are_optional_provider_todo_markers(tmp_path: Path) -> None:
     target = run_bootstrap(tmp_path, "python")
     workflow = (target / "docs/project/00-backlog-workflow.md").read_text(encoding="utf-8")
