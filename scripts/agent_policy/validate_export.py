@@ -16,6 +16,11 @@ except ModuleNotFoundError:  # pragma: no cover - exercised when PyYAML is unava
     yaml = None
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.ci.secret_detection import scan_file as scan_secret_file
+
 DEFAULT_POLICY = REPO_ROOT / "agent-policy.yaml"
 CREDENTIAL_NAME_PARTS = (
     "secret",
@@ -164,6 +169,14 @@ def validate(paths: list[str], *, policy_path: Path = DEFAULT_POLICY, external_e
         total += full.stat().st_size
         if max_total_bytes and total > max_total_bytes:
             raise ValidationError(f"total bytes exceed limit: {total} > {max_total_bytes}")
+        findings = scan_secret_file(full, rel_path)
+        if findings is None:
+            raise ValidationError(f"file is not readable UTF-8 text for export: {rel_path}")
+        if findings:
+            first = findings[0]
+            raise ValidationError(
+                f"likely secret rejected: {first.rel_path}:{first.line_number}: {first.label}"
+            )
     return normalized
 
 
