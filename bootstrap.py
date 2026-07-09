@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -48,6 +49,14 @@ EXCLUDE = {
     "CHANGELOG.md",     # framework history; replaced with a fresh skeleton
 }
 EXCLUDE_DIR_NAMES = {"__pycache__", ".agent-runs"}
+# Local/private files documented in .gitignore that must never be seeded,
+# even if they exist in a dirty source checkout or are accidentally tracked.
+PRIVATE_SOURCE_PATHS = {
+    Path(".cursor/mcp.json"),
+    Path(".claude/settings.local.json"),
+    Path("secrets.json"),
+    Path(".env"),
+}
 # Working dirs: copy the dir (and .gitkeep) but not their contents.
 EMPTY_KEEP_DIRS = {
     Path(".agent/scratch"),
@@ -123,19 +132,50 @@ def is_text(path: Path) -> bool:
     return path.suffix in TEXT_SUFFIXES or path.name in {".gitignore", "env.example"}
 
 
+def _tracked_source_paths() -> list[Path]:
+    """Return tracked files in FRAMEWORK_ROOT using git's index as the source manifest."""
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(FRAMEWORK_ROOT), "ls-files", "-z"],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise RuntimeError(
+            f"Unable to enumerate tracked scaffold files from {FRAMEWORK_ROOT}; "
+            "run bootstrap.py from a git checkout or provide a tracked-file manifest."
+        ) from exc
+
+    return sorted(Path(raw) for raw in proc.stdout.decode("utf-8").split("\0") if raw)
+
+
+def _is_private_source_path(rel: Path) -> bool:
+    return rel in PRIVATE_SOURCE_PATHS or rel.match(".env.*")
+
+
+def _is_excluded_source_path(rel: Path) -> bool:
+    parts = set(rel.parts)
+    if parts & EXCLUDE_DIR_NAMES:
+        return True
+    if rel.parts and rel.parts[0] in EXCLUDE or str(rel) in EXCLUDE:
+        return True
+    if _is_private_source_path(rel):
+        return True
+    # Skip contents of working dirs (files and local subdirs) except .gitkeep.
+    if any(_under(rel, d) and rel.name != ".gitkeep" for d in EMPTY_KEEP_DIRS):
+        return True
+    return False
+
+
 def iter_sources() -> list[Path]:
     out: list[Path] = []
-    for p in FRAMEWORK_ROOT.rglob("*"):
-        rel = p.relative_to(FRAMEWORK_ROOT)
-        parts = set(rel.parts)
-        if parts & EXCLUDE_DIR_NAMES:
+    for rel in _tracked_source_paths():
+        if _is_excluded_source_path(rel):
             continue
-        if rel.parts and rel.parts[0] in EXCLUDE or str(rel) in EXCLUDE:
-            continue
-        # Skip contents of working dirs (files and local subdirs) except .gitkeep
-        if any(_under(rel, d) and rel.name != ".gitkeep" for d in EMPTY_KEEP_DIRS):
-            continue
-        out.append(p)
+        src = FRAMEWORK_ROOT / rel
+        if src.exists():
+            out.append(src)
     return out
 
 
