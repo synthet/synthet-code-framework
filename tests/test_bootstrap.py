@@ -204,3 +204,47 @@ def test_non_empty_target_rejected(tmp_path: Path) -> None:
         assert bootstrap.main() == 1
     finally:
         sys.argv = old_argv
+
+def test_private_and_working_dir_files_are_not_seeded_from_source_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "framework"
+    source.mkdir()
+    public_files = [
+        "AGENTS.md",
+        "CLAUDE.md",
+        ".gitignore",
+        "env.example",
+        ".cursor/mcp.example.json",
+        ".agent/scratch/.gitkeep",
+    ]
+    private_files = [
+        ".cursor/mcp.json",
+        ".claude/settings.local.json",
+        "secrets.json",
+        ".env",
+        ".env.local",
+        ".agent/scratch/local-notes.md",
+    ]
+    for rel in [*public_files, *private_files]:
+        path = source / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(f"contents for {rel}\n", encoding="utf-8")
+
+    monkeypatch.setattr(bootstrap, "FRAMEWORK_ROOT", source)
+    monkeypatch.setattr(
+        bootstrap,
+        "_tracked_source_paths",
+        lambda: sorted(Path(rel) for rel in [*public_files, *private_files]),
+    )
+
+    target = run_bootstrap(tmp_path, "python", ["--no-include-ci"])
+
+    assert (target / ".cursor/mcp.example.json").is_file()
+    assert (target / ".agent/scratch").is_dir()
+    assert (target / ".agent/scratch/.gitkeep").is_file()
+    for rel in private_files:
+        if rel == ".agent/scratch/local-notes.md":
+            assert not (target / rel).exists(), "working-dir contents should not be seeded"
+        else:
+            assert not (target / rel).exists(), f"private source path seeded: {rel}"
