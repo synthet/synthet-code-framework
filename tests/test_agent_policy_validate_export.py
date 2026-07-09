@@ -97,3 +97,43 @@ def test_external_export_requires_explicit_approval_marker(tmp_path: Path) -> No
         external_export=True,
         approval_marker="APPROVED_EXTERNAL_EXPORT",
     ) == ["README.md"]
+
+
+def write_candidate(tmp_path: Path, rel_path: str, text: str) -> None:
+    path = tmp_path / rel_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def test_secret_shaped_token_in_markdown_is_rejected(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    policy = write_policy(tmp_path)
+    token = "ghp_" + "1234567890abcdefghijklmnopqrstuvwxyz"
+    write_candidate(tmp_path, "docs/review.md", f"# Review\nToken: {token}\n")
+    monkeypatch.setattr(validate_export, "REPO_ROOT", tmp_path)
+
+    with pytest.raises(validate_export.ValidationError, match="likely secret rejected: docs/review.md:2: GitHub token"):
+        validate_export.validate(["docs/review.md"], policy_path=policy)
+
+
+def test_placeholder_and_redacted_values_remain_allowed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    policy = write_policy(tmp_path)
+    write_candidate(
+        tmp_path,
+        "docs/review.md",
+        "# Review\napi_key = \"${OPENAI_API_KEY}\"\npassword = \"redacted\"\n",
+    )
+    monkeypatch.setattr(validate_export, "REPO_ROOT", tmp_path)
+
+    assert validate_export.validate(["docs/review.md"], policy_path=policy) == ["docs/review.md"]
+
+
+def test_safe_markdown_content_passes_secret_scan(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    policy = write_policy(tmp_path)
+    write_candidate(
+        tmp_path,
+        "docs/review.md",
+        "# Review\n\nThis document summarizes non-sensitive implementation details.\n",
+    )
+    monkeypatch.setattr(validate_export, "REPO_ROOT", tmp_path)
+
+    assert validate_export.validate(["docs/review.md"], policy_path=policy) == ["docs/review.md"]

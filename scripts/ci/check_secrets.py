@@ -16,50 +16,16 @@ Exit code 0 when clean, 1 when potential secrets are found. CI complement to .ag
 from __future__ import annotations
 
 import argparse
-import re
 import subprocess
+import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-TOKEN_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
-    ("AWS access key id", re.compile(r"\b(AKIA|ASIA)[0-9A-Z]{16}\b")),
-    ("GitHub token", re.compile(r"\bgh[pousr]_[A-Za-z0-9]{36,}\b")),
-    ("GitHub fine-grained token", re.compile(r"\bgithub_pat_[A-Za-z0-9_]{22,}\b")),
-    ("Slack token", re.compile(r"\bxox[baprs]-[A-Za-z0-9-]{10,}\b")),
-    ("OpenAI key", re.compile(r"\bsk-[A-Za-z0-9_-]{20,}\b")),
-    ("Anthropic key", re.compile(r"\bsk-ant-[A-Za-z0-9_-]{20,}\b")),
-    ("Google API key", re.compile(r"\bAIza[0-9A-Za-z_-]{35}\b")),
-    ("JWT", re.compile(r"\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b")),
-    ("Private key block", re.compile(r"-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----")),
-    (
-        "Credentialed URL",
-        re.compile(r"\b[a-z][a-z0-9+.-]*://[^\s:/@\"']+:[^\s:/@\"']+@[^\s\"']+"),
-    ),
-    (
-        "Suspicious assignment",
-        re.compile(
-            r"(?i)\b(api[_-]?key|auth[_-]?token|access[_-]?token|client[_-]?secret|password|passwd)\b"
-            r"\s*[:=]\s*[\"']([A-Za-z0-9+/_=-]{16,})[\"']"
-        ),
-    ),
-]
+from scripts.ci.secret_detection import SKIP_NAME_PARTS, SKIP_SUFFIXES, scan_file as scan_secret_file
 
-# A line matching any of these is treated as a placeholder/example, not a secret.
-ALLOW_LINE_RE = re.compile(
-    r"\$\{[A-Z0-9_]+\}"          # ${PLACEHOLDER}
-    r"|\{\{[^}]*\}\}"            # {{ template }}
-    r"|TODO\("                   # TODO(KEY) markers
-    r"|<[A-Za-z][A-Za-z0-9 _-]*>"  # <angle-bracket placeholder>
-    r"|(?i:\b(example|placeholder|dummy|sample|fake|redacted|changeme|your[_-]))"
-    r"|x{6,}|\*{4,}|\.{3}",
-)
-
-SKIP_NAME_PARTS = {"env.example", ".env.example"}
-SKIP_SUFFIXES = {
-    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".pdf", ".zip", ".woff", ".woff2",
-    ".lock", ".svg",
-}
 SKIP_PATH_PREFIXES = ("scripts/ci/check_secrets.py",)  # this file contains the patterns
 
 
@@ -70,20 +36,6 @@ def tracked_files(root: Path) -> list[Path]:
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip() or "git ls-files failed")
     return [root / line for line in result.stdout.splitlines() if line.strip()]
-
-
-def scan_file(path: Path, rel: str, findings: list[str]) -> None:
-    try:
-        text = path.read_text(encoding="utf-8")
-    except (UnicodeDecodeError, OSError):
-        return
-    for lineno, line in enumerate(text.splitlines(), start=1):
-        if ALLOW_LINE_RE.search(line):
-            continue
-        for label, pattern in TOKEN_PATTERNS:
-            if pattern.search(line):
-                findings.append(f"{rel}:{lineno}: possible {label}")
-                break
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -103,7 +55,10 @@ def main(argv: list[str] | None = None) -> int:
             continue
         if path.name.lower() in SKIP_NAME_PARTS or path.suffix.lower() in SKIP_SUFFIXES:
             continue
-        scan_file(path, rel, findings)
+        file_findings = scan_secret_file(path, rel)
+        if file_findings is None:
+            continue
+        findings.extend(finding.format() for finding in file_findings)
 
     if findings:
         print(f"Secrets check FAILED ({len(findings)} potential secret(s)):")
