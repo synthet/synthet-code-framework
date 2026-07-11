@@ -14,8 +14,9 @@ Placeholders resolved here:
     PROJECT_OWNER, PROJECT_REPO, PROJECT_NUMBER, PROJECT_NODE_ID,
     STAGE_FIELD_ID + STAGE_*_ID
 
-Board/stage IDs can't be known at seed time; unset ones become a clear `TODO(<KEY>)` marker you fill
-in from your GitHub Project later (so no raw ${...} tokens remain).
+GitHub Projects board/stage IDs are optional provider settings. Unset ones become clear
+`TODO(<KEY>)` markers, but generic projects can use Local Markdown or GitHub Issues without filling
+them in.
 """
 
 from __future__ import annotations
@@ -208,8 +209,9 @@ def project_readme(vals: dict[str, str]) -> str:
         "Seeded from **synthet-code-framework**. Agent scaffolding lives in `.claude/`, `.cursor/`,\n"
         "`.agents/`, `.codex/`, `.agent/`, and `.agent-memory/`. Start with [`CLAUDE.md`](CLAUDE.md)\n"
         "and [`AGENTS.md`](AGENTS.md); Codex setup is documented in [`.codex/README.md`](.codex/README.md).\n\n"
-        "Fill in build/test/lint commands in `CLAUDE.md` + `AGENTS.md`, and your GitHub Project board\n"
-        "IDs (search for `TODO(` markers).\n"
+        "Fill in build/test/lint commands in `CLAUDE.md` + `AGENTS.md`, choose a backlog provider,\n"
+        "and fill optional provider IDs (for example, GitHub Projects IDs) only when that provider needs them\n"
+        "(search for `TODO(` markers).\n"
     )
 
 
@@ -341,12 +343,12 @@ def main() -> int:
     if not args.auto_detect:
         print("  1. cd into the target and `git init` (or push to your remote).")
         print("  2. Fill in build/test/lint commands in CLAUDE.md + AGENTS.md.")
-        print("  3. Replace TODO(...) markers (board IDs, repo URL) once your Project board exists.")
+        print("  3. Choose a backlog provider; fill GitHub Projects TODO(...) IDs only if you use that provider.")
         print("  4. `python scripts/sync_assistant_trees.py` after editing .claude/ assets.")
     else:
         print("  1. cd into the target and `git init` (or push to your remote).")
         print("  2. Review auto-detected commands in CLAUDE.md + AGENTS.md (marked # auto-detected).")
-        print("  3. Replace TODO(...) markers (board IDs, repo URL) once your Project board exists.")
+        print("  3. Choose a backlog provider; fill GitHub Projects TODO(...) IDs only if you use that provider.")
         print("  4. `python scripts/sync_assistant_trees.py` after editing .claude/ assets.")
     return 0
 

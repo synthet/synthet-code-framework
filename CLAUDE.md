@@ -15,18 +15,18 @@
 
 ## Backlog & queue (read this before picking work)
 
-The canonical queue is a **GitHub Project board**, not `TODO.md`: **${PROJECT_BOARD_URL}**
+The canonical queue is the configured **backlog provider**, not ad hoc `TODO.md` notes. Generic projects default to Local Markdown; GitHub-hosted projects may use GitHub Issues; GitHub Projects is optional when a board is explicitly configured.
 
 **Mandatory contract for every agent (human or AI). Do all five steps:**
 
-1. **Pick from `Stage = Ready`**, sorted by `priority:p0..p3`. If `Ready` is empty, ask the maintainer — do not invent work.
-2. **Claim** the issue: `/task-claim <N>` (assigns you, moves the card to `Stage = Claimed`).
-3. **Flip to `Stage = In Progress`** on your first commit.
-4. **If blocked**, move the card to `Stage = Blocked` *and* comment the blocker + what would unblock it.
-5. **Reference the issue in the PR** with `Closes #<N>`; move to `Stage = Review` while open; merging closes it.
+1. **Pick from the ready queue**, sorted by priority. If ready work is empty, ask the maintainer — do not invent work.
+2. **Claim** the item: `/task-claim <item-ref>` records ownership in the provider.
+3. **Move to in progress** on your first commit.
+4. **If blocked**, mark the item blocked and record the blocker + what would unblock it.
+5. **Reference the item in the PR** with the provider-specific reference (`Refs <ID>` or `Closes #<N>`).
 
-Do not add tasks to `TODO.md`, do not work without an issue, and do not skip Stage transitions.
-Full contract: [`docs/project/00-backlog-workflow.md`](docs/project/00-backlog-workflow.md).
+Do not add tasks to random `TODO.md` files, do not work without a backlog item, and do not skip provider status transitions.
+Full contract: [`docs/project/00-backlog-workflow.md`](docs/project/00-backlog-workflow.md) and provider details in [`.agent/backlog/`](.agent/backlog/README.md).
 
 ## Architecture
 

@@ -25,7 +25,8 @@ separately by the `validate-implementation` skill — do not conflate the two.
 - Lint/test commands ran and are green (actual results, not "probably green").
 - Spec ACs Verified per `validate-implementation`, or open Unknowns/Failures listed explicitly.
 - Optional trace artifacts are sanitized, referenced by path, and summarized rather than pasted wholesale.
-- PR references its issue (`Closes #<N>`); board card in `Stage = Review`.
+- PR references its backlog item using the selected provider's convention (`Refs <ID>` or `Closes #<N>`); if the provider tracks status, the item is marked review-ready; providers without status fields only need the PR reference.
+- No GitHub Projects board/card status is required unless GitHub Projects is the selected provider.
 - Diff clean: no debug code, secrets, large binaries, or unrelated refactors.
 
 ## Done when
