@@ -42,14 +42,14 @@ TOKEN_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ),
 ]
 
-# A line matching any of these is treated as a placeholder/example, not a secret.
-ALLOW_LINE_RE = re.compile(
-    r"\$\{[A-Z0-9_]+\}"          # ${PLACEHOLDER}
-    r"|\{\{[^}]*\}\}"            # {{ template }}
-    r"|TODO\("                   # TODO(KEY) markers
-    r"|<[A-Za-z][A-Za-z0-9 _-]*>"  # <angle-bracket placeholder>
+# A matched candidate value matching any of these is treated as a placeholder/example, not a secret.
+ALLOW_VALUE_RE = re.compile(
+    r"^\$\{[A-Z0-9_]+\}$"          # ${PLACEHOLDER}
+    r"|^\{\{[^}]*\}\}$"            # {{ template }}
+    r"|^TODO\([^)]*\)$"             # TODO(KEY) markers
+    r"|^<[A-Za-z][A-Za-z0-9 _-]*>$"  # <angle-bracket placeholder>
     r"|(?i:\b(example|placeholder|dummy|sample|fake|redacted|changeme|your[_-]))"
-    r"|x{6,}|\*{4,}|\.\.\.",
+    r"|^x{6,}$|^\*{4,}$|^\.{3}$",
 )
 
 SKIP_NAME_PARTS = {"env.example", ".env.example"}
@@ -59,15 +59,25 @@ SKIP_SUFFIXES = {
 }
 
 
+def matched_secret_value(match: re.Match[str]) -> str:
+    """Return the concrete candidate value from a token-pattern match."""
+    if match.lastindex and match.lastindex >= 2 and match.group(2) is not None:
+        return match.group(2)
+    return match.group(0)
+
+
+def is_allowed_secret_match(match: re.Match[str]) -> bool:
+    """Return true when the matched candidate itself is a documented dummy value."""
+    return bool(ALLOW_VALUE_RE.search(matched_secret_value(match).strip()))
+
+
 def scan_text(text: str, rel_path: str) -> list[SecretFinding]:
     """Return likely secret findings in UTF-8 text."""
 
     findings: list[SecretFinding] = []
     for lineno, line in enumerate(text.splitlines(), start=1):
-        if ALLOW_LINE_RE.search(line):
-            continue
         for label, pattern in TOKEN_PATTERNS:
-            if pattern.search(line):
+            if any(not is_allowed_secret_match(match) for match in pattern.finditer(line)):
                 findings.append(SecretFinding(rel_path, lineno, label))
                 break
     return findings
