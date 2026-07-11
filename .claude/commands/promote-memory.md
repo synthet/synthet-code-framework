@@ -1,3 +1,12 @@
+---
+capability: "promote-memory agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
+---
+
 > **Claude Code:** Same intent as Cursor `/promote-memory`. Mirror: `.cursor/commands/promote-memory.md`.
 
 # /promote-memory — Approve dream into active memory

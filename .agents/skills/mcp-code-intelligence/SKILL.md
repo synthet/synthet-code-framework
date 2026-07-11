@@ -1,6 +1,12 @@
 ---
 name: mcp-code-intelligence
 description: Compare MCP code intelligence tiers — CLI wrappers, ast-grep, Serena, Zoekt, fff file search, embeddings. Prefer text search before heavy indexes.
+capability: "mcp-code-intelligence agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 # MCP code intelligence

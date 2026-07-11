@@ -1,6 +1,12 @@
 ---
 name: windows-agent-tooling
 description: Native Windows agent workflows — PowerShell, winget, Cursor IDE, Docker Desktop, when WSL is optional.
+capability: "windows-agent-tooling agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 # Windows agent tooling

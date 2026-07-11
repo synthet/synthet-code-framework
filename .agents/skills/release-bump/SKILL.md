@@ -1,6 +1,12 @@
 ---
 name: release-bump
 description: Bump the project version with a semver rubric, promote the Unreleased changelog section, and verify before committing. Use when the user asks to cut a release, bump the version, or tag a new version.
+capability: "release-bump agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 # Release bump

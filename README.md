@@ -71,8 +71,10 @@ Dev dependencies: `pip install -r requirements-dev.txt`.
 ## Conventions
 
 - **Backlog as issues:** a GitHub Project board is the queue; `/task-claim` + the five-step contract.
-- **Safety first:** secrets in `secrets.json`/`.env`; never touch `.git/config`; write-capable tools
-  are opt-in. See [`.agent/SAFETY.md`](.agent/SAFETY.md).
+- **Safety first:** secrets in `secrets.json`/`.env`; never touch `.git/config`; the default
+  `.claude/settings.json` is read-only, write-capable commands are opt-in via
+  `.claude/settings.write.example.json`, and external exports require explicit approval. See
+  [`.agent/SAFETY.md`](.agent/SAFETY.md).
 - **OKF docs:** `docs/` is an Open Knowledge Format bundle — markdown + YAML frontmatter, file path =
   identity, links = graph. See [`docs/OKF_ADOPTION.md`](docs/OKF_ADOPTION.md).
 

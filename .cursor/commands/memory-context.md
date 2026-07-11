@@ -1,3 +1,12 @@
+---
+capability: "memory-context agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
+---
+
 > **Claude Code:** Same intent as Cursor `/memory-context`. Mirror: `.cursor/commands/memory-context.md`.
 
 # /memory-context — Print memory for a new session

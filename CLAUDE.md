@@ -56,6 +56,15 @@ Tests live in `…`. Document how to run the fast subset vs. the full suite. If 
 of end-to-end tests, give each a distinct name and a one-line disambiguation table — avoid ambiguous
 "E2E" wording.
 
+
+## Tool permissions and write access
+
+- **Default read-only mode:** the scaffolded `.claude/settings.json` only allows read-oriented inspection (`git status`, `git diff:*`, `git log:*`) plus `WebSearch`.
+- **Local writes are opt-in:** to let an agent stage or commit local changes, copy or merge `.claude/settings.write.example.json` into the active Claude settings for that workspace, preferably enabling only the entries needed for the current task.
+- **Remote writes are separate:** GitHub mutations through `gh pr:*`, `gh issue:*`, or `gh project:*` affect shared remote state and may notify people; enable them only after explicit task intent and target verification.
+- **External export approval:** exporting code, prompts, logs, or generated artifacts to external services/providers requires explicit approval and a secrets check, even when local writes are already allowed.
+- **Bootstrap inheritance:** seeded projects inherit the read-only `.claude/settings.json` so new repos begin with the safer default.
+
 ## Development Guidelines
 
 - **No hardcoded paths** — use a config module / base-dir constant.

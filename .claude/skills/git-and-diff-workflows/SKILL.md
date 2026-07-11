@@ -1,6 +1,12 @@
 ---
 name: git-and-diff-workflows
 description: Safe git and GitHub CLI workflows — status, diff, log, branch, PR operations with inspect-before-commit patterns.
+capability: "git-and-diff-workflows agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 # Git and diff workflows

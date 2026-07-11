@@ -1,6 +1,12 @@
 ---
 name: safe-command-patterns
 description: Reusable command rules that minimize accidental data loss, context overflow, and unreviewed changes. Use before editing, searching, and committing.
+capability: "safe-command-patterns agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 # Safe command patterns

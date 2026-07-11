@@ -63,9 +63,28 @@ Commands (`.claude/commands/`) and rules (`.claude/rules/`) are catalogued in
 - **Skills:** YAML frontmatter required; `name` is the **first** key and matches the directory
   name; `description` is non-empty; skill names are unique across the tree.
 - **Agents:** frontmatter required; `name` matches the file stem; `description` non-empty; names unique.
+- **Commands:** YAML frontmatter required and H1 heading of the form `# /<file-stem> …`.
 - **Rules:** frontmatter required with non-empty `description`.
-- **Commands:** H1 heading of the form `# /<file-stem> …`.
+- **Commands, skills, and agents:** frontmatter must include the metadata contract fields below
+  wherever the field applies to the asset:
+  - `capability` — short user-facing statement of what the asset enables.
+  - `side_effect_level` — one of `read_only`, `local_write`, `remote_write`,
+    `external_export`. Use `external_export` when repository context or task data leaves the
+    local workspace, and `remote_write` for GitHub PR/issue/project mutations.
+  - `approval_required` — boolean `true` or `false`. Use `true` for high-risk external export
+    assets and remote mutations that require explicit human approval.
+  - `requires_tools` — compact scalar summary of required CLIs, MCP tools, or platform APIs.
+  - `output_schema` — compact scalar summary of the expected response/report shape.
+  - `risk_class` — one of `low`, `medium`, `high`.
+- **High-risk external review assets:** `risk_class: high` external Codex/Gemini/subagent review
+  assets must also set `side_effect_level: external_export` and `approval_required: true`.
+- **PR/issue/project mutation commands:** commands that mutate GitHub PRs, issues, or Project
+  boards must set `side_effect_level: remote_write`.
 - **All files:** plain scalar frontmatter keys only — no exotic YAML tags (`!!`).
+
+Use `python scripts/migrate_agent_frontmatter.py` to populate missing command, skill, and agent
+metadata defaults before hand-tuning values. Use `--check` in CI or review workflows to report
+assets that still need migration without rewriting files.
 
 Violations fail CI; fix the asset rather than the checker. If the contract itself must change,
 update the checker, this file, and [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)

@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -41,12 +42,21 @@ PLACEHOLDER_RE = re.compile(r"\$\{([A-Z0-9_]+)\}")
 EXCLUDE = {
     ".git",
     ".github",          # framework CI (tests bootstrap.py, which is not shipped)
+    ".github-template",  # starter CI templates copied to .github/workflows when enabled
     "tests",            # framework self-tests
     "bootstrap.py",
     "README.md",        # framework README; replaced with a minimal project README
     "CHANGELOG.md",     # framework history; replaced with a fresh skeleton
 }
 EXCLUDE_DIR_NAMES = {"__pycache__", ".agent-runs"}
+# Local/private files documented in .gitignore that must never be seeded,
+# even if they exist in a dirty source checkout or are accidentally tracked.
+PRIVATE_SOURCE_PATHS = {
+    Path(".cursor/mcp.json"),
+    Path(".claude/settings.local.json"),
+    Path("secrets.json"),
+    Path(".env"),
+}
 # Working dirs: copy the dir (and .gitkeep) but not their contents.
 EMPTY_KEEP_DIRS = {
     Path(".agent/scratch"),
@@ -122,20 +132,58 @@ def is_text(path: Path) -> bool:
     return path.suffix in TEXT_SUFFIXES or path.name in {".gitignore", "env.example"}
 
 
+def _tracked_source_paths() -> list[Path]:
+    """Return tracked files in FRAMEWORK_ROOT using git's index as the source manifest."""
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(FRAMEWORK_ROOT), "ls-files", "-z"],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise RuntimeError(
+            f"Unable to enumerate tracked scaffold files from {FRAMEWORK_ROOT}; "
+            "run bootstrap.py from a git checkout or provide a tracked-file manifest."
+        ) from exc
+
+    return sorted(Path(raw) for raw in proc.stdout.decode("utf-8").split("\0") if raw)
+
+
+def _is_private_source_path(rel: Path) -> bool:
+    return rel in PRIVATE_SOURCE_PATHS or rel.match(".env.*")
+
+
+def _is_excluded_source_path(rel: Path) -> bool:
+    parts = set(rel.parts)
+    if parts & EXCLUDE_DIR_NAMES:
+        return True
+    if rel.parts and rel.parts[0] in EXCLUDE or str(rel) in EXCLUDE:
+        return True
+    if _is_private_source_path(rel):
+        return True
+    # Skip contents of working dirs (files and local subdirs) except .gitkeep.
+    if any(_under(rel, d) and rel.name != ".gitkeep" for d in EMPTY_KEEP_DIRS):
+        return True
+    return False
+
+
 def iter_sources() -> list[Path]:
     out: list[Path] = []
-    for p in FRAMEWORK_ROOT.rglob("*"):
-        rel = p.relative_to(FRAMEWORK_ROOT)
-        parts = set(rel.parts)
-        if parts & EXCLUDE_DIR_NAMES:
+    for rel in _tracked_source_paths():
+        if _is_excluded_source_path(rel):
             continue
-        if rel.parts and rel.parts[0] in EXCLUDE or str(rel) in EXCLUDE:
-            continue
-        # Skip contents of working dirs (files and local subdirs) except .gitkeep
-        if any(_under(rel, d) and rel.name != ".gitkeep" for d in EMPTY_KEEP_DIRS):
-            continue
-        out.append(p)
+        src = FRAMEWORK_ROOT / rel
+        if src.exists():
+            out.append(src)
     return out
+
+
+def iter_ci_templates() -> list[Path]:
+    template_root = FRAMEWORK_ROOT / ".github-template" / "workflows"
+    if not template_root.is_dir():
+        return []
+    return sorted(p for p in template_root.glob("*") if p.is_file())
 
 
 def _under(rel: Path, base: Path) -> bool:
@@ -188,6 +236,20 @@ def main() -> int:
         action="store_true",
         help="Only probe --target for commands (no seeding); useful for existing projects",
     )
+    ci_group = ap.add_mutually_exclusive_group()
+    ci_group.add_argument(
+        "--include-ci",
+        dest="include_ci",
+        action="store_true",
+        default=True,
+        help="Include starter GitHub Actions workflows (default)",
+    )
+    ci_group.add_argument(
+        "--no-include-ci",
+        dest="include_ci",
+        action="store_false",
+        help="Skip starter GitHub Actions workflows",
+    )
     ap.add_argument("--dry-run", action="store_true", help="Print planned files without writing")
     args = ap.parse_args()
 
@@ -216,6 +278,9 @@ def main() -> int:
         files = sorted(
             src.relative_to(FRAMEWORK_ROOT).as_posix() for src in iter_sources() if src.is_file()
         )
+        if args.include_ci:
+            files.extend(f".github/workflows/{src.name}" for src in iter_ci_templates())
+            files.sort()
         print(f"DRY RUN: would seed '{vals['PROJECT_NAME']}' into {target}")
         print("Substitutions:")
         for key in sorted(vals):
@@ -242,6 +307,16 @@ def main() -> int:
         else:
             shutil.copy2(src, dst)
         count += 1
+
+    if args.include_ci:
+        for src in iter_ci_templates():
+            dst = target / ".github" / "workflows" / src.name
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            if is_text(src):
+                dst.write_text(substitute(src.read_text(encoding="utf-8"), vals), encoding="utf-8")
+            else:
+                shutil.copy2(src, dst)
+            count += 1
 
     (target / "README.md").write_text(project_readme(vals), encoding="utf-8")
     (target / "CHANGELOG.md").write_text(project_changelog(vals), encoding="utf-8")

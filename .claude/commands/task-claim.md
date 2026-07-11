@@ -1,3 +1,12 @@
+---
+capability: "task-claim agent asset workflow"
+side_effect_level: remote_write
+approval_required: true
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
+---
+
 > **Claude Code:** Same intent as Cursor `/task-claim`. When customizing, keep in sync with `.cursor/commands/task-claim.md`.
 
 # /task-claim — claim a board issue and move it to Stage=Claimed
