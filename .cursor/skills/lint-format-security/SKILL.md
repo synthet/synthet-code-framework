@@ -77,4 +77,3 @@ trivy fs --scanners vuln --exit-code 0 .
 
 - [ ] Linters run on narrowest scope
 - [ ] User approved any auto-fix
-

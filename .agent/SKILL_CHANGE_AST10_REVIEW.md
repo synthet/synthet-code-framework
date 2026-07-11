@@ -12,7 +12,7 @@ Many upstream checks assume **untrusted registry skills** (signing, SBOM, contai
 
 ## Supply chain and sync (AST02, AST07, AST10)
 
-- [ ] **Canonical copy:** Author under `.claude/skills/<name>/SKILL.md` (canonical); regenerate `.cursor/skills/` via `python scripts/sync_assistant_trees.py` and ship **both trees in the same PR** (see [AGENTS.md](../AGENTS.md)).
+- [ ] **Canonical copy:** Author under `.claude/skills/<name>/SKILL.md` (canonical); regenerate `.cursor/skills/` and `.agents/skills/` via `python scripts/sync_assistant_trees.py` and ship **all trees in the same PR** (see [AGENTS.md](../AGENTS.md)).
 - [ ] **Inventory:** [SKILL_INVENTORY.md](./SKILL_INVENTORY.md) updated (new row or **Last reviewed** date).
 
 ## Privilege and scope (AST03)

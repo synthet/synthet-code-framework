@@ -119,5 +119,3 @@ See topic skill for tool-specific failures.
 - [ ] Required tools respond (`--version` or `--help`)
 - [ ] Commands use bounded output (See [bounded-output-patterns.md](../cli-tools-overview/references/bounded-output-patterns.md).)
 - [ ] Destructive ops gated per confirmation reference
-
-

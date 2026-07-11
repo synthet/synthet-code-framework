@@ -108,4 +108,4 @@ python scripts/validate_cli_skills.py
 python -m pytest tests -q
 ```
 
-If `.claude/` skills changed, run `python scripts/sync_assistant_trees.py` before staging so `.cursor/` stays in sync.
+If `.claude/` assets changed, run `python scripts/sync_assistant_trees.py` before staging so the Cursor and Codex mirrors stay in sync.

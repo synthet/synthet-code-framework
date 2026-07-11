@@ -31,17 +31,19 @@ marked `TODO(...)` for things only you know (board IDs, repo URL). Then:
 | Subagents | `.claude/agents/` | pr-ready-hygiene, critical-commit-audit, external-cli/codex/gemini reviewers |
 | Rules | `.claude/rules/` | Always-on safety + SDLC core |
 | Cursor mirror | `.cursor/` | **Generated** from `.claude/` by `scripts/sync_assistant_trees.py` |
+| Codex skills | `.agents/skills/` | **Generated** repository skills for Codex |
+| Codex setup | `.codex/` | Project config plus generated custom subagents |
 | Governance | `.agent/` | SAFETY, inventory, subagent role matrix, SDLC workflow playbooks |
 | Memory | `.agent-memory/` + `scripts/agent-memory/` | log → dream → promote → context (deterministic, no LLM) |
 | Docs tooling | `scripts/okf_lint.py`, `wiki_lint.py`, `docs/` | OKF-aligned knowledge bundle + linters |
 
 ## Single source of truth
 
-Author agent assets under **`.claude/`** + **`.agent/`**; the **`.cursor/`** tree is generated.
+Author agent assets under **`.claude/`** + **`.agent/`**; the Cursor and Codex mirrors are generated.
 After editing `.claude/`, run:
 
 ```bash
-python scripts/sync_assistant_trees.py          # regenerate .cursor/
+python scripts/sync_assistant_trees.py          # regenerate Cursor + Codex mirrors
 python scripts/sync_assistant_trees.py --check  # CI: fail if out of sync
 ```
 
@@ -56,7 +58,7 @@ without it.
 
 ```bash
 python scripts/okf_lint.py --profile project --exclude-prefix archive/ docs   # 0 errors/0 warnings
-python scripts/sync_assistant_trees.py --check                                # .cursor in sync
+python scripts/sync_assistant_trees.py --check                                # all mirrors in sync
 python -m py_compile bootstrap.py scripts/*.py scripts/**/*.py                 # scripts compile
 python scripts/ci/check_agent_frontmatter.py                                  # asset frontmatter contract
 python scripts/ci/check_secrets.py                                            # no committed secrets

@@ -2,16 +2,16 @@
 
 ## Overview
 
-This repo ships agent scaffolding for Claude Code and Cursor: slash commands, skills, subagents,
+This repo ships agent scaffolding for Claude Code, Cursor, and Codex: commands, skills, subagents,
 safety rules, an `.agent/` governance hub, a project-memory subsystem, and OKF docs tooling. This
 file is the **source of truth** for how agents build/test/run and which tools they may use.
 
 ## Authoring & skill source of truth
 
 - **Canonical** assets are authored under `.claude/` (+ `.agent/`).
-- The **`.cursor/`** tree (rules/commands/skills/agents) is **generated** by
-  `python scripts/sync_assistant_trees.py` — do not hand-edit it; edit `.claude/` and re-run sync.
-- When you change a skill/command/agent, run the sync and commit both trees in the **same PR**
+- The **`.cursor/`** tree and Codex-native **`.agents/skills/`** + **`.codex/agents/`** trees are
+  **generated** by `python scripts/sync_assistant_trees.py` — do not hand-edit generated files.
+- When you change a skill/command/agent, run the sync and commit all generated mirrors in the **same PR**
   (see [`.agent/SKILL_CHANGE_AST10_REVIEW.md`](.agent/SKILL_CHANGE_AST10_REVIEW.md)).
 
 ## Commands
@@ -25,8 +25,9 @@ ${LINT_CMD}      # lint / typecheck / format
 
 ## MCP servers
 
-- Define project servers in [`.mcp.json`](.mcp.json) (Claude Code) and copy
-  [`.cursor/mcp.example.json`](.cursor/mcp.example.json) → `.cursor/mcp.json` (gitignored) for Cursor.
+- Define project servers in [`.mcp.json`](.mcp.json) (Claude Code), copy
+  [`.cursor/mcp.example.json`](.cursor/mcp.example.json) → `.cursor/mcp.json` (gitignored) for Cursor,
+  and use [`.codex/config.toml`](.codex/config.toml) or `~/.codex/config.toml` for Codex.
 - **Naming:** `<scope>-<role>-*` (e.g. `${MCP_PREFIX}-data`, `${MCP_PREFIX}-diag`).
 - **Surface:** prefer a compact **`search` + `dispatch`** pair over dozens of raw tools when the
   domain is large.
@@ -106,7 +107,10 @@ that was not obvious from the error message. Keep entries short: date, symptom, 
 | Claude subagents | `.claude/agents/*.md` |
 | Claude rules | `.claude/rules/*.md` |
 | Cursor mirror (generated) | `.cursor/{rules,commands,skills,agents}` |
-| MCP templates | `.mcp.json`, `.cursor/mcp.example.json` |
+| Codex skills (generated) | `.agents/skills/*/SKILL.md` |
+| Codex subagents (generated) | `.codex/agents/*.toml` |
+| Codex project config | `.codex/config.toml` |
+| MCP templates/config | `.mcp.json`, `.cursor/mcp.example.json`, `.codex/config.toml` |
 | Agent governance | `.agent/` |
 | Project memory | `.agent-memory/` |
 | Workflow playbooks | `.agent/workflows/*.md` |

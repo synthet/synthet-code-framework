@@ -75,4 +75,3 @@ All install/uninstall commands require user initiation. See [commands-requiring-
 - [ ] `uv --version` if Python repo
 - [ ] Block B (Recommended scope): `yq --version`, `just --version`, `shellcheck --version`
 - [ ] Cursor restarted; smoke test passes per [agent-environment.md](../cli-tools-overview/references/agent-environment.md)
-

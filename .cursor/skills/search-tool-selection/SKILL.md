@@ -91,4 +91,3 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 - [ ] Picked tool matches task type (name vs text vs syntax)
 - [ ] Output bounded before reading files
 - [ ] fff MCP used only when server is connected
-

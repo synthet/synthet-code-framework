@@ -18,7 +18,7 @@ ${TEST_CMD}                                # tests (see AGENTS.md)
 ## After changing agent assets
 
 ```bash
-python scripts/sync_assistant_trees.py     # regenerate .cursor/ mirror from .claude/
+python scripts/sync_assistant_trees.py     # regenerate Cursor and Codex mirrors from .claude/
 python scripts/validate_cli_skills.py      # CLI skill structure (when CLI skills changed)
 ```
 
@@ -28,7 +28,7 @@ Fast indexed repo search: install [fff-mcp](https://github.com/dmtrKovalenko/fff
 
 ## Known pitfalls
 
-- Edit assets under `.claude/` (canonical), not `.cursor/` (generated).
+- Edit assets under `.claude/` (canonical), not `.cursor/`, `.agents/skills/`, or `.codex/agents/` (generated).
 - Memory: never hand-edit `.agent-memory/memory.md`; use log → dream → promote.
 - `.agent/scratch/`, `.agent-memory/raw-sessions/`, `.agent-memory/dreams/`, `.agent-runs/` are gitignored.
 

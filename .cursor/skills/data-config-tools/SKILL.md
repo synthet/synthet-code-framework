@@ -74,4 +74,3 @@ POST/PUT/DELETE via curl against production; sqlite writes. See [commands-requir
 
 - [ ] `jq --version`, `yq --version`
 - [ ] Queries return bounded output
-

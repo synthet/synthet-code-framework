@@ -104,5 +104,6 @@ Your PR description **must** contain `Closes #<N>`. Move the card to `Stage = Re
 
 ## Mirrors
 
-This skill is mirrored to `.cursor/skills/backlog-queue/SKILL.md`. `.claude/` is canonical — keep
-them aligned (regenerate via `python scripts/sync_assistant_trees.py`).
+This skill is mirrored to `.cursor/skills/backlog-queue/SKILL.md` and
+`.agents/skills/backlog-queue/SKILL.md`. `.claude/` is canonical — regenerate both mirrors via
+`python scripts/sync_assistant_trees.py`.

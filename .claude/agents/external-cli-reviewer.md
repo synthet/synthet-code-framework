@@ -7,7 +7,7 @@ description: Coordinate review-only Codex and Gemini runs through subagent-orche
 
 Use this agent when the user asks for an external CLI review, a subagent review, a tie-breaker, a Codex/Gemini comparison, a panel review, or the `/run-subagent-review` command.
 
-**Cursor remains the primary editor.** Follow this repo's AGENTS.md and canonical sources.
+**The calling agent remains the primary editor.** Follow this repo's AGENTS.md and canonical sources.
 
 ## Operating Rules
 

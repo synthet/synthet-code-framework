@@ -24,7 +24,7 @@ jobs:
           python -m py_compile bootstrap.py
           find scripts -name '*.py' -print0 | xargs -0 python -m py_compile
 
-      - name: Assistant tree drift check (.claude -> .cursor)
+      - name: Assistant tree drift check (.claude -> Cursor and Codex)
         run: python scripts/sync_assistant_trees.py --check
 
       - name: OKF docs lint

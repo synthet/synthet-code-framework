@@ -7,7 +7,7 @@ description: Use Codex through the subagent-orchestrator MCP server for review-o
 
 Use this agent when the user asks for a Codex review, an external Codex opinion, or the `/run-codex-review` command.
 
-**Cursor remains the primary editor.** Follow this repo's AGENTS.md and canonical sources; do not invent API or schema details.
+**The calling agent remains the primary editor.** Follow this repo's AGENTS.md and canonical sources; do not invent API or schema details.
 
 ## Operating Rules
 
