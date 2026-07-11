@@ -77,9 +77,9 @@ is unnecessary (trivial fix), say so explicitly.
 | `/implement` | Minimal-diff change set with tests | Lint + narrowest tests green |
 | `/test-and-fix` | Green test run (or written blocker); RCA log entry for non-obvious failures; optional JSONL trace artifact | Tests pass or blocker documented |
 | `validate-implementation` (skill) | Per-AC Verified/Failed/Unknown report with evidence | Every AC Verified, or open items accepted by the user |
-| `/pr-ready` | Definition-of-done report + paste-ready PR text; optional JSONL trace evidence | Checks green, `Closes #<N>`, card in `Stage = Review` |
+| `/pr-ready` | Definition-of-done report + paste-ready PR text; optional JSONL trace evidence | Checks green, provider-specific backlog reference present, review-ready status set only when the provider tracks status |
 
-- **Backlog first:** pick and claim work via the [backlog contract](../project/00-backlog-workflow.md) (`/task-claim`).
+- **Backlog first:** pick and claim work via the [backlog contract](../project/00-backlog-workflow.md) (`/task-claim`); default to Local Markdown or GitHub Issues unless project docs explicitly opt into GitHub Projects.
 - **Review:** `/critical-commit-audit` for high-severity bug hunts; `/check-subagents` +
   `/run-codex-review` / `/run-gemini-review` for external second opinions. Sanitized JSONL trace artifacts can be linked as optional validation evidence; see [`../agent-observability.md`](../agent-observability.md).
 - **Docs:** `/wiki-ingest`, `/wiki-lint`, `/wiki-query` keep `docs/` healthy (see [WIKI_SCHEMA](../WIKI_SCHEMA.md)).

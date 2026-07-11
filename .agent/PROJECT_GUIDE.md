@@ -4,8 +4,9 @@ A fast orientation for AI agents. Read this, then the canonical sources it point
 
 ## 1. Before picking work
 
-- The queue is the **GitHub Project board**, not `TODO.md`. Follow the five-step contract in
-  [`../docs/project/00-backlog-workflow.md`](../docs/project/00-backlog-workflow.md). Claim with `/task-claim <N>`.
+- The queue is the configured **backlog provider**, not ad hoc `TODO.md` notes. Follow the five-step contract in
+  [`../docs/project/00-backlog-workflow.md`](../docs/project/00-backlog-workflow.md) and provider details in
+  [`backlog/README.md`](backlog/README.md). Claim with `/task-claim <item-ref>`.
 
 ## 2. Authority (don't invent contracts)
 

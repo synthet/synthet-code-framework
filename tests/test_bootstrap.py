@@ -46,6 +46,12 @@ REQUIRED_FILES = [
     ".codex/README.md",
     ".codex/agents/pr-ready-hygiene.toml",
     ".agent/SAFETY.md",
+    ".agent/backlog/README.md",
+    ".agent/backlog/providers/local-markdown.md",
+    ".agent/backlog/providers/github-issues.md",
+    ".agent/backlog/providers/github-projects.md",
+    ".agent/backlog/providers/linear.md",
+    ".agent/backlog/providers/jira.md",
     ".agent-memory/memory.md",
     "docs/CANONICAL_SOURCES.md",
     "scripts/sync_assistant_trees.py",
@@ -148,11 +154,39 @@ def test_include_ci_flag_is_explicit_default(tmp_path: Path) -> None:
     assert (target / ".github" / "workflows" / "codeql.yml").is_file()
 
 
-def test_board_ids_become_todo_markers(tmp_path: Path) -> None:
+def test_backlog_skill_maps_logical_states_to_selected_provider() -> None:
+    skill = (REPO_ROOT / ".claude/skills/backlog-queue/SKILL.md").read_text(encoding="utf-8")
+
+    assert "Treat Ready/Claimed/In Progress/Blocked/Review/Done as logical states" in skill
+    assert "instead of assuming a GitHub Projects" in skill
+
+
+def test_backlog_skill_does_not_require_github_projects_ids_by_default() -> None:
+    skill = (REPO_ROOT / ".claude/skills/backlog-queue/SKILL.md").read_text(encoding="utf-8")
+
+    assert "Do not require GitHub Projects IDs unless GitHub Projects is the" in skill
+    assert "selected provider" in skill
+
+
+def test_project_readme_points_to_backlog_provider_choice(tmp_path: Path) -> None:
     target = run_bootstrap(tmp_path, "python")
-    backlog = (target / "docs/project/00-backlog-workflow.md").read_text(encoding="utf-8")
-    assert "TODO(PROJECT_BOARD_URL)" in backlog
-    assert not unresolved_placeholders(backlog)
+    readme = (target / "README.md").read_text(encoding="utf-8")
+
+    assert "choose a backlog provider" in readme
+    assert "optional provider IDs" in readme
+    assert "GitHub Projects" in readme
+
+
+def test_github_projects_ids_are_optional_provider_todo_markers(tmp_path: Path) -> None:
+    target = run_bootstrap(tmp_path, "python")
+    workflow = (target / "docs/project/00-backlog-workflow.md").read_text(encoding="utf-8")
+    projects_provider = (target / ".agent/backlog/providers/github-projects.md").read_text(encoding="utf-8")
+
+    assert "TODO(PROJECT_BOARD_URL)" not in workflow
+    assert "TODO(PROJECT_BOARD_URL)" in projects_provider
+    assert "Missing GitHub Projects board IDs are not mandatory" in workflow
+    assert not unresolved_placeholders(workflow)
+    assert not unresolved_placeholders(projects_provider)
 
 
 def test_assistant_trees_consistent(tmp_path: Path) -> None:

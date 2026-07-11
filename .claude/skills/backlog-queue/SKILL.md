@@ -1,6 +1,6 @@
 ---
 name: backlog-queue
-description: A GitHub Project board is the canonical task queue. Use whenever picking work, claiming an issue, transitioning Stage, or filing/closing a backlog issue.
+description: Provider-oriented backlog queue. Use whenever picking work, claiming an item, transitioning status, or filing/closing backlog work across Local Markdown, GitHub Issues, or optional GitHub Projects.
 capability: "backlog-queue agent asset workflow"
 side_effect_level: remote_write
 approval_required: true
@@ -11,102 +11,72 @@ risk_class: medium
 
 # Backlog queue
 
-> The canonical task queue is a GitHub Project board: **${PROJECT_BOARD_URL}**
->
-> `TODO.md` files (if any) are pointers only — **never** add tasks there.
->
-> **Setup:** fill the `${...}` placeholders (board URL, owner, project/field/option IDs) from your
-> own Project before first use. Read them with `gh project field-list <N> --owner <OWNER>`.
+The canonical task queue is the project's configured **backlog provider**, not ad hoc `TODO.md`
+notes. Provider docs live in [`.agent/backlog/`](../../../.agent/backlog/README.md). Resolve the
+provider in this order:
+
+1. Use the provider explicitly named by the user or project docs.
+2. Otherwise use GitHub Issues for GitHub-hosted repos with issue tracking enabled.
+3. Otherwise use Local Markdown for generic/offline projects.
+4. Use GitHub Projects only when the project explicitly adopts that optional board provider.
 
 ## When to use
 
 - The user asks to pick the next task, start work, or "what's next".
 - The user asks to file a new backlog item.
-- A PR is being prepared and needs a `Closes #N` reference.
+- A PR is being prepared and needs an item reference.
 - A task has hit a blocker, is ready for review, or is finished.
-- The user mentions `Stage`, `Ready`, `Backlog`, `Claimed`, `Blocked`, `Review`, or `Done`.
-- An agent picks up a task without a corresponding issue — stop and file one first.
+- The user mentions a provider status such as Ready, Claimed, In Progress, Blocked, Review, or Done.
+- An agent picks up a task without a corresponding backlog item — stop and file one first.
 
-## The five-step contract
+Treat Ready/Claimed/In Progress/Blocked/Review/Done as logical states. Map them to the selected
+provider's fields, labels, table columns, or workflow statuses instead of assuming a GitHub Projects
+`Stage` field exists.
+
+## Generic five-step contract
 
 Every contributor (human or AI) follows the same five steps. Do **all** of them; skipping a step
 puts the queue out of sync.
 
-### 1. Pick from `Stage = Ready`
+### 1. Pick from the ready queue
 
-Open the board, filter to **Stage = Ready**, sort by `priority:p0..p3`. Pick the highest-priority
-unassigned card. If `Ready` is empty, stop and ask the maintainer to promote items from `Backlog`.
-**Do not invent new work.**
+Open the configured provider and pick the highest-priority unassigned ready item. If the ready queue
+is empty, stop and ask the maintainer to promote or create work. **Do not invent new work.**
 
-### 2. Claim the issue
+### 2. Claim the item
 
-Use `/task-claim <issue-number>` (preferred) or `gh` directly: verify the issue is claimable,
-`--add-assignee @me`, find the project item id, and move it to the `Claimed` option. The exact
-`gh` commands + IDs live in [`/task-claim`](../../commands/task-claim.md).
+Use `/task-claim <item-ref>` (preferred) or the provider-specific claim flow. Claiming must record an
+owner/assignee before work begins. Do not require GitHub Projects IDs unless GitHub Projects is the
+selected provider.
 
-### 3. Flip to `In Progress` on first commit
+### 3. Mark in progress on first commit
 
-Move the card to the `In Progress` option (`${STAGE_IN_PROGRESS_ID}`).
+Move the item to the provider's in-progress state on the first commit.
 
 ### 4. If blocked, mark + comment
 
-Move to `Blocked` (`${STAGE_BLOCKED_ID}`) **and** comment the reason + unblock condition:
+Move the item to the provider's blocked state and record the reason plus the unblock condition.
 
-```bash
-gh issue comment <N> --repo $OWNER/<repo> --body "Blocked: <reason + what would unblock>."
-```
+### 5. PR references the item
 
-### 5. PR references the issue
+Your PR description must reference the backlog item. Use `Closes #<N>` for GitHub Issues when the PR
+fully resolves the issue; use `Refs <ID>` for local or partial work. Move the item to the provider's
+review/done state according to that provider's rules.
 
-Your PR description **must** contain `Closes #<N>`. Move the card to `Stage = Review`
-(`${STAGE_REVIEW_ID}`) when opening the PR. On merge, manually move `Stage = Done`
-(`${STAGE_DONE_ID}`).
+## Provider references
 
-## Filing a new task
-
-1. Confirm there isn't already an issue (`gh issue list --search "<keywords>"`).
-2. Open the issue with title, body, and labels matching the taxonomy below.
-3. Add to the board: `gh project item-add ${PROJECT_NUMBER} --owner $OWNER --url <issue-url>`.
-4. Set `Stage = Backlog` by default; promote to `Ready` only with maintainer signoff.
-
-## Label taxonomy (adapt per project)
-
-| Family | Example values |
-|--------|----------------|
-| `area:*` | one per major module/domain of your repo |
-| `priority:*` | `p0`, `p1`, `p2`, `p3` |
-| `type:*` | `bug`, `feature`, `refactor`, `test`, `chore`, `epic` |
-| (special) | `cross-repo` (multi-repo programs) |
-| (status) | `status:obsolete` — superseded/deferred; stays open on Backlog |
-
-### Epics
-
-- Parent issues use `type:epic` and link children via **GitHub sub-issues** (same repo).
-- Cross-repo programs: one epic per repo + `cross-repo` label + counterpart URL in the body.
-
-## Reference IDs (fill in per project)
-
-| Thing | ID |
-|-------|----|
-| Project node id | `${PROJECT_NODE_ID}` |
-| Project number | `${PROJECT_NUMBER}` |
-| Owner | `${PROJECT_OWNER}` |
-| `Stage` field id | `${STAGE_FIELD_ID}` |
-| `Backlog` option | `${STAGE_BACKLOG_ID}` |
-| `Ready` option | `${STAGE_READY_ID}` |
-| `Claimed` option | `${STAGE_CLAIMED_ID}` |
-| `In Progress` option | `${STAGE_IN_PROGRESS_ID}` |
-| `Blocked` option | `${STAGE_BLOCKED_ID}` |
-| `Review` option | `${STAGE_REVIEW_ID}` |
-| `Done` option | `${STAGE_DONE_ID}` |
+- Local Markdown: [`.agent/backlog/providers/local-markdown.md`](../../../.agent/backlog/providers/local-markdown.md)
+- GitHub Issues: [`.agent/backlog/providers/github-issues.md`](../../../.agent/backlog/providers/github-issues.md)
+- GitHub Projects: [`.agent/backlog/providers/github-projects.md`](../../../.agent/backlog/providers/github-projects.md)
 
 ## Don'ts
 
-- **Don't** add tasks to `TODO.md`.
-- **Don't** start work on an issue without claiming it (assignee + Stage transition).
-- **Don't** silently abandon a `Claimed` or `In Progress` card — move to `Blocked` with a comment.
-- **Don't** open a PR without `Closes #N`.
-- **Don't** skip Stage transitions — drift makes the queue lie about who's doing what.
+- **Don't** add tasks to random `TODO.md` files.
+- **Don't** start work without claiming a provider-backed item.
+- **Don't** silently abandon a claimed or in-progress item — mark it blocked with the unblock condition.
+- **Don't** open a PR without a backlog reference.
+- **Don't** embed provider-specific IDs or board commands in generic workflow docs; put them under `.agent/backlog/providers/`.
+- **Don't** treat missing optional-provider IDs (for example GitHub Projects field IDs) as setup blockers for Local Markdown or GitHub Issues.
 
 ## Mirrors
 
