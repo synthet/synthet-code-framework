@@ -1,6 +1,12 @@
 ---
 name: security-review
 description: Lightweight security sanity check before merge or when the user asks for a security pass — secrets, risky patterns, dependencies.
+capability: "security-review agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 # Security review (lightweight)

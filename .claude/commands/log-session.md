@@ -1,3 +1,12 @@
+---
+capability: "log-session agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
+---
+
 > **Claude Code:** Same intent as Cursor `/log-session`. Mirror: `.cursor/commands/log-session.md`.
 
 # /log-session — Log agent session to raw memory

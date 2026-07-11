@@ -1,20 +1,5 @@
 #!/usr/bin/env python3
-"""Validate frontmatter contracts for agent assets under .claude/ (stdlib only).
-
-Contract enforced (see .agent/SKILL_INVENTORY.md):
-  Skills   .claude/skills/<name>/SKILL.md  frontmatter required; `name` is the FIRST key and
-                                           matches the directory name; non-empty `description`;
-                                           names unique across the tree.
-  Agents   .claude/agents/<name>.md        frontmatter required; `name` matches the file stem;
-                                           non-empty `description`; names unique.
-  Rules    .claude/rules/*.md              frontmatter required; non-empty `description`.
-  Commands .claude/commands/<name>.md      an H1 of the form `# /<name> ...` must be present
-                                           (frontmatter optional).
-
-All files: no exotic YAML tags (`!!`) in frontmatter — plain scalar keys only.
-
-Exit code 0 when clean, 1 when any violation is found.
-"""
+"""Validate frontmatter contracts for agent assets under .claude/ (stdlib only)."""
 
 from __future__ import annotations
 
@@ -25,6 +10,20 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 _KEY_RE = re.compile(r"^([A-Za-z][A-Za-z0-9_-]*):(.*)$")
+SIDE_EFFECT_LEVELS = {"read_only", "local_write", "remote_write", "external_export"}
+RISK_CLASSES = {"low", "medium", "high"}
+REQUIRED_METADATA = (
+    "capability",
+    "side_effect_level",
+    "approval_required",
+    "requires_tools",
+    "output_schema",
+    "risk_class",
+)
+MUTATION_COMMAND_RE = re.compile(r"(?:^|[-_])(pr|issue|project|task)(?:[-_]|$)")
+EXTERNAL_REVIEW_RE = re.compile(
+    r"external|codex|gemini|subagent-review|run-(?:codex|gemini|subagent)-review"
+)
 
 
 def parse_frontmatter(text: str) -> list[tuple[str, str]] | None:
@@ -37,11 +36,11 @@ def parse_frontmatter(text: str) -> list[tuple[str, str]] | None:
         if line.strip() == "---":
             return pairs
         if not line.strip() or line.startswith((" ", "\t", "-", "#")):
-            continue  # continuation lines, list items, comments
+            continue
         m = _KEY_RE.match(line)
         if m:
             pairs.append((m.group(1), m.group(2).strip().strip("\"'")))
-    return None  # unterminated block
+    return None
 
 
 def _value(pairs: list[tuple[str, str]], key: str) -> str | None:
@@ -62,9 +61,108 @@ def check_no_exotic_yaml(text: str, rel: str, errors: list[str]) -> None:
             errors.append(f"{rel}: exotic YAML tag in frontmatter ({line.strip()!r})")
 
 
+def _bool_text(value: str | None) -> bool | None:
+    if value is None:
+        return None
+    lowered = value.lower()
+    if lowered == "true":
+        return True
+    if lowered == "false":
+        return False
+    return None
+
+
+def is_high_risk_external_review_asset(rel: str, pairs: list[tuple[str, str]]) -> bool:
+    name = _value(pairs, "name") or Path(rel).stem
+    capability = _value(pairs, "capability") or ""
+    risk_class = _value(pairs, "risk_class")
+    return risk_class == "high" and bool(
+        EXTERNAL_REVIEW_RE.search(f"{rel} {name} {capability}")
+    )
+
+
+def is_pr_issue_project_mutation_command(
+    rel: str, pairs: list[tuple[str, str]], text_body: str = ""
+) -> bool:
+    if not rel.startswith(".claude/commands/"):
+        return False
+    stem = Path(rel).stem
+    capability = (_value(pairs, "capability") or "").lower()
+    text = f"{stem} {capability} {text_body}".lower()
+    if MUTATION_COMMAND_RE.search(stem) and any(
+        w in capability
+        for w in (
+            "mutat",
+            "create",
+            "edit",
+            "assign",
+            "move",
+            "update",
+            "claim",
+            "ready",
+        )
+    ):
+        return True
+    return any(
+        phrase in text
+        for phrase in (
+            "gh issue edit",
+            "gh project item-edit",
+            "create pr",
+            "open pr",
+            "project mutation",
+            "issue mutation",
+        )
+    )
+
+
+def check_metadata_contract(
+    rel: str, pairs: list[tuple[str, str]], errors: list[str], text_body: str = ""
+) -> None:
+    for key in REQUIRED_METADATA:
+        if _value(pairs, key) in (None, ""):
+            errors.append(f"{rel}: missing or empty `{key}`")
+
+    side_effect_level = _value(pairs, "side_effect_level")
+    if side_effect_level and side_effect_level not in SIDE_EFFECT_LEVELS:
+        errors.append(
+            f"{rel}: invalid `side_effect_level` {side_effect_level!r}; expected one of {sorted(SIDE_EFFECT_LEVELS)}"
+        )
+
+    approval_required = _value(pairs, "approval_required")
+    if approval_required is not None and _bool_text(approval_required) is None:
+        errors.append(f"{rel}: `approval_required` must be boolean true or false")
+
+    risk_class = _value(pairs, "risk_class")
+    if risk_class and risk_class not in RISK_CLASSES:
+        errors.append(
+            f"{rel}: invalid `risk_class` {risk_class!r}; expected one of {sorted(RISK_CLASSES)}"
+        )
+
+    if is_high_risk_external_review_asset(rel, pairs):
+        if side_effect_level != "external_export":
+            errors.append(
+                f"{rel}: high-risk external review assets require `side_effect_level: external_export`"
+            )
+        if _bool_text(approval_required) is not True:
+            errors.append(
+                f"{rel}: high-risk external review assets require `approval_required: true`"
+            )
+
+    if (
+        is_pr_issue_project_mutation_command(rel, pairs, text_body)
+        and side_effect_level != "remote_write"
+    ):
+        errors.append(
+            f"{rel}: PR/issue/project mutation commands require `side_effect_level: remote_write`"
+        )
+
+
 def check_skills(root: Path, errors: list[str]) -> None:
     skills_dir = root / ".claude" / "skills"
     seen: dict[str, str] = {}
+    if not skills_dir.is_dir():
+        return
     for skill_dir in sorted(p for p in skills_dir.iterdir() if p.is_dir()):
         skill_md = skill_dir / "SKILL.md"
         rel = skill_md.relative_to(root).as_posix()
@@ -81,18 +179,26 @@ def check_skills(root: Path, errors: list[str]) -> None:
             errors.append(f"{rel}: `name` must be the first frontmatter key")
         name = _value(pairs, "name")
         if name and name != skill_dir.name:
-            errors.append(f"{rel}: name {name!r} does not match directory {skill_dir.name!r}")
+            errors.append(
+                f"{rel}: name {name!r} does not match directory {skill_dir.name!r}"
+            )
         if not _value(pairs, "description"):
             errors.append(f"{rel}: missing or empty `description`")
+        check_metadata_contract(rel, pairs, errors, text)
         if name:
             if name in seen:
-                errors.append(f"{rel}: duplicate skill name {name!r} (also in {seen[name]})")
+                errors.append(
+                    f"{rel}: duplicate skill name {name!r} (also in {seen[name]})"
+                )
             seen[name] = rel
 
 
 def check_agents(root: Path, errors: list[str]) -> None:
     seen: dict[str, str] = {}
-    for md in sorted((root / ".claude" / "agents").glob("*.md")):
+    agents_dir = root / ".claude" / "agents"
+    if not agents_dir.is_dir():
+        return
+    for md in sorted(agents_dir.glob("*.md")):
         rel = md.relative_to(root).as_posix()
         text = md.read_text(encoding="utf-8")
         check_no_exotic_yaml(text, rel, errors)
@@ -107,14 +213,20 @@ def check_agents(root: Path, errors: list[str]) -> None:
             errors.append(f"{rel}: name {name!r} does not match file stem {md.stem!r}")
         if not _value(pairs, "description"):
             errors.append(f"{rel}: missing or empty `description`")
+        check_metadata_contract(rel, pairs, errors, text)
         if name:
             if name in seen:
-                errors.append(f"{rel}: duplicate agent name {name!r} (also in {seen[name]})")
+                errors.append(
+                    f"{rel}: duplicate agent name {name!r} (also in {seen[name]})"
+                )
             seen[name] = rel
 
 
 def check_rules(root: Path, errors: list[str]) -> None:
-    for md in sorted((root / ".claude" / "rules").glob("*.md")):
+    rules_dir = root / ".claude" / "rules"
+    if not rules_dir.is_dir():
+        return
+    for md in sorted(rules_dir.glob("*.md")):
         rel = md.relative_to(root).as_posix()
         text = md.read_text(encoding="utf-8")
         check_no_exotic_yaml(text, rel, errors)
@@ -127,10 +239,18 @@ def check_rules(root: Path, errors: list[str]) -> None:
 
 
 def check_commands(root: Path, errors: list[str]) -> None:
-    for md in sorted((root / ".claude" / "commands").glob("*.md")):
+    commands_dir = root / ".claude" / "commands"
+    if not commands_dir.is_dir():
+        return
+    for md in sorted(commands_dir.glob("*.md")):
         rel = md.relative_to(root).as_posix()
         text = md.read_text(encoding="utf-8")
         check_no_exotic_yaml(text, rel, errors)
+        pairs = parse_frontmatter(text)
+        if pairs is None:
+            errors.append(f"{rel}: missing or unterminated YAML frontmatter")
+        else:
+            check_metadata_contract(rel, pairs, errors, text)
         expected = f"# /{md.stem}"
         for line in text.splitlines():
             if line.startswith(expected) and (
@@ -142,7 +262,9 @@ def check_commands(root: Path, errors: list[str]) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Validate .claude/ agent-asset frontmatter")
+    parser = argparse.ArgumentParser(
+        description="Validate .claude/ agent-asset frontmatter"
+    )
     parser.add_argument(
         "--root", type=Path, default=REPO_ROOT, help="Repo root (default: this repo)"
     )

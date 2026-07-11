@@ -51,10 +51,14 @@ REQUIRED_FILES = [
     "scripts/sync_assistant_trees.py",
     "scripts/ci/check_agent_frontmatter.py",
     "scripts/ci/check_secrets.py",
+    ".github/workflows/project-ci.yml",
+    ".github/workflows/dependency-review.yml",
+    ".github/workflows/codeql.yml",
 ]
 
 # Framework-only paths that must NOT ship to seeded projects.
-FRAMEWORK_ONLY = ["bootstrap.py", "tests", ".github", ".git"]
+# `.github` is intentionally generated when CI templates are included.
+FRAMEWORK_ONLY = ["bootstrap.py", "tests", ".git"]
 
 
 def run_bootstrap(tmp_path: Path, stack: str, extra: list[str] | None = None) -> Path:
@@ -102,6 +106,46 @@ def test_seed_stack(tmp_path: Path, stack: str) -> None:
 
     claude_md = (target / "CLAUDE.md").read_text(encoding="utf-8")
     assert "Demo App" in claude_md
+
+
+def test_ci_workflows_included_by_default(tmp_path: Path) -> None:
+    target = run_bootstrap(tmp_path, "python")
+
+    workflows = target / ".github" / "workflows"
+    assert (workflows / "project-ci.yml").is_file()
+    assert (workflows / "dependency-review.yml").is_file()
+    assert (workflows / "codeql.yml").is_file()
+
+    project_ci = (workflows / "project-ci.yml").read_text(encoding="utf-8")
+    assert "permissions:" in project_ci
+    assert "contents: read" in project_ci
+    assert bootstrap.STACK_DEFAULTS["python"]["BUILD_CMD"] in project_ci
+    assert bootstrap.STACK_DEFAULTS["python"]["TEST_CMD"] in project_ci
+    assert bootstrap.STACK_DEFAULTS["python"]["LINT_CMD"] in project_ci
+
+    dependency_review = (workflows / "dependency-review.yml").read_text(encoding="utf-8")
+    codeql = (workflows / "codeql.yml").read_text(encoding="utf-8")
+    assert "contents: read" in dependency_review
+    assert "actions/dependency-review-action" in dependency_review
+    assert "contents: read" in codeql
+    assert "github/codeql-action/init" in codeql
+
+
+def test_ci_workflows_can_be_intentionally_skipped(tmp_path: Path) -> None:
+    target = run_bootstrap(tmp_path, "python", ["--no-include-ci"])
+
+    assert not (target / ".github" / "workflows" / "project-ci.yml").exists()
+    assert not (target / ".github" / "workflows" / "dependency-review.yml").exists()
+    assert not (target / ".github" / "workflows" / "codeql.yml").exists()
+    assert not (target / ".github-template").exists()
+
+
+def test_include_ci_flag_is_explicit_default(tmp_path: Path) -> None:
+    target = run_bootstrap(tmp_path, "python", ["--include-ci"])
+
+    assert (target / ".github" / "workflows" / "project-ci.yml").is_file()
+    assert (target / ".github" / "workflows" / "dependency-review.yml").is_file()
+    assert (target / ".github" / "workflows" / "codeql.yml").is_file()
 
 
 def test_board_ids_become_todo_markers(tmp_path: Path) -> None:
@@ -186,3 +230,47 @@ def test_non_empty_target_rejected(tmp_path: Path) -> None:
         assert bootstrap.main() == 1
     finally:
         sys.argv = old_argv
+
+def test_private_and_working_dir_files_are_not_seeded_from_source_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "framework"
+    source.mkdir()
+    public_files = [
+        "AGENTS.md",
+        "CLAUDE.md",
+        ".gitignore",
+        "env.example",
+        ".cursor/mcp.example.json",
+        ".agent/scratch/.gitkeep",
+    ]
+    private_files = [
+        ".cursor/mcp.json",
+        ".claude/settings.local.json",
+        "secrets.json",
+        ".env",
+        ".env.local",
+        ".agent/scratch/local-notes.md",
+    ]
+    for rel in [*public_files, *private_files]:
+        path = source / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(f"contents for {rel}\n", encoding="utf-8")
+
+    monkeypatch.setattr(bootstrap, "FRAMEWORK_ROOT", source)
+    monkeypatch.setattr(
+        bootstrap,
+        "_tracked_source_paths",
+        lambda: sorted(Path(rel) for rel in [*public_files, *private_files]),
+    )
+
+    target = run_bootstrap(tmp_path, "python", ["--no-include-ci"])
+
+    assert (target / ".cursor/mcp.example.json").is_file()
+    assert (target / ".agent/scratch").is_dir()
+    assert (target / ".agent/scratch/.gitkeep").is_file()
+    for rel in private_files:
+        if rel == ".agent/scratch/local-notes.md":
+            assert not (target / rel).exists(), "working-dir contents should not be seeded"
+        else:
+            assert not (target / rel).exists(), f"private source path seeded: {rel}"

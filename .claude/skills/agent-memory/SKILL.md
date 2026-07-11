@@ -1,6 +1,12 @@
 ---
 name: agent-memory
 description: Log agent sessions, consolidate project memory (dream), promote reviewed memory, and load context for new chats. Use when ending a session, improving cross-session recall, or when the user mentions agent memory, dream, log-session, or memory.md.
+capability: "agent-memory agent asset workflow"
+side_effect_level: external_export
+approval_required: true
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: high
 ---
 
 # Agent memory

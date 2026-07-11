@@ -1,6 +1,12 @@
 ---
 name: wsl2-agent-tooling
 description: WSL2 Ubuntu agent workflows — repos, build/test, ast-grep, MCP servers, CI-like commands.
+capability: "wsl2-agent-tooling agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 # WSL2 agent tooling

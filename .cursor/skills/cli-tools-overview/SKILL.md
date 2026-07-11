@@ -1,6 +1,12 @@
 ---
 name: cli-tools-overview
 description: Router for CLI tooling skills — install checklist, safe patterns, search, git, MCP. Start here for agent command-line workflows.
+capability: "cli-tools-overview agent asset workflow"
+side_effect_level: read_only
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: low
 ---
 
 # CLI tools overview

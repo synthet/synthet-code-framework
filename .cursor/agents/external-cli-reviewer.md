@@ -1,6 +1,12 @@
 ---
 name: external-cli-reviewer
 description: Coordinate review-only Codex and Gemini runs through subagent-orchestrator MCP for ${PROJECT_NAME}, including sequential panel-style comparisons.
+capability: "external-cli-reviewer agent asset workflow"
+side_effect_level: external_export
+approval_required: true
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: high
 ---
 
 # External CLI Reviewer

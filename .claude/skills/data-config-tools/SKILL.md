@@ -1,6 +1,12 @@
 ---
 name: data-config-tools
 description: Query JSON/YAML/config with jq and yq; HTTP probes with curl; local sqlite inspection. Use for structured data, not raw grep on minified JSON.
+capability: "data-config-tools agent asset workflow"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: medium
 ---
 
 # Data and config tools
