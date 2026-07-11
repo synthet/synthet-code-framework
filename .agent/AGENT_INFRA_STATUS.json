@@ -1,8 +1,8 @@
 {
   "project": "${PROJECT_NAME}",
-  "review_date": "2026-07-01",
+  "review_date": "2026-07-10",
   "canonical_tree": ".claude",
-  "generated_tree": ".cursor",
+  "generated_trees": [".cursor", ".agents/skills", ".codex/agents"],
   "subsystems": {
     "commands": ".claude/commands",
     "skills": ".claude/skills",
@@ -17,9 +17,9 @@
     "tests": "tests"
   },
   "watchlist": [
-    "Regenerate .cursor mirror after editing .claude (scripts/sync_assistant_trees.py)",
+    "Regenerate Cursor and Codex mirrors after editing .claude (scripts/sync_assistant_trees.py)",
     "Regenerate AGENTS.md MCP tool inventory when tools change",
-    "Ship .claude and .cursor changes in the same PR",
+    "Ship .claude and all generated mirror changes in the same PR",
     "Update .agent/SKILL_INVENTORY.md in the same PR as any skill change",
     "Keep scripts/ci/check_agent_frontmatter.py aligned with the frontmatter invariants in SKILL_INVENTORY.md"
   ]

@@ -91,4 +91,3 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 
 - [ ] Core tools available in PowerShell
 - [ ] Chosen Windows vs WSL for this task
-

@@ -1,9 +1,9 @@
 # Agent infrastructure inventory — ${PROJECT_NAME}
 
-**Last reviewed:** 2026-07-01. Machine-readable mirror: [`AGENT_INFRA_STATUS.json`](AGENT_INFRA_STATUS.json).
+**Last reviewed:** 2026-07-10. Machine-readable mirror: [`AGENT_INFRA_STATUS.json`](AGENT_INFRA_STATUS.json).
 
 Keep this table current as the single catalog of every agent-facing asset. `.claude/` is canonical;
-`.cursor/` is generated from it.
+Cursor and Codex mirrors are generated from it.
 
 | Path | Purpose | Scope | Status |
 |------|---------|-------|--------|
@@ -23,6 +23,8 @@ Keep this table current as the single catalog of every agent-facing asset. `.cla
 | [.claude/agents/*.md](../.claude/agents/) | Subagents | coding | active |
 | [.claude/rules/*.md](../.claude/rules/) | Always-on rules | governance | active |
 | [.cursor/](../.cursor/) | Generated mirror of `.claude/` + `mcp.example.json` | mirror | generated |
+| [.agents/skills/](../.agents/skills/) | Generated Codex repository skills | mirror | generated |
+| [.codex/](../.codex/) | Codex project config + generated custom subagents | codex | active |
 | [.agent-memory/](../.agent-memory/) | Project memory (log → dream → promote) | memory | active |
 | [docs/CANONICAL_SOURCES.md](../docs/CANONICAL_SOURCES.md) | Authority map | governance | active |
 | [docs/WIKI_SCHEMA.md](../docs/WIKI_SCHEMA.md) | Wiki taxonomy & maintenance | docs | active |
@@ -34,6 +36,6 @@ Keep this table current as the single catalog of every agent-facing asset. `.cla
 
 ## Drift watchlist
 
-- **`.cursor/` mirror:** regenerate via `python scripts/sync_assistant_trees.py` after editing `.claude/`.
+- **Cursor/Codex mirrors:** regenerate via `python scripts/sync_assistant_trees.py` after editing `.claude/`.
 - **MCP tool inventory:** regenerate the `<!-- BEGIN/END MCP TOOL INVENTORY -->` block in `AGENTS.md` when tools change.
-- **Skills:** any skill/command/agent change ships both trees in the same PR.
+- **Skills:** any skill/command/agent change ships every generated mirror in the same PR.

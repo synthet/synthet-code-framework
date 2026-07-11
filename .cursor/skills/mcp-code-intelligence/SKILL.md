@@ -90,4 +90,3 @@ MCP tools that write files or run jobs need user intent. See [commands-requiring
 - [ ] MCP tier matches task (text before embeddings)
 - [ ] fff optional and documented as opt-in
 - [ ] Tool schemas read before first call
-

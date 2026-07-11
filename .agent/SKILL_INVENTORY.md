@@ -1,6 +1,6 @@
 # Skill inventory — ${PROJECT_NAME}
 
-**Last reviewed:** 2026-07-03. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md).
+**Last reviewed:** 2026-07-10. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md).
 Update this file (new row or **Last reviewed** date) in the same PR as any skill change.
 
 Risk tiers: **L1** = advisory/read-mostly (writes limited to docs/reports); **L2** = can run

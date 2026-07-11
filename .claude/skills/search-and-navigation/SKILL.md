@@ -78,4 +78,3 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 
 - [ ] `rg --version` and `fd --version`
 - [ ] Sample search returns bounded lines
-

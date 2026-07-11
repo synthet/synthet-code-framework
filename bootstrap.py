@@ -158,7 +158,8 @@ def project_readme(vals: dict[str, str]) -> str:
     return (
         f"# {vals['PROJECT_NAME']}\n\n{vals['PROJECT_DESC']}\n\n"
         "Seeded from **synthet-code-framework**. Agent scaffolding lives in `.claude/`, `.cursor/`,\n"
-        "`.agent/`, and `.agent-memory/`. Start with [`CLAUDE.md`](CLAUDE.md) and [`AGENTS.md`](AGENTS.md).\n\n"
+        "`.agents/`, `.codex/`, `.agent/`, and `.agent-memory/`. Start with [`CLAUDE.md`](CLAUDE.md)\n"
+        "and [`AGENTS.md`](AGENTS.md); Codex setup is documented in [`.codex/README.md`](.codex/README.md).\n\n"
         "Fill in build/test/lint commands in `CLAUDE.md` + `AGENTS.md`, and your GitHub Project board\n"
         "IDs (search for `TODO(` markers).\n"
     )

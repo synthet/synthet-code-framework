@@ -87,4 +87,3 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 
 - [ ] `uname -a` shows WSL
 - [ ] Project tests run in WSL checkout
-

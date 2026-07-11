@@ -77,4 +77,3 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 
 - [ ] `git status` clean or changes understood
 - [ ] Diff reviewed before commit
-

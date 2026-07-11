@@ -74,4 +74,3 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 - [ ] `git status --short` before edits
 - [ ] `git diff --stat` before commit
 - [ ] No destructive command without user OK
-

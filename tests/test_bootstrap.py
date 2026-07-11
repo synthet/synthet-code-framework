@@ -41,6 +41,10 @@ REQUIRED_FILES = [
     ".claude/skills/validate-implementation/SKILL.md",
     ".cursor/rules/sdlc-core.mdc",
     ".cursor/commands/spec.md",
+    ".agents/skills/validate-implementation/SKILL.md",
+    ".codex/config.toml",
+    ".codex/README.md",
+    ".codex/agents/pr-ready-hygiene.toml",
     ".agent/SAFETY.md",
     ".agent-memory/memory.md",
     "docs/CANONICAL_SOURCES.md",
@@ -107,7 +111,7 @@ def test_board_ids_become_todo_markers(tmp_path: Path) -> None:
     assert not unresolved_placeholders(backlog)
 
 
-def test_claude_cursor_trees_consistent(tmp_path: Path) -> None:
+def test_assistant_trees_consistent(tmp_path: Path) -> None:
     target = run_bootstrap(tmp_path, "generic")
     claude_cmds = {p.name for p in (target / ".claude/commands").glob("*.md")}
     cursor_cmds = {p.name for p in (target / ".cursor/commands").glob("*.md")}
@@ -117,9 +121,31 @@ def test_claude_cursor_trees_consistent(tmp_path: Path) -> None:
     cursor_skills = {p.name for p in (target / ".cursor/skills").iterdir() if p.is_dir()}
     assert claude_skills == cursor_skills
 
+    codex_skills = {p.name for p in (target / ".agents/skills").iterdir() if p.is_dir()}
+    assert claude_skills == codex_skills
+
     claude_rules = {p.stem for p in (target / ".claude/rules").glob("*.md")}
     cursor_rules = {p.stem for p in (target / ".cursor/rules").glob("*.mdc")}
     assert claude_rules == cursor_rules
+
+    claude_agents = {p.stem for p in (target / ".claude/agents").glob("*.md")}
+    codex_agents = {p.stem for p in (target / ".codex/agents").glob("*.toml")}
+    assert claude_agents == codex_agents
+
+
+def test_seeded_codex_toml_is_valid(tmp_path: Path) -> None:
+    import tomllib
+
+    target = run_bootstrap(tmp_path, "generic")
+    config = tomllib.loads((target / ".codex/config.toml").read_text(encoding="utf-8"))
+    assert config["agents"]["max_threads"] == 4
+    assert config["mcp_servers"]["openaiDeveloperDocs"]["url"].startswith("https://")
+
+    for agent_path in (target / ".codex/agents").glob("*.toml"):
+        agent = tomllib.loads(agent_path.read_text(encoding="utf-8"))
+        assert agent["name"] == agent_path.stem
+        assert agent["description"]
+        assert agent["developer_instructions"]
 
 
 def test_working_dirs_kept_empty(tmp_path: Path) -> None:

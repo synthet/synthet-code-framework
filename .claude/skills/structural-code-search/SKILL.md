@@ -78,4 +78,3 @@ Mechanical rewrites and `semgrep --fix` require user approval. See [commands-req
 
 - [ ] `sg --version`
 - [ ] Test pattern on small subdirectory first
-

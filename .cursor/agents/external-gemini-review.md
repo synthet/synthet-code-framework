@@ -7,7 +7,7 @@ description: Use Gemini CLI through the subagent-orchestrator MCP server for rev
 
 Use this agent when the user asks for a Gemini review, an external Gemini opinion, or the `/run-gemini-review` command.
 
-**Cursor remains the primary editor.** Follow this repo's AGENTS.md and canonical sources; do not invent API or schema details.
+**The calling agent remains the primary editor.** Follow this repo's AGENTS.md and canonical sources; do not invent API or schema details.
 
 ## Operating Rules
 

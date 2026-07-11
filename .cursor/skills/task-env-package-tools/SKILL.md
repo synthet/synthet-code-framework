@@ -75,7 +75,7 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 
 ## Troubleshooting
 
-- Sync drift: run `python scripts/sync_assistant_trees.py` after editing `.claude/`.
+- Sync drift: run `python scripts/sync_assistant_trees.py` after editing `.claude/` to update Cursor and Codex mirrors.
 - pytest failures: narrow to failing test file first.
 
 ## Windows Notes
@@ -92,4 +92,3 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 
 - [ ] `${TEST_CMD}` or pytest green for touched area
 - [ ] sync + frontmatter checks when agent assets changed
-

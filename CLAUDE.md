@@ -2,7 +2,8 @@
 
 > Seeded from **synthet-code-framework**. Replace this orientation with project specifics, but keep
 > the **Backlog**, **Development Guidelines**, and **Documentation** sections — they encode reusable
-> contracts. Run `python scripts/sync_assistant_trees.py` after editing `.claude/` assets.
+> contracts. Run `python scripts/sync_assistant_trees.py` after editing `.claude/` assets; it updates
+> both Cursor and Codex mirrors.
 
 <!-- Optional: list sibling repos this one coordinates with.
 ## Related Projects
