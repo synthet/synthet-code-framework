@@ -25,7 +25,7 @@ okf_version: 0.1
 | MCP template | `.cursor/mcp.example.json`, `.mcp.json` | Copy to gitignored `.cursor/mcp.json` to attach servers |
 | Agent governance | `.agent/` | Safety, inventory, subagent role matrix, workflow playbooks |
 | Project memory | `.agent-memory/` | log → dream → promote (see `CURSOR_USAGE.md`) |
-| Workflow playbooks | `.agent/workflows/*.md` | spec / plan / implement / pr-ready / test-and-fix / … |
+| Workflow playbooks | `.agent/workflows/*.md` | spec / plan / tasks / implement / pr-ready / test-and-fix / … |
 
 **Single source of truth:** edit assets under `.claude/` + `.agent/`, then run
 `python scripts/sync_assistant_trees.py` to regenerate the Cursor and Codex mirrors.
@@ -62,18 +62,19 @@ Validate after changes: `python scripts/validate_cli_skills.py`.
 ## The SDLC loop
 
 ```
-/spec  →  /plan  →  /implement  →  /test-and-fix  →  /pr-ready  →  (optional) /subagent-review  →  /release-notes
+/spec  →  /plan  →  /tasks  →  /implement  →  /test-and-fix  →  /pr-ready  →  (optional) /subagent-review  →  /release-notes
 ```
 
 ### Phase gates
 
 Each phase produces an artifact that gates the next one. Do not skip a gate silently — if a phase
-is unnecessary (trivial fix), say so explicitly.
+is unnecessary (trivial fix), say so explicitly. The `/spec` → `/plan` → `/tasks` split follows Spec Kit-style spec-driven development: define product outcomes first, choose implementation strategy second, and only then create executable task slices.
 
 | Phase | Artifact produced | Gate to pass before the next phase |
 |-------|-------------------|-------------------------------------|
 | `/spec` | Spec with EARS `AC-n` acceptance criteria | User approves; no criterion is AMBIGUOUS |
-| `/plan` | Implementation plan (files, approach, tests, rollback) | User approves the plan |
+| `/plan` | Implementation plan (files, approach, tests, rollback) | User approves the plan; skipped `/tasks` gate is justified only for trivial/single-step work |
+| `/tasks` | Traceable `T-n` task list mapped to `AC-n` criteria and verification commands | Every acceptance criterion has task coverage and evidence path |
 | `/implement` | Minimal-diff change set with tests | Lint + narrowest tests green |
 | `/test-and-fix` | Green test run (or written blocker); RCA log entry for non-obvious failures; optional JSONL trace artifact | Tests pass or blocker documented |
 | `validate-implementation` (skill) | Per-AC Verified/Failed/Unknown report with evidence | Every AC Verified, or open items accepted by the user |
