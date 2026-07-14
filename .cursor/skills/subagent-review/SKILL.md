@@ -1,6 +1,6 @@
 ---
 name: subagent-review
-description: Runs detect_subagents then run_subagent (codex/gemini) in review mode via subagent-orchestrator MCP, reads .agent-runs outputs, and summarizes findings. Use when the user asks for external CLI review, codex/gemini review, subagent panel, tie-breaker, or invokes /check-subagents, /run-codex-review, /run-gemini-review, /run-subagent-review.
+description: Use when the user requests external CLI review, codex/gemini review, a subagent panel, tie-breaker, or invokes /check-subagents, /run-codex-review, /run-gemini-review, or /run-subagent-review. Runs detect_subagents and review-mode subagents, then summarizes findings.
 capability: "subagent-review agent asset workflow"
 side_effect_level: external_export
 approval_required: true
@@ -16,7 +16,7 @@ Run external CLI coding agents **through the subagent-orchestrator MCP server** 
 ## Prerequisites
 
 - Sibling checkout: `../subagent-orchestrator/agent-orchestrator` built (`npm install && npm run build` there once)
-- MCP server enabled in [`.cursor/mcp.json`](../../.cursor/mcp.json) as **`cli-review`** (or user-level **`subagent-orchestrator`**) and reloaded in Cursor
+- MCP server enabled in `.cursor/mcp.json` (copy the project template from [`.cursor/mcp.example.json`](../../../.cursor/mcp.example.json)) as **`cli-review`** or user-level **`subagent-orchestrator`**, then reload Cursor
 
 ## Step 1 — Resolve MCP server
 

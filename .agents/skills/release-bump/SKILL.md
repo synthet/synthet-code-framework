@@ -1,6 +1,6 @@
 ---
 name: release-bump
-description: Bump the project version with a semver rubric, promote the Unreleased changelog section, and verify before committing. Use when the user asks to cut a release, bump the version, or tag a new version.
+description: Use when cutting a release, bumping project version, promoting the changelog Unreleased section, tagging release prep, or applying a semver rubric. Includes verification steps before committing release changes.
 capability: "release-bump agent asset workflow"
 side_effect_level: local_write
 approval_required: false
@@ -41,7 +41,7 @@ State the chosen level and the one or two changes that justify it.
 
 ## 4. Verify
 
-Run the project's checks from **AGENTS.md** (`${LINT_CMD}`, `${TEST_CMD}`). For this framework
+Run the project's lint/test commands from **AGENTS.md**. For this framework
 repo, run the self-verify set from `README.md` (OKF lint, sync `--check`, `py_compile`, pytest).
 Do not proceed with failing checks.
 

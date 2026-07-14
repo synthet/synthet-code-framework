@@ -15,6 +15,21 @@ Many upstream checks assume **untrusted registry skills** (signing, SBOM, contai
 - [ ] **Canonical copy:** Author under `.claude/skills/<name>/SKILL.md` (canonical); regenerate `.cursor/skills/` and `.agents/skills/` via `python scripts/sync_assistant_trees.py` and ship **all trees in the same PR** (see [AGENTS.md](../AGENTS.md)).
 - [ ] **Inventory:** [SKILL_INVENTORY.md](./SKILL_INVENTORY.md) updated (new row or **Last reviewed** date).
 
+## Anthropic-style skill quality
+
+- [ ] **Triggering description:** `description` says both what the skill does and when to use it.
+  Be explicit enough to avoid under-triggering, including common user phrases and adjacent cases
+  where this skill should win.
+- [ ] **Lean body:** Keep `SKILL.md` under 500 lines. Move optional details into direct
+  `references/`, reusable code into `scripts/`, and output templates/assets into `assets/`.
+- [ ] **Progressive disclosure:** Every bundled reference is linked from `SKILL.md` with guidance
+  on when to read it; relative Markdown links resolve from the skill directory.
+- [ ] **Actionable workflow:** Prefer imperative steps, quick starts, report/output templates, and
+  examples over abstract prose. Explain why important constraints exist instead of relying on
+  unexplained all-caps rules.
+- [ ] **Evaluation hooks:** For materially new or changed skills, add or update 2–3 realistic test
+  prompts (including near misses for trigger behavior) or document why qualitative review is enough.
+
 ## Privilege and scope (AST03)
 
 - [ ] **Scope:** Instructions stay within the skill’s stated purpose; no broad “read all secrets” unless justified and called out.

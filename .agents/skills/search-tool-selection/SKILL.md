@@ -1,6 +1,6 @@
 ---
 name: search-tool-selection
-description: Choose the right search tool before running commands — fd vs rg vs grep vs ast-grep vs fff MCP vs IDE Grep. Use at the start of any code-finding task.
+description: Use before any code-finding task to choose fd/find vs rg vs ast-grep vs semgrep vs fff MCP vs IDE search. Apply when deciding filename, text, syntax, symbol, config, or repeated repo-wide search strategy.
 capability: "search-tool-selection agent asset workflow"
 side_effect_level: read_only
 approval_required: false

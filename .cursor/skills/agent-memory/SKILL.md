@@ -1,6 +1,6 @@
 ---
 name: agent-memory
-description: Log agent sessions, consolidate project memory (dream), promote reviewed memory, and load context for new chats. Use when ending a session, improving cross-session recall, or when the user mentions agent memory, dream, log-session, or memory.md.
+description: Use when starting or ending an agent session, loading or improving repo memory, consolidating dream outputs, promoting reviewed memory, or when the user mentions agent memory, dream-memory, log-session, promote-memory, context, recall, durable learnings, or memory.md.
 capability: "agent-memory agent asset workflow"
 side_effect_level: external_export
 approval_required: true
@@ -11,7 +11,7 @@ risk_class: high
 
 # Agent memory
 
-Local consolidation for **${PROJECT_NAME}** — external artifacts only (no model training).
+Local consolidation for this repository — external artifacts only (no model training).
 
 ## When to use
 
@@ -72,5 +72,5 @@ When they conflict, committed `.agent-memory/memory.md` and live repo evidence w
 
 ## Reference
 
-- [`.agent-memory/CURSOR_USAGE.md`](../../.agent-memory/CURSOR_USAGE.md)
-- [`.agent-memory/schema.md`](../../.agent-memory/schema.md)
+- [`.agent-memory/CURSOR_USAGE.md`](../../../.agent-memory/CURSOR_USAGE.md)
+- [`.agent-memory/schema.md`](../../../.agent-memory/schema.md)
