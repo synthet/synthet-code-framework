@@ -10,6 +10,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 _KEY_RE = re.compile(r"^([A-Za-z][A-Za-z0-9_-]*):(.*)$")
+_MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 SIDE_EFFECT_LEVELS = {"read_only", "local_write", "remote_write", "external_export"}
 RISK_CLASSES = {"low", "medium", "high"}
 REQUIRED_METADATA = (
@@ -158,6 +159,23 @@ def check_metadata_contract(
         )
 
 
+def check_relative_markdown_links(path: Path, rel: str, text: str, errors: list[str]) -> None:
+    """Require relative Markdown links in skill bodies to resolve on disk."""
+    for match in _MARKDOWN_LINK_RE.finditer(text):
+        target = match.group(1)
+        if (
+            "://" in target
+            or target.startswith(("#", "mailto:", "tel:"))
+            or target.startswith("<")
+        ):
+            continue
+        target_path = target.split("#", 1)[0]
+        if not target_path:
+            continue
+        if not (path.parent / target_path).resolve().exists():
+            errors.append(f"{rel}: unresolved relative Markdown link {target!r}")
+
+
 def check_skills(root: Path, errors: list[str]) -> None:
     skills_dir = root / ".claude" / "skills"
     seen: dict[str, str] = {}
@@ -191,6 +209,7 @@ def check_skills(root: Path, errors: list[str]) -> None:
                     f"{rel}: duplicate skill name {name!r} (also in {seen[name]})"
                 )
             seen[name] = rel
+        check_relative_markdown_links(skill_md, rel, text, errors)
 
 
 def check_agents(root: Path, errors: list[str]) -> None:
