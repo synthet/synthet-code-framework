@@ -111,12 +111,8 @@ def generate_node(
             "build": "tsc --noEmit",
             "lint": "tsc --noEmit",
             "test": "node --test",
-            "plop": "plop",
         },
-        "devDependencies": {
-            "plop": "^4.0.5",
-            "typescript": "^5.0.0",
-        },
+        "devDependencies": {"typescript": "^5.0.0"},
     }
     files = {
         Path("package.json"): json.dumps(package_json, indent=2) + "\n",
@@ -141,35 +137,6 @@ import test from 'node:test';
 test('project scaffold has a known greeting', () => {{
   assert.equal('hello from {project_slug}', 'hello from {project_slug}');
 }});
-''',
-        Path("plopfile.mjs"): '''/**
- * Project micro-generators (https://www.npmjs.com/package/plop).
- * Run: npm run plop
- */
-export default function (plop) {
-  plop.setGenerator("module", {
-    description: "Add a small TypeScript module under src/",
-    prompts: [
-      {
-        type: "input",
-        name: "name",
-        message: "module name (kebab or camel):",
-        validate: (v) => (v && String(v).trim() ? true : "Name is required"),
-      },
-    ],
-    actions: [
-      {
-        type: "add",
-        path: "src/{{camelCase name}}.ts",
-        templateFile: "plop-templates/module.ts.hbs",
-      },
-    ],
-  });
-}
-''',
-        Path("plop-templates") / "module.ts.hbs": '''export function {{camelCase name}}(): string {
-  return "{{name}}";
-}
 ''',
     }
     return _write_files(target, files, force=force)
