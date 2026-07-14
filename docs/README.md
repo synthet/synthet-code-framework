@@ -17,6 +17,7 @@ Start here. This `docs/` tree is an [OKF-aligned](OKF_ADOPTION.md) knowledge bun
 - [WIKI_SCHEMA.md](WIKI_SCHEMA.md) — how to add/move/lint wiki pages
 - [OKF_ADOPTION.md](OKF_ADOPTION.md) — the OKF profile and lint commands
 - [ai-workflow/README.md](ai-workflow/README.md) — where every agent asset lives + the SDLC loop
+- [agent-asset-inventory.md](agent-asset-inventory.md) — generated table of canonical commands, skills, and subagents
 - [EXTERNAL_CLI_REVIEWS.md](EXTERNAL_CLI_REVIEWS.md) — Codex/Gemini review via subagent-orchestrator
 - [security.md](security.md) — security model and review checklist
 - [project/00-backlog-workflow.md](project/00-backlog-workflow.md) — the backlog/board contract

@@ -30,6 +30,9 @@ jobs:
       - name: Assistant tree drift check (.claude -> Cursor and Codex)
         run: python scripts/sync_assistant_trees.py --check
 
+      - name: Agent asset inventory drift check
+        run: python scripts/generate_agent_asset_inventory.py --check
+
       - name: OKF docs lint
         run: python scripts/okf_lint.py --profile project --exclude-prefix archive/ docs
 
