@@ -1,6 +1,6 @@
 ---
 name: safe-command-patterns
-description: Reusable command rules that minimize accidental data loss, context overflow, and unreviewed changes. Use before editing, searching, and committing.
+description: Use before running shell commands that explore, edit, delete, move, generate, or inspect many files. Apply when constructing safe bounded commands, avoiding destructive operations, or replacing risky patterns with agent-safe alternatives.
 capability: "safe-command-patterns agent asset workflow"
 side_effect_level: local_write
 approval_required: false

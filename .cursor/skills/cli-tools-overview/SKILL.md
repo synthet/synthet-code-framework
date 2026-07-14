@@ -1,6 +1,6 @@
 ---
 name: cli-tools-overview
-description: Router for CLI tooling skills — install checklist, safe patterns, search, git, MCP. Start here for agent command-line workflows.
+description: Use as the router for agent CLI workflows: installing tools, choosing safe shell patterns, navigating/searching repos, Git/MCP operations, and task runners. Start here whenever the user asks which command-line tool or workflow to use, or when another CLI skill is not obviously more specific.
 capability: "cli-tools-overview agent asset workflow"
 side_effect_level: read_only
 approval_required: false

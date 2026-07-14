@@ -1,6 +1,6 @@
 ---
 name: mcp-code-intelligence
-description: Compare MCP code intelligence tiers — CLI wrappers, ast-grep, Serena, Zoekt, fff file search, embeddings. Prefer text search before heavy indexes.
+description: Use when choosing or comparing code-intelligence/search backends such as text search, ast-grep, Serena, Zoekt, fff MCP, embeddings, or IDE semantic search. Apply when repo search is repeated, cross-reference heavy, or plain rg is insufficient.
 capability: "mcp-code-intelligence agent asset workflow"
 side_effect_level: local_write
 approval_required: false
