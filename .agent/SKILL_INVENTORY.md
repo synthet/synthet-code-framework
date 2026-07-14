@@ -21,7 +21,6 @@ commands or edit code/config as part of its procedure.
 | mcp-server-design | Design MCP servers with safe transport, discoverable tools, pagination, and validation | L1 | 2026-07-14 |
 | release-bump | Semver bump, changelog promotion, release commit prep | L2 | 2026-07-01 |
 | security-review | Lightweight pre-merge security sanity check | L1 | 2026-07-01 |
-| skill-authoring | Create and improve first-party skills with progressive disclosure and eval guidance | L2 | 2026-07-14 |
 | subagent-review | Review-only external CLI orchestration via MCP | L1 | 2026-07-01 |
 | threat-modeling-agentic-tools | Threat-model MCP/tool abuse and injection | L1 | 2026-07-01 |
 | validate-implementation | Per-AC Verified/Failed/Unknown verdicts with evidence | L2 | 2026-07-01 |
