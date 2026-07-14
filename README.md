@@ -32,7 +32,7 @@ the same generator is available later via
 |------|------|-------------------|
 | Orientation | `CLAUDE.md`, `AGENTS.md` | Project + agent contract templates |
 | Slash commands | `.claude/commands/` | `/spec /plan /implement /test-and-fix /pr-ready /release-notes`, wiki, memory, external-review, `/task-claim` |
-| Skills | `.claude/skills/` | agent-memory, commit-conventions, security-review, critical-commit-audit, subagent-review, backlog-queue, mcp-server-design, threat-modeling-agentic-tools, validate-implementation, release-bump |
+| Skills | `.claude/skills/` | agent-memory, commit-conventions, security-review, critical-commit-audit, diagnosing-bugs, tdd, subagent-review, backlog-queue, mcp-server-design, threat-modeling-agentic-tools, validate-implementation, release-bump, plus CLI/tooling skills |
 | Subagents | `.claude/agents/` | pr-ready-hygiene, critical-commit-audit, external-cli/codex/gemini reviewers |
 | Rules | `.claude/rules/` | Always-on safety + SDLC core |
 | Cursor mirror | `.cursor/` | **Generated** from `.claude/` by `scripts/sync_assistant_trees.py` |
