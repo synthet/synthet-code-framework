@@ -253,6 +253,11 @@ def main() -> int:
         help="Skip starter GitHub Actions workflows",
     )
     ap.add_argument("--dry-run", action="store_true", help="Print planned files without writing")
+    ap.add_argument(
+        "--include-boilerplate",
+        action="store_true",
+        help="Generate small stack-specific starter code/resources for python, node, or go",
+    )
     args = ap.parse_args()
 
     target: Path = args.target.resolve()
@@ -287,6 +292,8 @@ def main() -> int:
         print("Substitutions:")
         for key in sorted(vals):
             print(f"  {key} = {vals[key]}")
+        if args.include_boilerplate and vals["STACK"] in {"python", "node", "go"}:
+            files.append(f"<generated {vals['STACK']} boilerplate>")
         print(f"Files ({len(files)} + generated README.md, CHANGELOG.md):")
         for f in files:
             print(f"  {f}")
@@ -323,7 +330,27 @@ def main() -> int:
     (target / "README.md").write_text(project_readme(vals), encoding="utf-8")
     (target / "CHANGELOG.md").write_text(project_changelog(vals), encoding="utf-8")
 
-    print(f"Seeded '{vals['PROJECT_NAME']}' into {target} ({count} files).")
+    boilerplate_count = 0
+    if args.include_boilerplate:
+        from scripts.generate_project_boilerplate import generate_boilerplate
+
+        written = generate_boilerplate(
+            target,
+            vals["STACK"],
+            vals["PROJECT_SLUG"],
+            vals["PROJECT_DESC"],
+            force=args.force,
+        )
+        boilerplate_count = len(written)
+        if written:
+            print("Generated starter boilerplate:")
+            for path in written:
+                print(f"  {path.relative_to(target)}")
+        elif vals["STACK"] == "generic":
+            print("Starter boilerplate skipped: generic stack has no code template.")
+
+    extra = f" plus {boilerplate_count} boilerplate files" if boilerplate_count else ""
+    print(f"Seeded '{vals['PROJECT_NAME']}' into {target} ({count} files{extra}).")
 
     if args.auto_detect:
         stack = args.stack if args.stack in STACK_DEFAULTS else "generic"
@@ -345,6 +372,7 @@ def main() -> int:
         print("  2. Fill in build/test/lint commands in CLAUDE.md + AGENTS.md.")
         print("  3. Choose a backlog provider; fill GitHub Projects TODO(...) IDs only if you use that provider.")
         print("  4. `python scripts/sync_assistant_trees.py` after editing .claude/ assets.")
+        print("  5. Optional: rerun `python scripts/generate_project_boilerplate.py --stack <stack> --project-slug <slug>` for starter code.")
     else:
         print("  1. cd into the target and `git init` (or push to your remote).")
         print("  2. Review auto-detected commands in CLAUDE.md + AGENTS.md (marked # auto-detected).")

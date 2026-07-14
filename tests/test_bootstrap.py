@@ -57,6 +57,7 @@ REQUIRED_FILES = [
     "scripts/sync_assistant_trees.py",
     "scripts/ci/check_agent_frontmatter.py",
     "scripts/ci/check_secrets.py",
+    "scripts/generate_project_boilerplate.py",
     ".github/workflows/project-ci.yml",
     ".github/workflows/dependency-review.yml",
     ".github/workflows/codeql.yml",
@@ -233,6 +234,64 @@ def test_working_dirs_kept_empty(tmp_path: Path) -> None:
         assert d.is_dir(), f"missing working dir {rel}"
         contents = [p.name for p in d.iterdir()]
         assert contents in ([], [".gitkeep"]), f"{rel} not empty: {contents}"
+
+
+def test_include_boilerplate_generates_python_starter(tmp_path: Path) -> None:
+    target = run_bootstrap(tmp_path, "python", ["--include-boilerplate"])
+
+    assert (target / "pyproject.toml").is_file()
+    assert (target / "src" / "demo_app" / "__init__.py").is_file()
+    assert (target / "tests" / "test_smoke.py").is_file()
+    pyproject = (target / "pyproject.toml").read_text(encoding="utf-8")
+    assert 'description = "A demo project"' in pyproject
+    smoke_test = (target / "tests" / "test_smoke.py").read_text(encoding="utf-8")
+    assert "hello from demo-app" in smoke_test
+
+
+def test_include_boilerplate_generates_node_starter(tmp_path: Path) -> None:
+    target = run_bootstrap(tmp_path, "node", ["--include-boilerplate"])
+
+    assert (target / "package.json").is_file()
+    assert (target / "tsconfig.json").is_file()
+    assert (target / "src" / "index.ts").is_file()
+    assert (target / "test" / "smoke.test.mjs").is_file()
+    package_json = (target / "package.json").read_text(encoding="utf-8")
+    assert '"description": "A demo project"' in package_json
+
+
+def test_include_boilerplate_generates_go_starter(tmp_path: Path) -> None:
+    target = run_bootstrap(tmp_path, "go", ["--include-boilerplate"])
+
+    assert (target / "go.mod").is_file()
+    assert (target / "main.go").is_file()
+    assert (target / "main_test.go").is_file()
+    assert "func Greeting() string" in (target / "main.go").read_text(encoding="utf-8")
+
+
+def test_boilerplate_sanitizes_identifiers_and_escapes_metadata(tmp_path: Path) -> None:
+    from scripts.generate_project_boilerplate import generate_boilerplate
+
+    generate_boilerplate(tmp_path / "python", "python", "123 Demo!", 'A "quoted" demo')
+    pyproject = (tmp_path / "python" / "pyproject.toml").read_text(encoding="utf-8")
+    assert 'name = "123 Demo!"' in pyproject
+    assert 'description = "A \\"quoted\\" demo"' in pyproject
+    package_init = tmp_path / "python" / "src" / "project_123_demo" / "__init__.py"
+    assert package_init.is_file()
+
+    generate_boilerplate(tmp_path / "go", "go", "!!!")
+    go_mod = (tmp_path / "go" / "go.mod").read_text(encoding="utf-8")
+    assert go_mod.startswith("module app")
+
+
+def test_generate_project_boilerplate_does_not_overwrite_without_force(tmp_path: Path) -> None:
+    from scripts.generate_project_boilerplate import generate_boilerplate
+
+    (tmp_path / "package.json").write_text('{"name":"custom"}\n', encoding="utf-8")
+    written = generate_boilerplate(tmp_path, "node", "demo-app")
+
+    assert tmp_path / "package.json" not in written
+    assert (tmp_path / "package.json").read_text(encoding="utf-8") == '{"name":"custom"}\n'
+    assert (tmp_path / "src" / "index.ts").is_file()
 
 
 def test_dry_run_writes_nothing(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
