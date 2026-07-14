@@ -1,11 +1,11 @@
 ---
 name: tdd
-description: Use when the target behavior is known and a practical test seam exists: new features, root-caused bug fixes, or risky refactors that should proceed through red-green-refactor slices.
-capability: "Test-driven development loop for known behavior changes"
+description: Use when implementing behavior with tests, fixing bugs with regression coverage, or building risky changes one vertical slice at a time. Enforces a red-green-refactor loop before production edits whenever a practical test seam exists.
+capability: "Test-driven development loop for behavior changes"
 side_effect_level: local_write
 approval_required: false
 requires_tools: "Project test runner and edit access to tests/source files"
-output_schema: "TDD slice plan with red, green, refactor, and verification evidence"
+output_schema: "Plan of slices, red/green/refactor evidence, and final test commands"
 risk_class: medium
 ---
 
@@ -13,49 +13,56 @@ risk_class: medium
 
 ## Purpose
 
-Turn a known behavior change into small, evidenced red-green-refactor slices. This skill starts **after** the intended behavior is clear; if the failure is still unclear, use `diagnosing-bugs` first.
+Build or fix behavior through short feedback loops: write a failing test, make it pass with the smallest production change, then refactor with tests still green.
 
-## Boundary
+Use this to keep agent changes grounded in executable evidence instead of broad speculative edits.
 
-Use this skill for:
+## When to Use
 
-- New behavior with an observable unit, integration, CLI, or snapshot seam.
-- A bug fix after the root cause or failing scenario is understood.
-- A refactor where existing behavior must stay stable.
-- Any request for TDD, tests-first, or red-green-refactor.
+- Adding behavior where a unit, integration, CLI, or snapshot test can observe the outcome.
+- Fixing a bug that should never regress.
+- Refactoring behavior behind an existing public seam.
+- Any change where the user asks for TDD, red/green/refactor, or tests first.
 
-Do not force this skill for docs-only edits, generated mirror sync, mechanical formatting, or changes with no practical test seam. State the limitation and choose the closest verification instead.
-
-## First Minute
-
-Before production edits, identify four items:
-
-| Item | Question |
-|------|----------|
-| Behavior | What user-visible outcome should change or remain stable? |
-| Seam | Which existing test surface can observe it? |
-| Slice | What is the smallest end-to-end increment worth making? |
-| Command | Which narrow command should fail first? |
-
-If the seam is unknown, inspect nearby tests before creating new test infrastructure.
+Do **not** force TDD when the work is purely documentation, mechanical formatting, generated asset sync, or when the repo has no practical test seam. In those cases, state the limitation and choose the closest verification.
 
 ## Loop
 
-1. **Red:** write one focused test for the slice and run the narrow command. Confirm it fails for the intended reason.
-2. **Green:** make the smallest production change that passes the focused test. Avoid unrelated cleanup.
-3. **Refactor:** improve naming, duplication, or local boundaries only while the focused test stays green.
-4. **Widen:** repeat for the next slice, then run the relevant broader suite.
-
-Avoid batching multiple red tests unless one small implementation step should make them pass together.
+1. **Choose one vertical slice.** Name the externally visible behavior and the smallest seam that can verify it.
+2. **Red:** add or update one focused test that fails for the right reason. Run the narrowest test command and capture the failure.
+3. **Green:** make the smallest production change needed to pass that test. Avoid unrelated cleanup.
+4. **Refactor:** improve naming, boundaries, or duplication only while tests stay green.
+5. **Widen:** repeat for the next slice, then run the relevant broader suite.
 
 ## Test Quality Bar
 
-Prefer tests that assert stable behavior, use deterministic fixtures, and would fail on the original bug or missing feature. Avoid tests that only assert mock calls, freeze incidental formatting, depend on network/secrets/sleeps, or restate the implementation.
+Prefer tests that:
 
-## Refactor Gate
+- Assert behavior at a stable public interface rather than implementation details.
+- Would fail on the original bug or missing feature.
+- Use small fixtures and deterministic data.
+- Cover one reason to fail per test.
+- Name the scenario in domain language.
 
-A refactor is in scope only when it keeps public behavior unchanged, stays near the touched slice, and is covered by the same focused test plus related existing tests. Stop and report if cleanup crosses package boundaries or changes public contracts.
+Avoid tests that:
 
-## Output Evidence
+- Only assert mocks were called when visible behavior can be checked.
+- Freeze incidental formatting or timestamps without a product reason.
+- Require network, secrets, production services, or broad sleeps.
+- Reproduce the implementation line-for-line.
 
-Report the behavior slices, red failure evidence when practical, green/refactor commands, broader verification, and any missing test seam with the reason.
+## Agent-Safe Patterns
+
+- Read existing nearby tests before inventing test infrastructure.
+- Prefer the repo's documented test command over ad hoc runners.
+- Keep each red/green step small enough to explain in the final response.
+- If a failing test exposes a pre-existing unrelated issue, narrow the command or document the blocker before changing scope.
+
+## Final Response Evidence
+
+Report:
+
+- The behavior slices implemented.
+- The narrow red/green commands, including the initial failing test when available.
+- The broader verification command.
+- Any test seam that could not be created and why.
