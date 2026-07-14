@@ -1,6 +1,6 @@
 ---
 name: install-checklist
-description: Human workstation provisioning for agent CLI tools via winget, apt, and Homebrew. Not for automated agent install loops — user runs these once.
+description: Use when provisioning a human workstation with agent CLI tools via winget, apt, or Homebrew. Apply when the user asks what to install on Windows, WSL2 Ubuntu, or macOS; do not use for automated dependency install loops inside a task.
 capability: "install-checklist agent asset workflow"
 side_effect_level: local_write
 approval_required: false
