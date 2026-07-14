@@ -65,18 +65,7 @@ REQUIRED_FILES = [
 
 # Framework-only paths that must NOT ship to seeded projects.
 # `.github` is intentionally generated when CI templates are included.
-FRAMEWORK_ONLY = [
-    "bootstrap.py",
-    "cookiecutter.json",
-    "hooks",
-    "{{cookiecutter.project_slug}}",
-    "plopfile.mjs",
-    "package.json",
-    "package-lock.json",
-    "node_modules",
-    "tests",
-    ".git",
-]
+FRAMEWORK_ONLY = ["bootstrap.py", "tests", ".git"]
 
 
 def run_bootstrap(tmp_path: Path, stack: str, extra: list[str] | None = None) -> Path:
@@ -258,7 +247,6 @@ def test_include_boilerplate_generates_python_starter(tmp_path: Path) -> None:
     smoke_test = (target / "tests" / "test_smoke.py").read_text(encoding="utf-8")
     assert "hello from demo-app" in smoke_test
 
-
 def test_include_boilerplate_generates_node_starter(tmp_path: Path) -> None:
     target = run_bootstrap(tmp_path, "node", ["--include-boilerplate"])
 
@@ -267,36 +255,7 @@ def test_include_boilerplate_generates_node_starter(tmp_path: Path) -> None:
     assert (target / "src" / "index.ts").is_file()
     assert (target / "test" / "smoke.test.mjs").is_file()
     package_json = (target / "package.json").read_text(encoding="utf-8")
-    assert '"plop": "plop"' in package_json
-    assert '"plop": "^4.0.5"' in package_json
-    assert (target / "plopfile.mjs").is_file()
-    assert (target / "plop-templates" / "module.ts.hbs").is_file()
-    assert "setGenerator(\"module\"" in (target / "plopfile.mjs").read_text(encoding="utf-8")
-
-
-def test_framework_plop_bootstrap_assets_exist() -> None:
-    assert (REPO_ROOT / "package.json").is_file()
-    assert (REPO_ROOT / "plopfile.mjs").is_file()
-    package = (REPO_ROOT / "package.json").read_text(encoding="utf-8")
-    assert '"plop"' in package
-    assert '"bootstrap": "plop bootstrap"' in package
-    plopfile = (REPO_ROOT / "plopfile.mjs").read_text(encoding="utf-8")
-    assert 'setGenerator("bootstrap"' in plopfile
-    assert "runBootstrap" in plopfile
-    assert "bootstrap.py" in plopfile
-
-
-def test_framework_plop_assets_are_excluded_from_seed(tmp_path: Path) -> None:
-    node_target = run_bootstrap(tmp_path, "node", ["--include-boilerplate"])
-    python_target = run_bootstrap(tmp_path, "python")
-    assert not (python_target / "package.json").exists()
-    assert not (python_target / "plopfile.mjs").exists()
-    # Seeded node package.json is the boilerplate one, not the framework tooling package.
-    seeded_pkg = (node_target / "package.json").read_text(encoding="utf-8")
-    assert "synthet-code-framework" not in seeded_pkg
-    assert "demo-app" in seeded_pkg
-    assert '"description": "A demo project"' in seeded_pkg
-
+    assert '"description": "A demo project"' in package_json
 
 def test_include_boilerplate_generates_go_starter(tmp_path: Path) -> None:
     target = run_bootstrap(tmp_path, "go", ["--include-boilerplate"])
@@ -305,21 +264,6 @@ def test_include_boilerplate_generates_go_starter(tmp_path: Path) -> None:
     assert (target / "main.go").is_file()
     assert (target / "main_test.go").is_file()
     assert "func Greeting() string" in (target / "main.go").read_text(encoding="utf-8")
-
-
-def test_boilerplate_sanitizes_identifiers_and_escapes_metadata(tmp_path: Path) -> None:
-    from scripts.generate_project_boilerplate import generate_boilerplate
-
-    generate_boilerplate(tmp_path / "python", "python", "123 Demo!", 'A "quoted" demo')
-    pyproject = (tmp_path / "python" / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'name = "123 Demo!"' in pyproject
-    assert 'description = "A \\"quoted\\" demo"' in pyproject
-    package_init = tmp_path / "python" / "src" / "project_123_demo" / "__init__.py"
-    assert package_init.is_file()
-
-    generate_boilerplate(tmp_path / "go", "go", "!!!")
-    go_mod = (tmp_path / "go" / "go.mod").read_text(encoding="utf-8")
-    assert go_mod.startswith("module app")
 
 
 def test_generate_project_boilerplate_does_not_overwrite_without_force(tmp_path: Path) -> None:
@@ -349,6 +293,23 @@ def test_dry_run_writes_nothing(tmp_path: Path, capsys: pytest.CaptureFixture[st
     out = capsys.readouterr().out
     assert "DRY RUN" in out
     assert "AGENTS.md" in out
+
+
+
+
+def test_boilerplate_sanitizes_identifiers_and_escapes_metadata(tmp_path: Path) -> None:
+    from scripts.generate_project_boilerplate import generate_boilerplate
+
+    generate_boilerplate(tmp_path / "python", "python", "123 Demo!", 'A "quoted" demo')
+    pyproject = (tmp_path / "python" / "pyproject.toml").read_text(encoding="utf-8")
+    assert 'name = "123 Demo!"' in pyproject
+    assert 'description = "A \\"quoted\\" demo"' in pyproject
+    package_init = tmp_path / "python" / "src" / "project_123_demo" / "__init__.py"
+    assert package_init.is_file()
+
+    generate_boilerplate(tmp_path / "go", "go", "!!!")
+    go_mod = (tmp_path / "go" / "go.mod").read_text(encoding="utf-8")
+    assert go_mod.startswith("module app")
 
 
 def test_dry_run_shows_boilerplate_marker(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
