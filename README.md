@@ -9,6 +9,8 @@ all domain specifics so any new project starts mature instead of from scratch.
 
 ```bash
 python bootstrap.py --target ../my-app --name "My App" --stack python --desc "What it does"
+# Optionally include runnable starter code/resources for python, node, or go:
+python bootstrap.py --target ../my-api --name "My API" --stack python --include-boilerplate
 ```
 
 This copies the scaffold into `../my-app`, substitutes `${PLACEHOLDER}` tokens, and leaves clearly
@@ -19,7 +21,10 @@ marked `TODO(...)` for things only you know (repo URL and optional backlog-provi
 3. Choose a backlog provider in `.agent/backlog/`; fill GitHub Projects `TODO(...)` markers only if you use that provider.
 4. Run `python scripts/sync_assistant_trees.py` whenever you edit `.claude/` assets.
 
-`--stack` accepts `python | node | go | generic` (sets default build/test/lint commands).
+`--stack` accepts `python | node | go | generic` (sets default build/test/lint commands). Use
+`--include-boilerplate` to generate lightweight starter code/resources for `python`, `node`, or `go`;
+the same generator is available later via
+`python scripts/generate_project_boilerplate.py --stack <stack> --project-slug <slug>`.
 
 ## What's inside
 
