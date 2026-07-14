@@ -16,7 +16,7 @@ Run external CLI coding agents **through the subagent-orchestrator MCP server** 
 ## Prerequisites
 
 - Sibling checkout: `../subagent-orchestrator/agent-orchestrator` built (`npm install && npm run build` there once)
-- MCP server enabled in [`.cursor/mcp.json`](../../.cursor/mcp.json) as **`cli-review`** (or user-level **`subagent-orchestrator`**) and reloaded in Cursor
+- MCP server enabled in [`.cursor/mcp.example.json`](../../../.cursor/mcp.example.json) as **`cli-review`** (or user-level **`subagent-orchestrator`**) and reloaded in Cursor
 
 ## Step 1 — Resolve MCP server
 
