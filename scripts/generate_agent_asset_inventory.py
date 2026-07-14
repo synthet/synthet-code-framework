@@ -26,6 +26,13 @@ def _relative(path: Path, root: Path) -> str:
     return path.relative_to(root).as_posix()
 
 
+def _display_path(path: Path, root: Path) -> str:
+    try:
+        return path.relative_to(root).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
 def _parse_frontmatter(path: Path) -> tuple[dict[str, str], str]:
     text = path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
     match = _FRONTMATTER_RE.match(text)
@@ -141,24 +148,26 @@ def render_inventory(root: Path = ROOT) -> str:
     return "\n".join(sections).rstrip() + "\n"
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generate docs/agent-asset-inventory.md")
     parser.add_argument("--check", action="store_true", help="Fail if the inventory is stale")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="Inventory file to write or check")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     expected = render_inventory(ROOT)
     if args.check:
         actual = args.output.read_text(encoding="utf-8") if args.output.exists() else ""
+        output_label = _display_path(args.output, ROOT)
         if actual != expected:
-            print(f"OUT OF SYNC: {args.output.relative_to(ROOT).as_posix()}")
+            print(f"OUT OF SYNC: {output_label}")
+            print(f"Run `python {Path(__file__).relative_to(ROOT).as_posix()}` to regenerate it.")
             return 1
-        print(f"in sync: {args.output.relative_to(ROOT).as_posix()}")
+        print(f"in sync: {output_label}")
         return 0
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(expected, encoding="utf-8", newline="\n")
-    print(f"wrote {args.output.relative_to(ROOT).as_posix()}")
+    print(f"wrote {_display_path(args.output, ROOT)}")
     return 0
 
 

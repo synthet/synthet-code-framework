@@ -28,3 +28,13 @@ def test_generated_inventory_is_current() -> None:
     actual = (REPO_ROOT / "docs" / "agent-asset-inventory.md").read_text(encoding="utf-8")
 
     assert actual == expected
+
+
+def test_main_accepts_output_outside_repo(tmp_path: Path, capsys) -> None:
+    output = tmp_path / "inventory.md"
+
+    result = generate_agent_asset_inventory.main(["--output", output.as_posix()])
+
+    assert result == 0
+    assert output.read_text(encoding="utf-8") == generate_agent_asset_inventory.render_inventory(REPO_ROOT)
+    assert f"wrote {output.as_posix()}" in capsys.readouterr().out
