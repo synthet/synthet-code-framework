@@ -1,6 +1,6 @@
 ---
 name: backlog-queue
-description: Provider-oriented backlog queue. Use whenever picking work, claiming an item, transitioning status, or filing/closing backlog work across Local Markdown, GitHub Issues, or optional GitHub Projects.
+description: Use when picking, claiming, triaging, updating, closing, or filing backlog work across Local Markdown, GitHub Issues, or GitHub Projects. Always use when the user mentions backlog, queue, claim, status transition, issue intake, project board, or provider-oriented task flow.
 capability: "backlog-queue agent asset workflow"
 side_effect_level: remote_write
 approval_required: true
