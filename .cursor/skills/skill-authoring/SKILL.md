@@ -45,8 +45,11 @@ Use this skill when the task asks to:
    new skill only for a distinct trigger surface and procedure.
 3. **Edit canonical assets only.** Change `.claude/skills/<name>/SKILL.md` and optional
    `.claude/skills/<name>/{references,scripts,assets}/...` resources.
-4. **Deduplicate.** Keep quick routing/workflow in `SKILL.md`; move repeated, long, or variant-heavy
-   guidance into targeted references. Do not duplicate policy already owned by repo docs.
+4. **Deduplicate and resolve conflicts.** If a generated mirror conflicts with the canonical file,
+   keep `.claude/skills/<name>/SKILL.md` as the source of truth, fold in any non-duplicative remote
+   guidance there, then regenerate mirrors. Keep quick routing/workflow in `SKILL.md`; move repeated,
+   long, or variant-heavy guidance into targeted references. Do not duplicate policy already owned by
+   repo docs.
 5. **Sync mirrors.** Run `python scripts/sync_assistant_trees.py` after editing `.claude/` assets.
 6. **Validate and summarize.** Run sync/frontmatter checks, focused tests when warranted, and note
    AST10 safety considerations for material skill changes.
@@ -67,6 +70,7 @@ Use this skill when the task asks to:
 ## Verification Checklist
 
 - [ ] Canonical source changed under `.claude/skills/`
+- [ ] Skill conflicts resolved in canonical `.claude/` source before regenerating mirrors
 - [ ] Detailed or repeated guidance moved to `references/`, `scripts/`, or `assets/` as appropriate
 - [ ] Review rubric applied for new skills or material rewrites
 - [ ] `python scripts/sync_assistant_trees.py` run after canonical edits
