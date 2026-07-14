@@ -40,7 +40,7 @@ the same generator is available later via
 | Codex setup | `.codex/` | Project config plus generated custom subagents |
 | Governance | `.agent/` | SAFETY, provider-oriented backlog docs, inventory, subagent role matrix, SDLC workflow playbooks |
 | Memory | `.agent-memory/` + `scripts/agent-memory/` | log → dream → promote → context (deterministic, no LLM) |
-| Docs tooling | `scripts/okf_lint.py`, `wiki_lint.py`, `docs/` | OKF-aligned knowledge bundle + linters |
+| Docs tooling | `scripts/okf_lint.py`, `wiki_lint.py`, `scripts/generate_agent_asset_inventory.py`, `docs/` | OKF-aligned knowledge bundle, asset inventory, and linters |
 
 ## Single source of truth
 
@@ -64,6 +64,7 @@ without it.
 ```bash
 python scripts/okf_lint.py --profile project --exclude-prefix archive/ docs   # 0 errors/0 warnings
 python scripts/sync_assistant_trees.py --check                                # all mirrors in sync
+python scripts/generate_agent_asset_inventory.py --check                       # agent inventory docs in sync
 python -m py_compile bootstrap.py scripts/*.py scripts/**/*.py                 # scripts compile
 python scripts/ci/check_agent_frontmatter.py                                  # asset frontmatter contract
 python scripts/ci/check_secrets.py                                            # no committed secrets
