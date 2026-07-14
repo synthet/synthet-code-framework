@@ -1,6 +1,6 @@
 ---
 name: task-env-package-tools
-description: Task runners, uv, docker, and project verification gates for synthet-code-framework — sync check, frontmatter, OKF lint, pytest.
+description: Use for synthet-code-framework task runners, uv, Docker, sync checks, frontmatter validation, OKF lint, pytest, and project verification gates. Apply when running repo-specific tests/checks or diagnosing environment/package tooling.
 capability: "task-env-package-tools agent asset workflow"
 side_effect_level: local_write
 approval_required: false

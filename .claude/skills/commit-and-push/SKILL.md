@@ -1,9 +1,6 @@
 ---
 name: commit-and-push
-description: >-
-  Stage intended changes, write a Conventional Commit message, commit, and push
-  to origin. Use when the user asks to commit and push, ship changes, or publish
-  a release commit after release-bump.
+description: Use when the user asks to commit and push, publish, ship, or prepare a release commit. Guides staging only intended changes, writing a Conventional Commit, committing, and pushing to origin after verifying status and diff.
 capability: "commit-and-push agent asset workflow"
 side_effect_level: local_write
 approval_required: false

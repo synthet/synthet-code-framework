@@ -1,6 +1,6 @@
 ---
 name: threat-modeling-agentic-tools
-description: Threat-model agentic tooling — MCP/tool abuse, hook/prompt injection, remote control surfaces, and secret leakage. Use during security reviews or when adding features that expose the system to AI agents or remote callers.
+description: Use when threat-modeling agentic tooling, MCP/tools, hooks, prompts, remote control surfaces, review bundles, external exports, or secret exposure. Apply during security reviews or when adding features that let AI agents call tools or move data.
 capability: "threat-modeling-agentic-tools agent asset workflow"
 side_effect_level: external_export
 approval_required: true

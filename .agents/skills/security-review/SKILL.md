@@ -1,6 +1,6 @@
 ---
 name: security-review
-description: Lightweight security sanity check before merge or when the user asks for a security pass — secrets, risky patterns, dependencies.
+description: Use for a lightweight pre-merge security sanity check or whenever the user asks for security review. Covers secrets, risky patterns, dependency concerns, external input validation, and side-effecting agent/tool surfaces.
 capability: "security-review agent asset workflow"
 side_effect_level: local_write
 approval_required: false

@@ -1,6 +1,6 @@
 ---
 name: lint-format-security
-description: Run linters and security scanners with bounded scope — ruff, prettier, eslint, shellcheck, trivy, hadolint.
+description: Use when running or choosing bounded linters, formatters, type checks, or security scanners such as ruff, prettier, eslint, shellcheck, trivy, hadolint, or gitleaks. Apply before merge when the user asks for lint, format, static analysis, or security checks.
 capability: "lint-format-security agent asset workflow"
 side_effect_level: local_write
 approval_required: false
