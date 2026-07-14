@@ -46,6 +46,13 @@ EXCLUDE = {
     ".github-template",  # starter CI templates copied to .github/workflows when enabled
     "tests",            # framework self-tests
     "bootstrap.py",
+    "cookiecutter.json",  # cookiecutter wrapper (prompts → bootstrap.py)
+    "hooks",              # cookiecutter post_gen → bootstrap.py
+    "{{cookiecutter.project_slug}}",  # cookiecutter stub project dir
+    "plopfile.mjs",     # interactive npm/plop front-end for bootstrap.py
+    "package.json",     # framework-only plop tooling
+    "package-lock.json",
+    "node_modules",
     "README.md",        # framework README; replaced with a minimal project README
     "CHANGELOG.md",     # framework history; replaced with a fresh skeleton
 }
@@ -57,6 +64,7 @@ PRIVATE_SOURCE_PATHS = {
     Path(".claude/settings.local.json"),
     Path("secrets.json"),
     Path(".env"),
+    Path(".agent/backlog/items.md"),  # framework-local backlog; not a seed template
 }
 # Working dirs: copy the dir (and .gitkeep) but not their contents.
 EMPTY_KEEP_DIRS = {
@@ -256,7 +264,7 @@ def main() -> int:
     ap.add_argument(
         "--include-boilerplate",
         action="store_true",
-        help="Generate small stack-specific starter code/resources for python, node, or go",
+        help="Generate minimal stack-specific starter code/resources for python, node, or go",
     )
     args = ap.parse_args()
 
@@ -334,7 +342,13 @@ def main() -> int:
     if args.include_boilerplate:
         from scripts.generate_project_boilerplate import generate_boilerplate
 
-        written = generate_boilerplate(target, vals["STACK"], vals["PROJECT_SLUG"], force=args.force)
+        written = generate_boilerplate(
+            target,
+            vals["STACK"],
+            vals["PROJECT_SLUG"],
+            vals["PROJECT_DESC"],
+            force=args.force,
+        )
         boilerplate_count = len(written)
         if written:
             print("Generated starter boilerplate:")
@@ -366,7 +380,7 @@ def main() -> int:
         print("  2. Fill in build/test/lint commands in CLAUDE.md + AGENTS.md.")
         print("  3. Choose a backlog provider; fill GitHub Projects TODO(...) IDs only if you use that provider.")
         print("  4. `python scripts/sync_assistant_trees.py` after editing .claude/ assets.")
-        print("  5. Optional: rerun `python scripts/generate_project_boilerplate.py --stack <stack> --project-slug <slug>` for starter code.")
+        print("  5. Optional: rerun `python scripts/generate_project_boilerplate.py --stack <stack> --project-slug <slug> --project-desc '...'` for starter code.")
     else:
         print("  1. cd into the target and `git init` (or push to your remote).")
         print("  2. Review auto-detected commands in CLAUDE.md + AGENTS.md (marked # auto-detected).")

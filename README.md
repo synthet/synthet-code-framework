@@ -24,7 +24,7 @@ marked `TODO(...)` for things only you know (repo URL and optional backlog-provi
 `--stack` accepts `python | node | go | generic` (sets default build/test/lint commands). Use
 `--include-boilerplate` to generate lightweight starter code/resources for `python`, `node`, or `go`;
 the same generator is available later via
-`python scripts/generate_project_boilerplate.py --stack <stack> --project-slug <slug>`.
+`python scripts/generate_project_boilerplate.py --stack <stack> --project-slug <slug> --project-desc '...'`.
 
 ## What's inside
 
@@ -32,9 +32,9 @@ the same generator is available later via
 |------|------|-------------------|
 | Orientation | `CLAUDE.md`, `AGENTS.md` | Project + agent contract templates |
 | Slash commands | `.claude/commands/` | `/spec /plan /implement /test-and-fix /pr-ready /release-notes`, wiki, memory, external-review, `/task-claim` |
-| Skills | `.claude/skills/` | agent-memory, commit-conventions, security-review, critical-commit-audit, diagnosing-bugs, tdd, subagent-review, backlog-queue, mcp-server-design, threat-modeling-agentic-tools, validate-implementation, release-bump, plus CLI/tooling skills |
+| Skills | `.claude/skills/` | agent-memory, commit-conventions, security-review, critical-commit-audit, systematic-debugging, test-driven-development, verification-before-completion, karpathy-guidelines, subagent-review, backlog-queue, mcp-server-design, threat-modeling-agentic-tools, validate-implementation, release-bump, plus CLI/tooling skills |
 | Subagents | `.claude/agents/` | pr-ready-hygiene, critical-commit-audit, external-cli/codex/gemini reviewers |
-| Rules | `.claude/rules/` | Always-on safety + SDLC core |
+| Rules | `.claude/rules/` | Always-on safety, SDLC core, and Karpathy coding guardrails |
 | Cursor mirror | `.cursor/` | **Generated** from `.claude/` by `scripts/sync_assistant_trees.py` |
 | Codex skills | `.agents/skills/` | **Generated** repository skills for Codex |
 | Codex setup | `.codex/` | Project config plus generated custom subagents |
