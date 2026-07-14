@@ -256,7 +256,7 @@ def main() -> int:
     ap.add_argument(
         "--include-boilerplate",
         action="store_true",
-        help="Generate small stack-specific starter code/resources for python, node, or go",
+        help="Generate minimal stack-specific starter code/resources for python, node, or go",
     )
     args = ap.parse_args()
 

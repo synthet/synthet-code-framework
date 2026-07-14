@@ -336,6 +336,32 @@ def test_dry_run_shows_boilerplate_marker(tmp_path: Path, capsys: pytest.Capture
     out = capsys.readouterr().out
     assert "<generated python boilerplate>" in out
 
+
+def test_generate_project_boilerplate_cli_writes_project_desc(tmp_path: Path) -> None:
+    from scripts import generate_project_boilerplate
+
+    target = tmp_path / "cli-generated"
+    argv = [
+        "generate_project_boilerplate.py",
+        "--target",
+        str(target),
+        "--stack",
+        "node",
+        "--project-slug",
+        "demo-app",
+        "--project-desc",
+        "CLI generated demo",
+    ]
+    old_argv = sys.argv
+    sys.argv = argv
+    try:
+        assert generate_project_boilerplate.main() == 0
+    finally:
+        sys.argv = old_argv
+
+    package_json = (target / "package.json").read_text(encoding="utf-8")
+    assert '"description": "CLI generated demo"' in package_json
+
 def test_non_empty_target_rejected(tmp_path: Path) -> None:
     target = tmp_path / "occupied"
     target.mkdir()

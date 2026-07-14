@@ -26,6 +26,9 @@ marked `TODO(...)` for things only you know (repo URL and optional backlog-provi
 the same generator is available later via
 `python scripts/generate_project_boilerplate.py --stack <stack> --project-slug <slug> --project-desc "..."`.
 
+Generated boilerplate is intentionally minimal: Python emits package metadata plus a smoke test,
+Node emits TypeScript config plus a Node test, and Go emits a tiny module plus `go test` coverage.
+
 ## What's inside
 
 | Area | Path | What it gives you |

@@ -3,7 +3,8 @@
 
 The generated files are intentionally small and dependency-light so a new
 project has concrete code/resources to iterate from without hiding stack setup
-behind a larger framework template.
+behind a larger framework template. Existing files are preserved unless
+``--force`` is requested.
 """
 
 from __future__ import annotations
