@@ -372,7 +372,7 @@ def main() -> int:
         print("  2. Fill in build/test/lint commands in CLAUDE.md + AGENTS.md.")
         print("  3. Choose a backlog provider; fill GitHub Projects TODO(...) IDs only if you use that provider.")
         print("  4. `python scripts/sync_assistant_trees.py` after editing .claude/ assets.")
-        print("  5. Optional: rerun `python scripts/generate_project_boilerplate.py --stack <stack> --project-slug <slug>` for starter code.")
+        print("  5. Optional: rerun `python scripts/generate_project_boilerplate.py --stack <stack> --project-slug <slug> --project-desc '...'` for starter code.")
     else:
         print("  1. cd into the target and `git init` (or push to your remote).")
         print("  2. Review auto-detected commands in CLAUDE.md + AGENTS.md (marked # auto-detected).")

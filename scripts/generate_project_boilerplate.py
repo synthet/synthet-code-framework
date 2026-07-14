@@ -205,7 +205,11 @@ def main() -> int:
     parser.add_argument(
         "--stack", required=True, choices=SUPPORTED_STACKS, help="Boilerplate stack"
     )
-    parser.add_argument("--project-slug", required=True, help="Project/package slug")
+    parser.add_argument(
+        "--project-slug",
+        required=True,
+        help="Project/package slug used for generated package names",
+    )
     parser.add_argument(
         "--project-desc",
         default=DEFAULT_PROJECT_DESC,

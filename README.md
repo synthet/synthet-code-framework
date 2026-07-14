@@ -24,7 +24,7 @@ marked `TODO(...)` for things only you know (repo URL and optional backlog-provi
 `--stack` accepts `python | node | go | generic` (sets default build/test/lint commands). Use
 `--include-boilerplate` to generate lightweight starter code/resources for `python`, `node`, or `go`;
 the same generator is available later via
-`python scripts/generate_project_boilerplate.py --stack <stack> --project-slug <slug>`.
+`python scripts/generate_project_boilerplate.py --stack <stack> --project-slug <slug> --project-desc "..."`.
 
 ## What's inside
 

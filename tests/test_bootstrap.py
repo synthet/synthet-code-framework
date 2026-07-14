@@ -312,6 +312,30 @@ def test_dry_run_writes_nothing(tmp_path: Path, capsys: pytest.CaptureFixture[st
     assert "AGENTS.md" in out
 
 
+def test_dry_run_shows_boilerplate_marker(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    target = tmp_path / "seeded-dry-boilerplate"
+    argv = [
+        "bootstrap.py",
+        "--target",
+        str(target),
+        "--name",
+        "Demo App",
+        "--stack",
+        "python",
+        "--include-boilerplate",
+        "--dry-run",
+    ]
+    old_argv = sys.argv
+    sys.argv = argv
+    try:
+        assert bootstrap.main() == 0
+    finally:
+        sys.argv = old_argv
+
+    assert not target.exists()
+    out = capsys.readouterr().out
+    assert "<generated python boilerplate>" in out
+
 def test_non_empty_target_rejected(tmp_path: Path) -> None:
     target = tmp_path / "occupied"
     target.mkdir()
