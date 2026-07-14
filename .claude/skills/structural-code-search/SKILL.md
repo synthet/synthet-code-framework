@@ -1,6 +1,6 @@
 ---
 name: structural-code-search
-description: Syntax-aware search with ast-grep and semgrep; ctags for symbol indexes. Use when ripgrep has too many false positives — see search-tool-selection first.
+description: Use when syntax-aware search is needed with ast-grep, semgrep, or ctags, especially after rg has too many false positives. Apply for refactors, API usage patterns, AST shapes, policy rules, or symbol indexes.
 capability: "structural-code-search agent asset workflow"
 side_effect_level: local_write
 approval_required: false

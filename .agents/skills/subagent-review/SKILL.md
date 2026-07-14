@@ -1,6 +1,6 @@
 ---
 name: subagent-review
-description: Runs detect_subagents then run_subagent (codex/gemini) in review mode via subagent-orchestrator MCP, reads .agent-runs outputs, and summarizes findings. Use when the user asks for external CLI review, codex/gemini review, subagent panel, tie-breaker, or invokes /check-subagents, /run-codex-review, /run-gemini-review, /run-subagent-review.
+description: Use when the user requests external CLI review, codex/gemini review, a subagent panel, tie-breaker, or invokes /check-subagents, /run-codex-review, /run-gemini-review, or /run-subagent-review. Runs detect_subagents and review-mode subagents, then summarizes findings.
 capability: "subagent-review agent asset workflow"
 side_effect_level: external_export
 approval_required: true

@@ -1,6 +1,6 @@
 ---
 name: mcp-server-design
-description: Design and implement an MCP server's tools, resources, and prompts with safe transport and input validation. Use when building or extending a Model Context Protocol server for agent integration.
+description: Use when designing, building, reviewing, or extending a Model Context Protocol server, including tools, resources, prompts, transports, input validation, auth, and safe dispatch surfaces. Always apply when the user mentions MCP server design or agent integration tools.
 capability: "mcp-server-design agent asset workflow"
 side_effect_level: local_write
 approval_required: false

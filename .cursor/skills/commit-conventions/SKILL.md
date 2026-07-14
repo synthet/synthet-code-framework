@@ -1,6 +1,6 @@
 ---
 name: commit-conventions
-description: Apply Conventional Commits and consistent PR titles when the user asks for commit messages, PR titles, or changelog-ready wording.
+description: Use when drafting commit messages, PR titles, branch names, changelog entries, or release notes. Always apply for Conventional Commit wording, scoped commit subjects, breaking-change footers, or PR-ready messaging.
 capability: "commit-conventions agent asset workflow"
 side_effect_level: local_write
 approval_required: false
