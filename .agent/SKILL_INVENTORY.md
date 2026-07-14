@@ -17,16 +17,18 @@ commands or edit code/config as part of its procedure.
 | commit-conventions | Conventional Commits and PR title wording | L1 | 2026-07-01 |
 | commit-and-push | Stage, commit, and push with git safety rules; pairs with release-bump | L2 | 2026-07-04 |
 | critical-commit-audit | Deep post-commit hunt for high-severity bugs | L2 | 2026-07-01 |
-| diagnosing-bugs | Structured reproduce/minimise/hypothesise/instrument/fix/regression debugging loop | L2 | 2026-07-14 |
 | eval | Capture task quality signals to agent memory | L2 | 2026-07-01 |
+| karpathy-guidelines | Deliberate coding checklist: assumptions, simplicity, surgical diffs, verifiable goals | L2 | 2026-07-14 |
 | mcp-server-design | Design MCP servers with safe transport, discoverable tools, pagination, and validation | L1 | 2026-07-14 |
 | release-bump | Semver bump, changelog promotion, release commit prep | L2 | 2026-07-01 |
 | security-review | Lightweight pre-merge security sanity check | L1 | 2026-07-01 |
 | skill-authoring | Create and improve first-party skills with progressive disclosure and eval guidance | L2 | 2026-07-14 |
 | subagent-review | Review-only external CLI orchestration via MCP | L1 | 2026-07-01 |
+| systematic-debugging | Evidence-first root-cause debugging with reproduce/minimise/hypothesis/regression loop | L2 | 2026-07-14 |
+| test-driven-development | Red-green-refactor workflow for behavior changes with practical test seams | L2 | 2026-07-14 |
 | threat-modeling-agentic-tools | Threat-model MCP/tool abuse and injection | L1 | 2026-07-01 |
-| tdd | Red-green-refactor workflow for behavior changes with practical test seams | L2 | 2026-07-14 |
 | validate-implementation | Per-AC Verified/Failed/Unknown verdicts with evidence | L2 | 2026-07-01 |
+| verification-before-completion | Evidence-backed completion claims with fresh command proof | L1 | 2026-07-14 |
 
 ### CLI tooling ([cli-tools-skills-spec.md](cli-tools-skills-spec.md))
 

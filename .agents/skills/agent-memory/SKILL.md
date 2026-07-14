@@ -72,5 +72,5 @@ When they conflict, committed `.agent-memory/memory.md` and live repo evidence w
 
 ## Reference
 
-- [`.agent-memory/CURSOR_USAGE.md`](../../.agent-memory/CURSOR_USAGE.md)
-- [`.agent-memory/schema.md`](../../.agent-memory/schema.md)
+- [`.agent-memory/CURSOR_USAGE.md`](../../../.agent-memory/CURSOR_USAGE.md)
+- [`.agent-memory/schema.md`](../../../.agent-memory/schema.md)

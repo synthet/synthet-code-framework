@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 """Generate starter boilerplate for bootstrapped projects.
 
-This intentionally creates small, dependency-light defaults that make a newly
-seeded repository runnable before the owner replaces the example app code.
+The generated files are intentionally small and dependency-light so a new
+project has concrete code/resources to iterate from without hiding stack setup
+behind a larger framework template. Existing files are preserved unless
+``--force`` is requested.
 """
 
 from __future__ import annotations
 
 import argparse
+import json
+import re
 from pathlib import Path
 
 SUPPORTED_STACKS = ("python", "node", "go")
+DEFAULT_PROJECT_DESC = "TODO(PROJECT_DESC)"
 
 
 def _write(path: Path, content: str, *, force: bool) -> bool:
@@ -21,59 +26,246 @@ def _write(path: Path, content: str, *, force: bool) -> bool:
     return True
 
 
-def generate_python(target: Path, project_slug: str, *, force: bool = False) -> list[Path]:
-    package = project_slug.replace("-", "_")
+def _write_files(target: Path, files: dict[Path, str], *, force: bool) -> list[Path]:
+    return [
+        target / rel
+        for rel, content in files.items()
+        if _write(target / rel, content, force=force)
+    ]
+
+
+def _toml_string(value: str) -> str:
+    """Return a TOML basic-string literal for simple generated metadata."""
+    return json.dumps(value)
+
+
+def _python_package_name(project_slug: str) -> str:
+    package = re.sub(r"\W+", "_", project_slug).strip("_").lower()
+    if not package or package[0].isdigit():
+        package = f"project_{package or 'app'}"
+    return package
+
+
+def _go_module_name(project_slug: str) -> str:
+    module = re.sub(r"[^a-zA-Z0-9_./-]+", "", project_slug).strip("./-").lower()
+    return module or "app"
+
+
+def generate_python(
+    target: Path,
+    project_slug: str,
+    project_desc: str = DEFAULT_PROJECT_DESC,
+    *,
+    force: bool = False,
+) -> list[Path]:
+    package = _python_package_name(project_slug)
     files = {
-        Path("pyproject.toml"): f"""[build-system]\nrequires = [\"setuptools>=68\"]\nbuild-backend = \"setuptools.build_meta\"\n\n[project]\nname = \"{project_slug}\"\nversion = \"0.1.0\"\ndescription = \"TODO(PROJECT_DESC)\"\nrequires-python = \">=3.11\"\n\n[tool.pytest.ini_options]\ntestpaths = [\"tests\"]\n\n[tool.ruff]\nline-length = 100\n""",
-        Path("src") / package / "__init__.py": "\"\"\"Project package.\"\"\"\n\n__all__ = [\"hello\"]\n\n\ndef hello() -> str:\n    return \"hello from {project_slug}\"\n".replace("{project_slug}", project_slug),
-        Path("tests") / "test_smoke.py": f"""from {package} import hello\n\n\ndef test_hello() -> None:\n    assert hello() == \"hello from {project_slug}\"\n""",
+        Path("pyproject.toml"): f"""[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = {_toml_string(project_slug)}
+version = "0.1.0"
+description = {_toml_string(project_desc)}
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+""",
+        Path("src") / package / "__init__.py": f'''"""Project package."""
+
+__all__ = ["hello"]
+
+
+def hello() -> str:
+    return "hello from {project_slug}"
+''',
+        Path("tests") / "test_smoke.py": f'''from {package} import hello
+
+
+def test_hello() -> None:
+    assert hello() == "hello from {project_slug}"
+''',
     }
-    return [target / rel for rel, content in files.items() if _write(target / rel, content, force=force)]
+    return _write_files(target, files, force=force)
 
 
-def generate_node(target: Path, project_slug: str, *, force: bool = False) -> list[Path]:
+def generate_node(
+    target: Path,
+    project_slug: str,
+    project_desc: str = DEFAULT_PROJECT_DESC,
+    *,
+    force: bool = False,
+) -> list[Path]:
+    package_json = {
+        "name": project_slug,
+        "version": "0.1.0",
+        "description": project_desc,
+        "private": True,
+        "type": "module",
+        "scripts": {
+            "build": "tsc --noEmit",
+            "lint": "tsc --noEmit",
+            "test": "node --test",
+            "plop": "plop",
+        },
+        "devDependencies": {
+            "plop": "^4.0.5",
+            "typescript": "^5.0.0",
+        },
+    }
     files = {
-        Path("package.json"): f"""{{\n  \"name\": \"{project_slug}\",\n  \"version\": \"0.1.0\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"scripts\": {{\n    \"build\": \"tsc --noEmit\",\n    \"lint\": \"tsc --noEmit\",\n    \"test\": \"node --test\"\n  }},\n  \"devDependencies\": {{\n    \"typescript\": \"^5.0.0\"\n  }}\n}}\n""",
-        Path("tsconfig.json"): """{\n  \"compilerOptions\": {\n    \"target\": \"ES2022\",\n    \"module\": \"NodeNext\",\n    \"moduleResolution\": \"NodeNext\",\n    \"strict\": true,\n    \"noEmit\": true\n  },\n  \"include\": [\"src/**/*.ts\"]\n}\n""",
-        Path("src") / "index.ts": f"""export function hello(): string {{\n  return \"hello from {project_slug}\";\n}}\n""",
-        Path("test") / "smoke.test.mjs": f"""import assert from 'node:assert/strict';\nimport test from 'node:test';\n\ntest('hello placeholder', () => {{\n  assert.equal('hello from {project_slug}', 'hello from {project_slug}');\n}});\n""",
+        Path("package.json"): json.dumps(package_json, indent=2) + "\n",
+        Path("tsconfig.json"): '''{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts"]
+}
+''',
+        Path("src") / "index.ts": f'''export function hello(): string {{
+  return "hello from {project_slug}";
+}}
+''',
+        Path("test") / "smoke.test.mjs": f'''import assert from 'node:assert/strict';
+import test from 'node:test';
+
+test('project scaffold has a known greeting', () => {{
+  assert.equal('hello from {project_slug}', 'hello from {project_slug}');
+}});
+''',
+        Path("plopfile.mjs"): '''/**
+ * Project micro-generators (https://www.npmjs.com/package/plop).
+ * Run: npm run plop
+ */
+export default function (plop) {
+  plop.setGenerator("module", {
+    description: "Add a small TypeScript module under src/",
+    prompts: [
+      {
+        type: "input",
+        name: "name",
+        message: "module name (kebab or camel):",
+        validate: (v) => (v && String(v).trim() ? true : "Name is required"),
+      },
+    ],
+    actions: [
+      {
+        type: "add",
+        path: "src/{{camelCase name}}.ts",
+        templateFile: "plop-templates/module.ts.hbs",
+      },
+    ],
+  });
+}
+''',
+        Path("plop-templates") / "module.ts.hbs": '''export function {{camelCase name}}(): string {
+  return "{{name}}";
+}
+''',
     }
-    return [target / rel for rel, content in files.items() if _write(target / rel, content, force=force)]
+    return _write_files(target, files, force=force)
 
 
-def generate_go(target: Path, project_slug: str, *, force: bool = False) -> list[Path]:
-    module = project_slug.replace("-", "")
+def generate_go(
+    target: Path,
+    project_slug: str,
+    project_desc: str = DEFAULT_PROJECT_DESC,
+    *,
+    force: bool = False,
+) -> list[Path]:
+    del project_desc
+    module = _go_module_name(project_slug)
     files = {
         Path("go.mod"): f"module {module}\n\ngo 1.22\n",
-        Path("main.go"): f"""package main\n\nimport \"fmt\"\n\nfunc Greeting() string {{\n\treturn \"hello from {project_slug}\"\n}}\n\nfunc main() {{\n\tfmt.Println(Greeting())\n}}\n""",
-        Path("main_test.go"): f"""package main\n\nimport \"testing\"\n\nfunc TestGreeting(t *testing.T) {{\n\tif got := Greeting(); got != \"hello from {project_slug}\" {{\n\t\tt.Fatalf(\"Greeting() = %q\", got)\n\t}}\n}}\n""",
+        Path("main.go"): f'''package main
+
+import "fmt"
+
+func Greeting() string {{
+	return "hello from {project_slug}"
+}}
+
+func main() {{
+	fmt.Println(Greeting())
+}}
+''',
+        Path("main_test.go"): f'''package main
+
+import "testing"
+
+func TestGreeting(t *testing.T) {{
+	if got := Greeting(); got != "hello from {project_slug}" {{
+		t.Fatalf("Greeting() = %q", got)
+	}}
+}}
+''',
     }
-    return [target / rel for rel, content in files.items() if _write(target / rel, content, force=force)]
+    return _write_files(target, files, force=force)
 
 
-def generate_boilerplate(target: Path, stack: str, project_slug: str, *, force: bool = False) -> list[Path]:
-    generators = {"python": generate_python, "node": generate_node, "go": generate_go}
+def generate_boilerplate(
+    target: Path,
+    stack: str,
+    project_slug: str,
+    project_desc: str = DEFAULT_PROJECT_DESC,
+    *,
+    force: bool = False,
+) -> list[Path]:
+    generators = {
+        "python": generate_python,
+        "node": generate_node,
+        "go": generate_go,
+    }
     generator = generators.get(stack)
     if generator is None:
         return []
-    return generator(target, project_slug, force=force)
+    return generator(target, project_slug, project_desc, force=force)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Generate starter project boilerplate")
-    parser.add_argument("--target", type=Path, default=Path("."), help="Project root to write into")
-    parser.add_argument("--stack", required=True, choices=SUPPORTED_STACKS, help="Boilerplate stack")
-    parser.add_argument("--project-slug", required=True, help="Project/package slug")
+    parser.add_argument(
+        "--target", type=Path, default=Path("."), help="Project root to write into"
+    )
+    parser.add_argument(
+        "--stack", required=True, choices=SUPPORTED_STACKS, help="Boilerplate stack"
+    )
+    parser.add_argument(
+        "--project-slug",
+        required=True,
+        help="Project/package slug used for generated package names",
+    )
+    parser.add_argument(
+        "--project-desc",
+        default=DEFAULT_PROJECT_DESC,
+        help="Description to place in generated package metadata",
+    )
     parser.add_argument("--force", action="store_true", help="Overwrite existing boilerplate files")
     args = parser.parse_args()
 
-    written = generate_boilerplate(args.target.resolve(), args.stack, args.project_slug, force=args.force)
+    target = args.target.resolve()
+    written = generate_boilerplate(
+        target,
+        args.stack,
+        args.project_slug,
+        args.project_desc,
+        force=args.force,
+    )
     if not written:
         print(f"No boilerplate written for stack {args.stack}.")
     else:
         print("Generated boilerplate files:")
         for path in written:
-            print(f"  {path.relative_to(args.target.resolve())}")
+            print(f"  {path.relative_to(target)}")
     return 0
 
 

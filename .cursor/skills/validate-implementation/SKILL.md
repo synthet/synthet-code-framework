@@ -15,6 +15,9 @@ Answers one question: **does the implementation satisfy the spec's acceptance cr
 This is *not* merge readiness — CI status, review hygiene, and issue linkage belong to `/pr-ready`
 (definition of done). Keep the two checks separate.
 
+For generic “are we done / do tests pass?” claims without an AC matrix, use
+[`verification-before-completion`](../verification-before-completion/SKILL.md) instead.
+
 ## Inputs
 
 - The spec with numbered `AC-n` acceptance criteria (from `/spec`). If no spec exists, reconstruct
