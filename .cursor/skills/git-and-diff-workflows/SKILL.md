@@ -1,6 +1,6 @@
 ---
 name: git-and-diff-workflows
-description: Safe git and GitHub CLI workflows — status, diff, log, branch, PR operations with inspect-before-commit patterns.
+description: Use for safe Git and GitHub workflows: status, diffs, logs, branches, staging, commits, PR/issue inspection, and secret checks. Always apply before committing or when the user asks about git state, PRs, issues, or reviewing repository changes.
 capability: "git-and-diff-workflows agent asset workflow"
 side_effect_level: local_write
 approval_required: false

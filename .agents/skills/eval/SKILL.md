@@ -1,8 +1,6 @@
 ---
 name: eval
-description: Capture task quality signals and log them to agent memory to build a feedback loop.
-  Use at the end of each implemented task or merged PR, or whenever a task required more than one
-  agent iteration.
+description: Use at the end of an implemented task, merged PR, or multi-iteration agent workflow to capture quality signals in project memory. Apply when the user mentions eval, feedback loop, task quality, regression learnings, or session scoring.
 capability: "eval agent asset workflow"
 side_effect_level: local_write
 approval_required: false

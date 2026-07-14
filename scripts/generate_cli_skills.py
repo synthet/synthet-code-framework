@@ -15,13 +15,37 @@ BOUNDED_LINK = f"See [bounded-output-patterns.md]({REFS}/bounded-output-patterns
 SPLIT_LINK = f"See [windows-wsl-split.md]({REFS}/windows-wsl-split.md)."
 
 
+SKILL_METADATA: dict[str, tuple[str, str]] = {
+    "cli-tools-overview": ("read_only", "low"),
+    "safe-command-patterns": ("local_write", "medium"),
+    "install-checklist": ("local_write", "medium"),
+    "search-and-navigation": ("read_only", "low"),
+    "structural-code-search": ("local_write", "medium"),
+    "search-tool-selection": ("read_only", "low"),
+    "git-and-diff-workflows": ("local_write", "medium"),
+    "data-config-tools": ("local_write", "medium"),
+    "task-env-package-tools": ("local_write", "medium"),
+    "lint-format-security": ("local_write", "medium"),
+    "mcp-code-intelligence": ("local_write", "medium"),
+    "windows-agent-tooling": ("local_write", "medium"),
+    "wsl2-agent-tooling": ("local_write", "medium"),
+}
+
+
 def skill(name: str, description: str, body: str) -> str:
+    side_effect_level, risk_class = SKILL_METADATA[name]
     return f"""---
 name: {name}
 description: {description}
+capability: "{name} agent asset workflow"
+side_effect_level: {side_effect_level}
+approval_required: false
+requires_tools: "See asset body for tool requirements."
+output_schema: "Markdown report or documented command output."
+risk_class: {risk_class}
 ---
 
-{body}
+{body.rstrip()}
 """
 
 
@@ -81,7 +105,7 @@ def write(name: str, description: str, body: str) -> None:
 def main() -> None:
     write(
         "cli-tools-overview",
-        "Router for CLI tooling skills — install checklist, safe patterns, search, git, MCP. Start here for agent command-line workflows.",
+        "Use as the router for agent CLI workflows: installing tools, choosing safe shell patterns, navigating/searching repos, Git/MCP operations, and task runners. Start here whenever the user asks which command-line tool or workflow to use, or when another CLI skill is not obviously more specific.",
         f"""# CLI tools overview
 
 > For **which search tool to use**, see [`search-tool-selection`](../search-tool-selection/SKILL.md).
@@ -99,6 +123,19 @@ Index of CLI tooling skills and shared references for coding agents on Windows, 
 ## Required Tools
 
 Varies by topic skill; core: `git`, `rg`, `fd`, `jq`.
+
+## Install tiers
+
+Install in order — see [install-tiers.md](../cli-tools-overview/references/install-tiers.md):
+
+1. **Tier 0:** `git`, `rg`, `fd`, `jq`, `node`
+2. **Block A:** canonical block in [install-blocks.md](../cli-tools-overview/references/install-blocks.md)
+3. **Block B:** child-skill extensions (`yq`, `just`, `mise`, …)
+4. **Deferred:** optional tools per skill (`fzf`, `semgrep`, …)
+
+## Agent environment
+
+After installing CLI tools, **restart Cursor** and verify PATH — see [agent-environment.md](../cli-tools-overview/references/agent-environment.md).
 
 {platform_install()}
 
@@ -118,6 +155,17 @@ Benchmark/watch helpers (human): `hyperfine`, `entr`, `watchexec` — use for pe
 - Load `safe-command-patterns` before destructive or broad commands.
 - Load `search-tool-selection` before repo-wide search.
 - {BOUNDED_LINK}
+
+## Shared references
+
+| Reference | Topic |
+|-----------|-------|
+| [install-blocks.md](../cli-tools-overview/references/install-blocks.md) | Winget / apt / Homebrew install blocks |
+| [install-tiers.md](../cli-tools-overview/references/install-tiers.md) | Tier 0 → Block A → Block B → deferred |
+| [agent-environment.md](../cli-tools-overview/references/agent-environment.md) | PATH contract, Cursor restart, smoke tests |
+| [bounded-output-patterns.md](../cli-tools-overview/references/bounded-output-patterns.md) | Bounded search/read/git patterns |
+| [commands-requiring-confirmation.md](../cli-tools-overview/references/commands-requiring-confirmation.md) | Destructive / auto-fix gates |
+| [windows-wsl-split.md](../cli-tools-overview/references/windows-wsl-split.md) | Windows host vs WSL2 workloads |
 
 ## See also
 
@@ -142,7 +190,7 @@ Benchmark/watch helpers (human): `hyperfine`, `entr`, `watchexec` — use for pe
 
     write(
         "safe-command-patterns",
-        "Reusable command rules that minimize accidental data loss, context overflow, and unreviewed changes. Use before editing, searching, and committing.",
+        "Use before running shell commands that explore, edit, delete, move, generate, or inspect many files. Apply when constructing safe bounded commands, avoiding destructive operations, or replacing risky patterns with agent-safe alternatives.",
         f"""# Safe command patterns
 
 ## Purpose
@@ -204,7 +252,7 @@ rg "pattern" path/ --max-count 30
 
     write(
         "install-checklist",
-        "Human workstation provisioning for agent CLI tools via winget, apt, and Homebrew. Not for automated agent install loops — user runs these once.",
+        "Use when provisioning a human workstation with agent CLI tools via winget, apt, or Homebrew. Apply when the user asks what to install on Windows, WSL2 Ubuntu, or macOS; do not use for automated dependency install loops inside a task.",
         f"""# Install checklist
 
 ## Purpose
@@ -222,7 +270,24 @@ One-time setup of CLI tools on a developer machine.
 
 Package managers: `winget`, `apt`, or `brew`.
 
-{platform_install()}
+## Install
+
+Choose an install scope first — see [install-tiers.md](../cli-tools-overview/references/install-tiers.md) (Core only / Recommended / Everything missing).
+
+Install blocks are shared — {INSTALL_LINK}
+
+### Windows PowerShell
+
+Use winget blocks from the reference when provisioning a new machine.
+
+### WSL2 Ubuntu
+
+Use apt/curl blocks from the reference; symlink `fdfind` → `fd` if needed.
+
+### macOS
+
+Use Homebrew blocks from the reference.
+
 
 ## Common Commands
 
@@ -231,7 +296,8 @@ Copy full blocks from [install-blocks.md](../cli-tools-overview/references/insta
 ## Agent-Safe Patterns
 
 - User executes install blocks interactively.
-- After install, verify with `--version` commands only.
+- After install, **restart Cursor** and run the smoke test in [agent-environment.md](../cli-tools-overview/references/agent-environment.md).
+- Verify with `--version` commands only.
 
 ## Commands Requiring Confirmation
 
@@ -257,12 +323,14 @@ All install/uninstall commands require user initiation. {CONFIRM_LINK}
 - [ ] `git --version`, `rg --version`, `fd --version`, `jq --version`, `gh --version`
 - [ ] `node --version`, `pnpm --version` if JS repo
 - [ ] `uv --version` if Python repo
+- [ ] Block B (Recommended scope): `yq --version`, `just --version`, `shellcheck --version`
+- [ ] Cursor restarted; smoke test passes per [agent-environment.md](../cli-tools-overview/references/agent-environment.md)
 """,
     )
 
     write(
         "search-and-navigation",
-        "Fast repo navigation with ripgrep, fd, bat, tree, eza, zoxide, and delta. Use for text search and file discovery — see search-tool-selection for tool choice.",
+        "Use for fast repo navigation and discovery with rg, fd/find, bat/sed, tree, eza, zoxide, or delta. Apply whenever locating files, finding text, mapping repo layout, or bounding command output for code exploration.",
         f"""# Search and navigation
 
 > **Tool choice first:** [`search-tool-selection`](../search-tool-selection/SKILL.md) — fd → rg → read slice.
@@ -328,7 +396,7 @@ git diff -- path/to/file | delta
 
     write(
         "structural-code-search",
-        "Syntax-aware search with ast-grep and semgrep; ctags for symbol indexes. Use when ripgrep has too many false positives — see search-tool-selection first.",
+        "Use when syntax-aware search is needed with ast-grep, semgrep, or ctags, especially after rg has too many false positives. Apply for refactors, API usage patterns, AST shapes, policy rules, or symbol indexes.",
         f"""# Structural code search
 
 > **Tool choice first:** [`search-tool-selection`](../search-tool-selection/SKILL.md).
@@ -394,7 +462,7 @@ Mechanical rewrites and `semgrep --fix` require user approval. {CONFIRM_LINK}
 
     write(
         "search-tool-selection",
-        "Choose the right search tool before running commands — fd vs rg vs grep vs ast-grep vs fff MCP vs IDE Grep. Use at the start of any code-finding task.",
+        "Use before any code-finding task to choose fd/find vs rg vs ast-grep vs semgrep vs fff MCP vs IDE search. Apply when deciding filename, text, syntax, symbol, config, or repeated repo-wide search strategy.",
         f"""# Search tool selection
 
 ## Purpose
@@ -473,7 +541,7 @@ Exclude globs: `node_modules`, `dist`, `build`, `.git` (add domain dirs in downs
 
     write(
         "git-and-diff-workflows",
-        "Safe git and GitHub CLI workflows — status, diff, log, branch, PR operations with inspect-before-commit patterns.",
+        "Use for safe Git and GitHub workflows: status, diffs, logs, branches, staging, commits, PR/issue inspection, and secret checks. Always apply before committing or when the user asks about git state, PRs, issues, or reviewing repository changes.",
         f"""# Git and diff workflows
 
 ## Purpose
@@ -538,7 +606,7 @@ gitleaks detect --source . --no-git -v 2>/dev/null | head -50
 
     write(
         "data-config-tools",
-        "Query JSON/YAML/config with jq and yq; HTTP probes with curl; local sqlite inspection. Use for structured data, not raw grep on minified JSON.",
+        "Use when inspecting, querying, validating, or editing JSON, YAML, TOML, CSV, HTTP responses, or local SQLite/config data. Prefer jq/yq/sqlite/curl over raw text search, especially for minified or structured data.",
         f"""# Data and config tools
 
 ## Purpose
@@ -600,7 +668,7 @@ POST/PUT/DELETE via curl against production; sqlite writes. {CONFIRM_LINK}
 
     write(
         "task-env-package-tools",
-        "Task runners, uv, docker, and project verification gates for synthet-code-framework — sync check, frontmatter, OKF lint, pytest.",
+        "Use for synthet-code-framework task runners, uv, Docker, sync checks, frontmatter validation, OKF lint, pytest, and project verification gates. Apply when running repo-specific tests/checks or diagnosing environment/package tooling.",
         f"""# Task, environment, and package tools
 
 ## Purpose
@@ -658,7 +726,7 @@ docker compose logs --tail=50 service_name
 
 ## Troubleshooting
 
-- Sync drift: run `python scripts/sync_assistant_trees.py` after editing `.claude/`.
+- Sync drift: run `python scripts/sync_assistant_trees.py` after editing `.claude/` to update Cursor and Codex mirrors.
 - pytest failures: narrow to failing test file first.
 
 ## Windows Notes
@@ -680,7 +748,7 @@ docker compose logs --tail=50 service_name
 
     write(
         "lint-format-security",
-        "Run linters and security scanners with bounded scope — ruff, prettier, eslint, shellcheck, trivy, hadolint.",
+        "Use when running or choosing bounded linters, formatters, type checks, or security scanners such as ruff, prettier, eslint, shellcheck, trivy, hadolint, or gitleaks. Apply before merge when the user asks for lint, format, static analysis, or security checks.",
         f"""# Lint, format, and security
 
 ## Purpose
@@ -745,7 +813,7 @@ trivy fs --scanners vuln --exit-code 0 .
 
     write(
         "mcp-code-intelligence",
-        "Compare MCP code intelligence tiers — CLI wrappers, ast-grep, Serena, Zoekt, fff file search, embeddings. Prefer text search before heavy indexes.",
+        "Use when choosing or comparing code-intelligence/search backends such as text search, ast-grep, Serena, Zoekt, fff MCP, embeddings, or IDE semantic search. Apply when repo search is repeated, cross-reference heavy, or plain rg is insufficient.",
         f"""# MCP code intelligence
 
 ## Purpose
@@ -823,7 +891,7 @@ MCP tools that write files or run jobs need user intent. {CONFIRM_LINK}
 
     write(
         "windows-agent-tooling",
-        "Native Windows agent workflows — PowerShell, winget, Cursor IDE, Docker Desktop, when WSL is optional.",
+        "Use for native Windows agent workflows involving PowerShell, winget, Cursor IDE, Docker Desktop, path conventions, and decisions about when WSL is optional. Apply when the environment or user request is Windows-specific.",
         f"""# Windows agent tooling
 
 ## Purpose
@@ -902,7 +970,7 @@ Full diagram: [windows-wsl-split.md](../cli-tools-overview/references/windows-ws
 
     write(
         "wsl2-agent-tooling",
-        "WSL2 Ubuntu agent workflows — repos, build/test, ast-grep, MCP servers, CI-like commands.",
+        "Use for WSL2 Ubuntu agent workflows: repos under Linux filesystem, apt tooling, builds/tests, ast-grep, MCP servers, Docker/Windows interop, and CI-like commands. Apply when the environment or user request is WSL2-specific.",
         f"""# WSL2 agent tooling
 
 ## Purpose
