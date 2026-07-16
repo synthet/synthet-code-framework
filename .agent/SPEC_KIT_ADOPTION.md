@@ -10,6 +10,7 @@ This project does not vendor GitHub Spec Kit, but it adopts the parts that fit t
 - **Separate plan from tasks:** Keep architecture and approach in `/plan`, then create ordered, traceable work slices in `/tasks`.
 - **Traceability:** Maintain `AC-n` acceptance criteria IDs from spec through plan, tasks, implementation evidence, and validation.
 - **Analyze for coverage:** Before implementation, confirm every user story and acceptance criterion is represented by tests, tasks, or documented non-goals.
+- **Dedicated quality gates:** Keep clarification and cross-artifact analysis as first-class workflow steps so agents do not bury uncertainty inside implementation.
 
 ## Local workflow mapping
 
@@ -17,7 +18,8 @@ This project does not vendor GitHub Spec Kit, but it adopts the parts that fit t
 |------------------|-------------|
 | Constitution | `AGENTS.md`, `.agent/SAFETY.md`, `.agent/PROJECT_GUIDE.md` |
 | Specify | `/spec`, `.agent/workflows/spec.md` |
-| Clarify / Analyze | Clarification pass in `/spec`; traceability checks in `/tasks` and `validate-implementation` |
+| Clarify | `/clarify`, clarification pass in `/spec` |
+| Analyze | `/analyze`, traceability checks in `/tasks` and `validate-implementation` |
 | Plan | `/plan`, `.agent/workflows/plan.md` |
 | Tasks | `/tasks`, `.agent/workflows/tasks.md` |
 | Implement | `/implement`, `.agent/workflows/implement.md` |
