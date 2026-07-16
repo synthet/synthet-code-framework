@@ -62,7 +62,7 @@ Validate after changes: `python scripts/validate_cli_skills.py`.
 ## The SDLC loop
 
 ```
-/spec  →  /plan  →  /tasks  →  /implement  →  /test-and-fix  →  /pr-ready  →  (optional) /subagent-review  →  /release-notes
+/spec  →  /clarify  →  /plan  →  /tasks  →  /analyze  →  /implement  →  /test-and-fix  →  /pr-ready  →  (optional) /subagent-review  →  /release-notes
 ```
 
 ### Phase gates
@@ -73,8 +73,10 @@ is unnecessary (trivial fix), say so explicitly. The `/spec` → `/plan` → `/t
 | Phase | Artifact produced | Gate to pass before the next phase |
 |-------|-------------------|-------------------------------------|
 | `/spec` | Spec with EARS `AC-n` acceptance criteria | User approves; no criterion is AMBIGUOUS |
+| `/clarify` | Prioritized decisions plus spec patch notes | Material ambiguity is answered, defaulted, or carried as an explicit risk |
 | `/plan` | Implementation plan (files, approach, tests, rollback) | User approves the plan; skipped `/tasks` gate is justified only for trivial/single-step work |
 | `/tasks` | Traceable `T-n` task list mapped to `AC-n` criteria and verification commands | Every acceptance criterion has task coverage and evidence path |
+| `/analyze` | Cross-artifact coverage and consistency report | No blockers across spec, plan, tasks, governance, or verification paths |
 | `/implement` | Minimal-diff change set with tests | Lint + narrowest tests green |
 | `/test-and-fix` | Green test run (or written blocker); RCA log entry for non-obvious failures; optional JSONL trace artifact | Tests pass or blocker documented |
 | `validate-implementation` (skill) | Per-AC Verified/Failed/Unknown report with evidence | Every AC Verified, or open items accepted by the user |
