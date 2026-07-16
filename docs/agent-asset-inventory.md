@@ -18,7 +18,9 @@ This inventory lists the canonical Claude-authored assets that are mirrored to C
 
 | Name | Canonical path | Description |
 |------|----------------|-------------|
+| `/analyze` | `.claude/commands/analyze.md` | /analyze — Cross-artifact consistency and coverage check |
 | `/check-subagents` | `.claude/commands/check-subagents.md` | /check-subagents — Check external CLI sub-agents |
+| `/clarify` | `.claude/commands/clarify.md` | /clarify — Resolve material ambiguities before planning |
 | `/decompose` | `.claude/commands/decompose.md` | /decompose — Break a large task into parallelizable subtasks |
 | `/dream-memory` | `.claude/commands/dream-memory.md` | /dream-memory — Propose consolidated project memory |
 | `/implement` | `.claude/commands/implement.md` | /implement — Execute an approved plan |
