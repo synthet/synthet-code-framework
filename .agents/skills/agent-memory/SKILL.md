@@ -4,38 +4,18 @@ description: Use when starting or ending an agent session, loading or improving 
 capability: "agent-memory agent asset workflow"
 side_effect_level: external_export
 approval_required: true
-requires_tools: "See asset body for tool requirements."
-output_schema: "Markdown report or documented command output."
+requires_tools: "python scripts/agent-memory/*.py"
+output_schema: "Session YAML, dream proposal/changelog, or compact context block"
 risk_class: high
 ---
 
-# Agent memory
+# Agent memory (compiled harness)
+
+Already compiled: deterministic CLIs under `scripts/agent-memory/`. This skill is a bootloader.
 
 Local consolidation for **${PROJECT_NAME}** — external artifacts only (no model training).
 
-## When to use
-
-- **Session start:** Read `.agent-memory/memory.md`; prefer repo evidence on conflict.
-- **Session end / milestone:** Log durable learnings with `/log-session`.
-- **Periodic:** Run `/dream-memory`, review changelog, `/promote-memory` after human approval.
-
-## Memory candidates
-
-Use `text|category|confidence` on CLI or YAML `memory_candidates`:
-
-| Category | Use for |
-|----------|---------|
-| `stable_fact` | Stack, architecture, env |
-| `user_preference` | Style, workflow, review prefs |
-| `working_rule` | How to run tests, what not to touch |
-| `recurring_issue` | Flakes, traps, env pain |
-| `successful_pattern` | Approaches that worked |
-| `open_question` | Unverified assumptions |
-| `deprecated` | Superseded guidance |
-
-Confidence: `low`, `medium`, `high`.
-
-## Commands (repo root)
+## Invoke
 
 ```powershell
 python scripts/agent-memory/log_session.py --summary "..." --outcome "..." --candidate "text|working_rule|high"
@@ -44,33 +24,31 @@ python scripts/agent-memory/promote_dream.py --dream .agent-memory/dreams/<times
 python scripts/agent-memory/context.py
 ```
 
-## Dream review checklist
+Slash commands: `/log-session`, `/dream-memory`, `/promote-memory`, `/memory-context`.
 
-1. Open `dreams/*-changelog.md` — scan **Uncertain / needs review**.
-2. Check **Stale / needs re-verification** — for each flagged item, confirm it still applies to
-   the current codebase. Either re-log it via `/log-session` (refreshes the date) or promote it
-   as `deprecated` category if it no longer applies.
-3. Diff proposed `dreams/*.md` vs `memory.md`.
-4. Redact anything sensitive; reject promotion if secrets might be present.
-5. Promote only when the proposal is accurate and concise.
+## When to use
 
-## Relationship to Claude Code native memory
+| Moment | Action |
+|--------|--------|
+| Session start | `context.py` or read `.agent-memory/memory.md`; prefer repo evidence on conflict |
+| Session end / milestone | `log_session.py` with durable candidates |
+| Periodic | `dream.py` → human review changelog → `promote_dream.py` |
 
-Two memory stores coexist; keep them in their lanes:
+## LLM judgment slots
 
-- **`.agent-memory/memory.md` (this skill)** — team-shared, committed, repo-scoped, review-gated.
-- **Claude Code native `~/.claude/.../memory/MEMORY.md`** — private, auto-loaded, personal recall.
+- Phrase durable `memory_candidates` (`text|category|confidence`).
+- Review dream changelog **Uncertain** / **Stale** before promote.
 
-When they conflict, committed `.agent-memory/memory.md` and live repo evidence win.
+Categories: `stable_fact`, `user_preference`, `working_rule`, `recurring_issue`, `successful_pattern`, `open_question`, `deprecated`. Confidence: `low`|`medium`|`high`.
 
-## Safety
+## Safety (code-enforced)
 
 - Scripts block common secret patterns on write.
-- Do not log `secrets.json`, `.env`, tokens, or personal library paths.
-- Never edit `memory.md` directly during implementation work.
-- `raw-sessions/` and `dreams/` are gitignored; only `memory.md`, `schema.md`, `config.json`, and `CURSOR_USAGE.md` are shared.
+- Never edit `memory.md` by hand during implementation — log → dream → promote.
+- Do not log `.env`, `secrets.json`, tokens, or personal machine paths.
 
 ## Reference
 
 - [`.agent-memory/CURSOR_USAGE.md`](../../../.agent-memory/CURSOR_USAGE.md)
 - [`.agent-memory/schema.md`](../../../.agent-memory/schema.md)
+- Detail table: [references/categories.md](references/categories.md)

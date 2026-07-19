@@ -1,6 +1,7 @@
 # Skill inventory — ${PROJECT_NAME}
 
-**Last reviewed:** 2026-07-14. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md).
+**Last reviewed:** 2026-07-19. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
+and [SKILL_COMPILATION.md](SKILL_COMPILATION.md).
 Update this file (new row or **Last reviewed** date) in the same PR as any skill change.
 
 Risk tiers: **L1** = advisory/read-mostly (writes limited to docs/reports); **L2** = can run
@@ -12,29 +13,29 @@ commands or edit code/config as part of its procedure.
 
 | Skill | Purpose | Risk | Last reviewed |
 |-------|---------|------|---------------|
-| agent-memory | Log sessions, dream consolidation, promote memory, load context | L2 | 2026-07-01 |
+| agent-memory | Log sessions, dream consolidation, promote memory, load context (bootloader over `scripts/agent-memory/`) | L2 | 2026-07-19 |
 | backlog-queue | Provider-oriented backlog queue; local markdown, GitHub Issues, optional GitHub Projects | L2 | 2026-07-01 |
 | commit-conventions | Conventional Commits and PR title wording | L1 | 2026-07-01 |
-| commit-and-push | Stage, commit, and push with git safety rules; pairs with release-bump | L2 | 2026-07-04 |
+| commit-and-push | Stage, commit, and push with git safety rules; pairs with release-bump (**compiled harness**) | L2 | 2026-07-19 |
 | critical-commit-audit | Deep post-commit hunt for high-severity bugs | L2 | 2026-07-01 |
 | eval | Capture task quality signals to agent memory | L2 | 2026-07-01 |
 | karpathy-guidelines | Deliberate coding checklist: assumptions, simplicity, surgical diffs, verifiable goals | L2 | 2026-07-14 |
 | mcp-server-design | Design MCP servers with safe transport, discoverable tools, pagination, and validation | L1 | 2026-07-14 |
-| release-bump | Semver bump, changelog promotion, release commit prep | L2 | 2026-07-01 |
+| release-bump | Semver bump, changelog promotion, release commit prep (**compiled harness**) | L2 | 2026-07-19 |
 | security-review | Lightweight pre-merge security sanity check | L1 | 2026-07-01 |
 | skill-authoring | Create and improve first-party skills with progressive disclosure and eval guidance | L2 | 2026-07-14 |
 | subagent-review | Review-only external CLI orchestration via MCP | L1 | 2026-07-01 |
 | systematic-debugging | Evidence-first root-cause debugging with reproduce/minimise/hypothesis/regression loop | L2 | 2026-07-14 |
 | test-driven-development | Red-green-refactor workflow for behavior changes with practical test seams | L2 | 2026-07-14 |
 | threat-modeling-agentic-tools | Threat-model MCP/tool abuse and injection | L1 | 2026-07-01 |
-| validate-implementation | Per-AC Verified/Failed/Unknown verdicts with evidence | L2 | 2026-07-01 |
-| verification-before-completion | Evidence-backed completion claims with fresh command proof | L1 | 2026-07-14 |
+| validate-implementation | Per-AC Verified/Failed/Unknown verdicts with evidence (**compiled harness**) | L2 | 2026-07-19 |
+| verification-before-completion | Evidence-backed completion claims with fresh command proof (**compiled harness**) | L1 | 2026-07-19 |
 
 ### CLI tooling ([cli-tools-skills-spec.md](cli-tools-skills-spec.md))
 
 | Skill | Purpose | Risk | Last reviewed |
 |-------|---------|------|---------------|
-| search-tool-selection | Choose fd vs rg vs ast-grep vs fff MCP vs IDE search | L1 | 2026-07-03 |
+| search-tool-selection | Choose fd vs rg vs ast-grep vs fff MCP vs IDE search (**compiled harness**) | L1 | 2026-07-19 |
 | safe-command-patterns | Bounded output, inspect-before-edit, confirmation gates | L1 | 2026-07-03 |
 | search-and-navigation | rg, fd, bat, tree, navigation | L1 | 2026-07-03 |
 | git-and-diff-workflows | git, gh, bounded diffs | L1 | 2026-07-03 |
