@@ -70,6 +70,14 @@ Use `references/` for long decision tables, provider-specific docs, schemas, exa
 Use `scripts/` when future agents would otherwise rewrite the same parsing, packaging, grading, or
 validation code repeatedly.
 
+### Compiling a skill into a harness
+
+After a procedural skill has crystallized (same sources, filters, and state every run),
+**lower the stable steps into `scripts/harness.py`** and shrink `SKILL.md` to a thin bootloader
+that lists only LLM judgment slots and human authority gates. Prefer `--json` output for agents.
+Reuse shared parsers in `scripts/skill_harness/` when two or more harnesses need the same logic.
+See [`.agent/SKILL_COMPILATION.md`](../../../.agent/SKILL_COMPILATION.md).
+
 ## Frontmatter Guidelines
 
 The `description` is the primary trigger. Make it specific and slightly proactive:

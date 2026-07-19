@@ -4,16 +4,17 @@ description: Use before any code-finding task to choose fd/find vs rg vs ast-gre
 capability: "search-tool-selection agent asset workflow"
 side_effect_level: read_only
 approval_required: false
-requires_tools: "See asset body for tool requirements."
-output_schema: "Markdown report or documented command output."
+requires_tools: "python .claude/skills/search-tool-selection/scripts/harness.py; optional fd, rg, ast-grep, fff MCP"
+output_schema: "Recommendation: task, use, avoid, notes"
 risk_class: low
 ---
 
-# Search tool selection
+# Search tool selection (compiled harness)
 
 ## Purpose
 
-Route agents to the correct search tool **before** running commands.
+Route agents to the correct search tool **before** running commands. The decision table is
+compiled into `scripts/harness.py` — do not re-derive it from prose.
 
 ## When to Use
 
@@ -24,6 +25,7 @@ Route agents to the correct search tool **before** running commands.
 ## Required Tools
 
 Optional: `fd`, `rg`, `ast-grep`, fff MCP (`ffgrep`, `fffind`, `fff-multi-grep`), IDE Grep/SemanticSearch/Glob.
+Harness: `python .claude/skills/search-tool-selection/scripts/harness.py`.
 
 ## Install
 
@@ -41,32 +43,28 @@ Use apt/curl blocks from the reference; symlink `fdfind` → `fd` if needed.
 
 Use Homebrew blocks from the reference.
 
-
 ## Common Commands
+
+**Compiled router (preferred):**
+
+```bash
+python .claude/skills/search-tool-selection/scripts/harness.py --list --json
+python .claude/skills/search-tool-selection/scripts/harness.py --task-type content --json
+```
+
+Task types: `filename`, `content`, `syntax`, `security`, `symbols`, `layout`, `config`, `repeated`, `cursor`.
+
+**LLM slot:** map a vague user ask to `--task-type`, then follow the harness `use` / `avoid` fields.
 
 **Default escalation:** `fd` (filename) → `rg` (content) → `ast-grep` (syntax) → `bat`/`Read` (slice).
 
-| Task | Use | Avoid |
-|------|-----|-------|
-| File by name/path | `fd` | `grep -r` for filenames |
-| Text/literals in contents | `rg` | bare `grep -r .` |
-| grep fallback | `grep` with path scope | when `rg` available |
-| Syntax/AST shapes | `ast-grep` | regex alone |
-| Security rule packs | `semgrep scan` | ad hoc rg for policy |
-| Symbol index / cross-ref | `ctags`, Serena MCP, Zoekt | rg for every ref |
-| Repo layout | `tree -L 3` | loading all paths |
-| Interactive pick (human) | `fzf` | **agents** (non-interactive) |
-| Config keys in JSON/YAML | `jq` / `yq` | rg on minified JSON |
-| Repeated repo search (MCP connected) | **fff** `ffgrep`/`fffind` | many grep tool roundtrips |
-| Cursor agent | Grep / SemanticSearch / Glob | shell when tool bound |
-
 **grep vs rg:** Always prefer `rg`. Use `grep` only if `rg` is unavailable.
 
-**fff MCP:** When connected, prefer fff tools for repo-wide file/content search; keep one-off bounded probes as `rg`/`fd`.
+**fff MCP:** When connected, prefer fff for repo-wide search; keep one-off probes as `rg`/`fd`.
 
 **fzf:** Humans only — agents use `--max-count`, `-l`, `-g`, explicit paths.
 
-Exclude globs: `node_modules`, `dist`, `build`, `.git` (add domain dirs in downstream projects).
+Exclude globs: `node_modules`, `dist`, `build`, `.git`.
 
 ## Agent-Safe Patterns
 
@@ -79,12 +77,13 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 
 ## Troubleshooting
 
-- Too many rg hits: narrow path, add `-g '!tests'`, or switch to ast-grep.
+- Too many rg hits: narrow path, add `-g '!tests'`, or switch to `--task-type syntax`.
 - fff MCP unavailable: fall back to `rg`/`fd`; see mcp-code-intelligence for setup.
+- Unknown task type: run harness `--list` and pick the closest id.
 
 ## Windows Notes
 
-- IDE tools often beat shell on Windows for first pass.
+- IDE tools often beat shell on Windows for first pass (`--task-type cursor`).
 - See [windows-wsl-split.md](../cli-tools-overview/references/windows-wsl-split.md).
 
 ## WSL2 Notes
@@ -94,6 +93,7 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 
 ## Verification Checklist
 
+- [ ] Ran harness with a concrete `--task-type` (or listed types)
 - [ ] Picked tool matches task type (name vs text vs syntax)
 - [ ] Output bounded before reading files
 - [ ] fff MCP used only when server is connected
