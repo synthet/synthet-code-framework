@@ -14,8 +14,10 @@ sys.path.insert(0, str(ROOT))
 
 from scripts.skill_harness.acceptance import parse_acceptance_criteria, render_validation_report
 from scripts.skill_harness.changelog import promote_unreleased, unreleased_bullets
+from scripts.skill_harness.eval_signals import build_log_command, schema_skeleton
+from scripts.skill_harness.lint_router import recommend as lint_recommend
 from scripts.skill_harness.search_router import recommend
-from scripts.skill_harness.verify_catalog import is_secret_path
+from scripts.skill_harness.verify_catalog import is_secret_path, list_profiles, resolve_gates
 from scripts.skill_harness.version import bump_semver, detect_version_source, write_version
 
 
@@ -111,10 +113,11 @@ def test_secret_path_gate() -> None:
 
 
 def test_release_bump_harness_dry_run() -> None:
+    expected = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
     proc = _run_harness("release-bump", "--json")
     assert proc.returncode == 0, proc.stderr
     data = json.loads(proc.stdout)
-    assert data["current_version"] == "0.1.0"
+    assert data["current_version"] == expected
     assert data["applied"] is False
 
 
@@ -201,3 +204,119 @@ def test_commit_refuses_without_execute() -> None:
     assert proc.returncode != 0
     data = json.loads(proc.stdout)
     assert any("execute" in n.lower() for n in data["notes"])
+
+
+def test_verify_profiles_and_resolve_gates() -> None:
+    profiles = list_profiles()
+    assert "agent-assets" in profiles
+    assert profiles["agent-assets"] == ["sync_check", "frontmatter", "cli_skills"]
+    rows = resolve_gates(profile="tests")
+    assert len(rows) == 1
+    assert rows[0]["id"] == "pytest"
+    mixed = resolve_gates(profile="tests", gate_ids=["okf_lint"])
+    assert [r["id"] for r in mixed] == ["pytest", "okf_lint"]
+
+
+def test_lint_router() -> None:
+    rec = lint_recommend("python", paths="scripts")
+    assert rec.stack == "python"
+    assert any("ruff check scripts" in c for c in rec.check_commands)
+    assert "ruff check --fix" in rec.confirmation_gates
+
+
+def test_eval_signals_build_log_command() -> None:
+    payload = build_log_command(
+        summary="Implemented harness wave 2",
+        test_pass_rate="yes",
+        first_try_success="yes",
+        iteration_count=1,
+        candidates=["Scoped lint router|successful_pattern|high"],
+    )
+    assert payload["outcome"] == "first_try_success"
+    assert payload["test_results"] == "pass"
+    assert "log_session.py" in payload["command"]
+    assert schema_skeleton()["signals"]["test_pass_rate"] == ["no", "partial", "yes"]
+
+
+def test_task_env_harness_list() -> None:
+    proc = _run_harness("task-env-package-tools", "--list", "--json")
+    assert proc.returncode == 0, proc.stderr
+    data = json.loads(proc.stdout)
+    assert "agent-assets" in data["profiles"]
+    assert any(g["id"] == "sync_check" for g in data["catalog"])
+
+
+def test_task_env_harness_profile_dry_run() -> None:
+    proc = _run_harness(
+        "task-env-package-tools",
+        "--profile",
+        "agent-assets",
+        "--json",
+    )
+    assert proc.returncode == 0, proc.stderr
+    data = json.loads(proc.stdout)
+    assert data["ran"] is False
+    assert [g["id"] for g in data["selected"]] == [
+        "sync_check",
+        "frontmatter",
+        "cli_skills",
+    ]
+
+
+def test_lint_format_harness() -> None:
+    proc = _run_harness(
+        "lint-format-security",
+        "--stack",
+        "shell",
+        "--paths",
+        "scripts/*.sh",
+        "--json",
+    )
+    assert proc.returncode == 0, proc.stderr
+    data = json.loads(proc.stdout)
+    assert data["stack"] == "shell"
+    assert any("shellcheck" in c for c in data["check_commands"])
+
+
+def test_eval_harness_schema_and_emit() -> None:
+    schema = _run_harness("eval", "--json")
+    assert schema.returncode == 0, schema.stderr
+    data = json.loads(schema.stdout)
+    assert "successful_pattern" in data["categories"]
+
+    bad = _run_harness(
+        "eval",
+        "--emit-log-cmd",
+        "--summary",
+        "x",
+        "--test-pass-rate",
+        "yes",
+        "--first-try-success",
+        "yes",
+        "--iteration-count",
+        "2",
+        "--candidate",
+        "ok|successful_pattern|high",
+        "--json",
+    )
+    assert bad.returncode != 0
+
+    good = _run_harness(
+        "eval",
+        "--emit-log-cmd",
+        "--summary",
+        "Wave 2 compile",
+        "--test-pass-rate",
+        "partial",
+        "--first-try-success",
+        "no",
+        "--iteration-count",
+        "2",
+        "--candidate",
+        "Need fixture tests for harnesses|working_rule|high",
+        "--json",
+    )
+    assert good.returncode == 0, good.stderr
+    out = json.loads(good.stdout)
+    assert out["outcome"] == "partial"
+    assert out["test_results"] == "partial"

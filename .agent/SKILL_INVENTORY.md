@@ -1,6 +1,6 @@
 # Skill inventory — ${PROJECT_NAME}
 
-**Last reviewed:** 2026-07-19. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
+**Last reviewed:** 2026-07-21. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
 and [SKILL_COMPILATION.md](SKILL_COMPILATION.md).
 Update this file (new row or **Last reviewed** date) in the same PR as any skill change.
 
@@ -18,7 +18,7 @@ commands or edit code/config as part of its procedure.
 | commit-conventions | Conventional Commits and PR title wording | L1 | 2026-07-01 |
 | commit-and-push | Stage, commit, and push with git safety rules; pairs with release-bump (**compiled harness**) | L2 | 2026-07-19 |
 | critical-commit-audit | Deep post-commit hunt for high-severity bugs | L2 | 2026-07-01 |
-| eval | Capture task quality signals to agent memory | L2 | 2026-07-01 |
+| eval | Capture task quality signals to agent memory (**compiled harness**) | L2 | 2026-07-21 |
 | karpathy-guidelines | Deliberate coding checklist: assumptions, simplicity, surgical diffs, verifiable goals | L2 | 2026-07-14 |
 | mcp-server-design | Design MCP servers with safe transport, discoverable tools, pagination, and validation | L1 | 2026-07-14 |
 | release-bump | Semver bump, changelog promotion, release commit prep (**compiled harness**) | L2 | 2026-07-19 |
@@ -35,17 +35,18 @@ commands or edit code/config as part of its procedure.
 
 | Skill | Purpose | Risk | Last reviewed |
 |-------|---------|------|---------------|
-| search-tool-selection | Choose fd vs rg vs ast-grep vs fff MCP vs IDE search (**compiled harness**) | L1 | 2026-07-19 |
+| search-tool-selection | Choose fd vs rg vs ast-grep vs fff MCP vs Graphify vs IDE search (**compiled harness**) | L1 | 2026-07-21 |
 | safe-command-patterns | Bounded output, inspect-before-edit, confirmation gates | L1 | 2026-07-03 |
 | search-and-navigation | rg, fd, bat, tree, navigation | L1 | 2026-07-03 |
 | git-and-diff-workflows | git, gh, bounded diffs | L1 | 2026-07-03 |
 | cli-tools-overview | Router for CLI skills + shared references (install-tiers, agent-environment) | L1 | 2026-07-04 |
-| task-env-package-tools | Task runners, sync/frontmatter/pytest gates | L1 | 2026-07-03 |
+| task-env-package-tools | Task runners, sync/frontmatter/pytest gates (**compiled harness**) | L1 | 2026-07-21 |
 | structural-code-search | ast-grep, semgrep, ctags | L1 | 2026-07-03 |
 | data-config-tools | jq, yq, curl, sqlite | L1 | 2026-07-03 |
 | install-checklist | Human workstation provisioning (not agent-automated) | L2 | 2026-07-03 |
-| lint-format-security | ruff, eslint, trivy, shellcheck | L2 | 2026-07-03 |
-| mcp-code-intelligence | MCP tiers; fff, Serena, Zoekt, embeddings | L2 | 2026-07-03 |
+| lint-format-security | ruff, eslint, trivy, shellcheck (**compiled harness**) | L2 | 2026-07-21 |
+| mcp-code-intelligence | MCP tiers; fff, Graphify, Serena, Zoekt, embeddings | L2 | 2026-07-21 |
+| graphify-knowledge-graph | Query/refresh Graphify MCP or CLI for architecture paths and communities | L2 | 2026-07-21 |
 | windows-agent-tooling | Native Windows agent workflows | L2 | 2026-07-03 |
 | wsl2-agent-tooling | WSL2 build/test/MCP workflows | L2 | 2026-07-03 |
 

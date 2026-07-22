@@ -22,9 +22,10 @@ python scripts/sync_assistant_trees.py     # regenerate Cursor and Codex mirrors
 python scripts/validate_cli_skills.py      # CLI skill structure (when CLI skills changed)
 ```
 
-## Optional MCP (fff)
+## Optional MCP (fff, Graphify)
 
-Fast indexed repo search: install [fff-mcp](https://github.com/dmtrKovalenko/fff), copy `_examples.fff-mcp` from `.cursor/mcp.example.json` into gitignored `.cursor/mcp.json`, reload MCP. See [`AGENTS.md`](../AGENTS.md).
+- **fff:** Fast indexed repo search — install [fff-mcp](https://github.com/dmtrKovalenko/fff), copy `_examples.proj-ro-fff` from `.cursor/mcp.example.json` into gitignored `.cursor/mcp.json`, reload MCP.
+- **Graphify:** Local knowledge graph — `uv tool install graphifyy` (MCP: `graphifyy[mcp]`), run `graphify .` to build `graphify-out/graph.json`, copy `_examples.proj-ro-graphify` into `.cursor/mcp.json`. Do **not** run bare `graphify cursor install` in this scaffold (sync SoT). See [`AGENTS.md`](../AGENTS.md).
 
 ## Known pitfalls
 

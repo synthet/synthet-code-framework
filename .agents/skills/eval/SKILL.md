@@ -1,81 +1,54 @@
 ---
 name: eval
 description: Use at the end of an implemented task, merged PR, or multi-iteration agent workflow to capture quality signals in project memory. Apply when the user mentions eval, feedback loop, task quality, regression learnings, or session scoring.
-capability: "eval agent asset workflow"
+capability: "Validate eval signals and emit log_session.py command via compiled harness"
 side_effect_level: local_write
 approval_required: false
-requires_tools: "See asset body for tool requirements."
-output_schema: "Markdown report or documented command output."
+requires_tools: "python .claude/skills/eval/scripts/harness.py; python scripts/agent-memory/log_session.py"
+output_schema: "Signal schema or emit-log-cmd payload with argv/command"
 risk_class: medium
 ---
 
-# eval
+# eval (compiled harness)
 
-Eval design — building feedback loops with verifiable signals — is a core agentic engineering
-skill. Without it, the framework improves only by accident. This skill closes that loop by logging
-structured quality signals after each task so patterns surface in project memory.
+Thin bootloader. Signal schema validation and `log_session.py` command construction
+are compiled; you score the task and phrase memory candidates.
+
+## Invoke
+
+```bash
+# Schema + outcome→category hints
+python .claude/skills/eval/scripts/harness.py --json
+
+# After scoring signals, emit the log command (does not write memory itself)
+python .claude/skills/eval/scripts/harness.py --emit-log-cmd --json \
+  --summary "Implemented <feature> (Refs L-001)" \
+  --test-pass-rate yes \
+  --first-try-success yes \
+  --iteration-count 1 \
+  --candidate "Tests-first on auth module|successful_pattern|high"
+```
+
+Then run the emitted `command` (or argv) via `scripts/agent-memory/log_session.py`.
 
 ## When to use
 
-- After any `/implement` + `/pr-ready` cycle completes (success or not)
-- When a task required more than one agent round to complete
-- When tests were missing and had to be written after the fact
-- When a regression was introduced and caught (or missed) during the task
+- After `/implement` + `/pr-ready` (success or not)
+- Multi-round agent tasks, missing-then-added tests, regressions caught or missed
 
-## Three signals to capture
+## LLM judgment slots
 
-For each completed task, measure:
+1. Score `test_pass_rate` (`yes`/`partial`/`no`), `first_try_success` (`yes`/`no`), `iteration_count`.
+2. Phrase durable candidate text (`text|category|confidence`) using harness outcome hints.
+3. Do not invent brittle rules for “interesting” learnings — judgment stays here.
 
-| Signal | Question | Values |
-|--------|----------|--------|
-| `test_pass_rate` | Did all tests pass on the **first** agent attempt? | `yes` / `partial` / `no` |
-| `first_try_success` | Was the implementation accepted without revision? | `yes` / `no` |
-| `iteration_count` | How many agent rounds before done? | integer |
+## Human / safety
 
-## Step-by-step
-
-### 1. Assess the outcome
-
-After the task completes, answer the three signal questions above.
-
-### 2. Map to a memory candidate
-
-| Outcome | Category | Confidence | Example text |
-|---------|----------|------------|--------------|
-| First-try success, all tests green | `successful_pattern` | `high` | "Tests-first approach on auth module: zero retries, full green" |
-| Required 2–3 iterations | `recurring_issue` | `medium` | "UI snapshot tests require manual update after layout changes" |
-| Required >3 iterations | `recurring_issue` | `high` | "Database migration tasks consistently need schema inspection first" |
-| Tests were missing (written after code) | `working_rule` | `high` | "Always write test stubs for [module] before implementing" |
-| Regression caught in review | `working_rule` | `high` | "Run integration suite before merging [subsystem] changes" |
-| Regression shipped (caught later) | `recurring_issue` | `high` | "[Feature] broke [dependency] — add coverage for that path" |
-
-### 3. Log the session
-
-```bash
-python scripts/agent-memory/log_session.py \
-  --summary "Implemented <feature> (issue #<N>)" \
-  --outcome "<first_try_success|partial|multi-iteration>" \
-  --test-results "<pass|partial|fail>" \
-  --candidate "<memory text>|<category>|<confidence>"
-```
-
-Add a second `--candidate` flag for each additional insight from the task.
-
-### 4. Periodic review
-
-After 5–10 tasks, run `/dream-memory` and check the `## Successful Patterns` and
-`## Recurring Issues` sections. If the same module or workflow appears in recurring issues
-more than twice, that is a signal to improve the spec template, add a pre-flight checklist,
-or improve test coverage for that area.
-
-## Done when
-
-- At least one memory candidate is logged per task outcome.
-- Any pattern appearing ≥ 3 times in recurring issues has a proposed fix filed as a backlog issue.
+- Never log secrets, `.env`, tokens, or personal machine paths.
+- Promote/dream remains under `agent-memory` (`/dream-memory`, `/promote-memory`).
+- Patterns appearing ≥ 3 times in recurring issues → file a backlog follow-up.
 
 ## Cross-references
 
-- `/log-session` — CLI wrapper for `log_session.py`
-- `/dream-memory` — Consolidate logged sessions into a proposed memory update
-- `agent-memory` skill — Full memory pipeline (log → dream → promote → context)
-- `backlog-queue` skill — File a follow-up issue for systemic problems found via eval
+- `agent-memory` skill — log → dream → promote → context
+- `backlog-queue` — file systemic follow-ups

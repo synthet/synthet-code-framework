@@ -44,13 +44,25 @@ ${LINT_CMD}      # lint / typecheck / format
 4. Reload MCP in Cursor (Settings → MCP, or restart IDE).
 5. Agents: prefer fff for repeated repo-wide search when connected; one-off probes may still use `rg`/`fd` (see `search-tool-selection` skill).
 
+### Optional: Graphify knowledge-graph MCP
+
+[Graphify](https://github.com/Graphify-Labs/graphify) turns a repo into a queryable local knowledge graph (`graphify-out/`). **Opt-in** — clones work without it. PyPI package is `graphifyy`; CLI is `graphify`.
+
+1. `uv tool install graphifyy` (for MCP: `uv tool install "graphifyy[mcp]"`).
+2. Build a graph in the project: `graphify .` (writes `graphify-out/`, gitignored in this scaffold).
+3. Copy `_examples.proj-ro-graphify` from [`.cursor/mcp.example.json`](.cursor/mcp.example.json) / [`.mcp.json`](.mcp.json) into gitignored `.cursor/mcp.json` (or Claude `.mcp.json` `mcpServers`).
+4. Reload MCP in Cursor (Settings → MCP, or restart IDE).
+5. Agents: prefer Graphify for architecture / path / community questions when connected; keep text search on rg/fff (see `graphify-knowledge-graph` skill).
+6. **Do not** run bare `graphify cursor install` or `graphify install --project` here — those fight `.claude/` → sync SoT. Prefer this docs + MCP path, or a user-global install outside the repo.
+
 ## Available tools
 
 <!-- BEGIN MCP TOOL INVENTORY -->
 <!-- Auto-generated; do not edit by hand. Regenerate when your MCP tools change. -->
-| Server (example key) | Tools (when fff-mcp connected) | Notes |
-|----------------------|--------------------------------|-------|
+| Server (example key) | Tools (when connected) | Notes |
+|----------------------|------------------------|-------|
 | `fff-mcp` / `${MCP_PREFIX}-fff` | `ffgrep`, `fffind`, `fff-multi-grep` | Opt-in; see `.cursor/mcp.example.json` |
+| `graphify-mcp` / `${MCP_PREFIX}-graphify` | `query_graph`, `get_node`, `get_neighbors`, `shortest_path`, … | Opt-in; needs `graphify-out/graph.json`; see `_examples.proj-ro-graphify` |
 <!-- END MCP TOOL INVENTORY -->
 
 

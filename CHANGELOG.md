@@ -6,6 +6,38 @@ All notable changes to this framework are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-07-21
+
+### Added
+
+- Compiled skill harnesses (`scripts/harness.py`) for procedural workflows: `release-bump`,
+  `commit-and-push`, `eval`, `lint-format-security`, `task-env-package-tools`,
+  `search-tool-selection`, `validate-implementation`, and `verification-before-completion`.
+- Spec-kit quality gates and a spec-driven task gate in the agent workflow.
+- Bootstrap stack boilerplate generator (`--dry-run` / combinatorial coverage retained).
+- Skill authoring guidance plus disciplined development skills (TDD, systematic debugging).
+- Codex project infrastructure (`.codex/` agents/config) alongside Claude/Cursor mirrors.
+- Agent memory metadata, static agent eval fixtures, and an agent export policy validator.
+- MCP config examples/validation and starter GitHub workflows seeded by bootstrap.
+- Provider-oriented backlog structure and docs; generated agent-assets inventory.
+
+### Changed
+
+- Consolidated duplicate skills and clarified skill conflict resolution / authoring guidance.
+- Hardened default Claude permissions and GitHub Actions pin/dependency hygiene.
+- Strengthened assistant-tree sync drift detection (directory drift, stale generated files).
+
+### Fixed
+
+- Dropped accidental plop contamination from bootstrap tests.
+- Removed conflicting skill-authoring duplicate; normalized inventory drift diagnostics.
+- Narrowed subagent eval forbidden-export check; avoided secret-like MCP test fixtures.
+
+### Security
+
+- Reject likely secrets in export validation; tighten secret placeholder allowances.
+- Harden bootstrap source enumeration against unintended path inclusion.
+
 ## [0.1.0] — 2026-07-04
 
 ### Added

@@ -1,29 +1,31 @@
 ---
 name: task-env-package-tools
 description: Use for synthet-code-framework task runners, uv, Docker, sync checks, frontmatter validation, OKF lint, pytest, and project verification gates. Apply when running repo-specific tests/checks or diagnosing environment/package tooling.
-capability: "task-env-package-tools agent asset workflow"
+capability: "Emit and optionally run framework verify gates via compiled harness"
 side_effect_level: local_write
 approval_required: false
-requires_tools: "See asset body for tool requirements."
-output_schema: "Markdown report or documented command output."
+requires_tools: "python .claude/skills/task-env-package-tools/scripts/harness.py; python; optional docker, uv, just, mise"
+output_schema: "Gate catalog / selected commands / optional run results (JSON)"
 risk_class: medium
 ---
 
-# Task, environment, and package tools
+# Task, environment, and package tools (compiled harness)
 
 ## Purpose
 
-Run builds/tests/lint via project conventions; manage Python/Node envs safely.
+Run builds/tests/lint via project conventions. The framework verify catalog is
+compiled into `scripts/harness.py` — do not re-derive gate lists from prose.
 
 ## When to Use
 
 - Running framework or bootstrapped project checks
-- Docker compose for local services
-- Choosing `just`/`mise`/`npm run` over ad hoc commands
+- After editing `.claude/` assets (sync + frontmatter + cli_skills)
+- Choosing project scripts over ad hoc commands
 
 ## Required Tools
 
-Project-defined; framework defaults: `python`, `uv`, optional `docker`, `just`, `mise`, `pnpm`.
+Harness: `python .claude/skills/task-env-package-tools/scripts/harness.py`.
+Optional: `uv`, `docker`, `just`, `mise`, `pnpm`.
 
 ## Install
 
@@ -41,47 +43,40 @@ Use apt/curl blocks from the reference; symlink `fdfind` → `fd` if needed.
 
 Use Homebrew blocks from the reference.
 
-
 ## Common Commands
 
-Framework quality gates (this repo):
+**Compiled gates (preferred):**
 
 ```bash
-python scripts/sync_assistant_trees.py --check
-python scripts/ci/check_agent_frontmatter.py
-python scripts/okf_lint.py --profile project --exclude-prefix archive/ docs
-python -m pytest tests -q
-python scripts/validate_cli_skills.py
+python .claude/skills/task-env-package-tools/scripts/harness.py --list --json
+python .claude/skills/task-env-package-tools/scripts/harness.py --profile agent-assets --json
+python .claude/skills/task-env-package-tools/scripts/harness.py --profile agent-assets --run --json
+python .claude/skills/task-env-package-tools/scripts/harness.py --gates pytest,okf_lint --run --json
 ```
 
-Bootstrapped projects use tokens from AGENTS.md:
+Profiles: `framework`, `agent-assets` (sync + frontmatter + cli_skills), `tests`, `lint`.
 
-```bash
-${BUILD_CMD}
-${TEST_CMD}
-${LINT_CMD}
-```
+Bootstrapped projects: use `${BUILD_CMD}` / `${TEST_CMD}` / `${LINT_CMD}` from AGENTS.md.
 
-Docker (when compose file exists):
+## LLM judgment slots
 
-```bash
-docker compose config
-docker compose up -d --build
-docker compose logs --tail=50 service_name
-```
+- Choose `--profile` / `--gates` for the change type.
+- Interpret failures; narrow pytest to the failing file first.
 
 ## Agent-Safe Patterns
 
 - Read AGENTS.md / Makefile / package.json scripts before inventing commands.
-- Docker down/prune needs confirmation. See [bounded-output-patterns.md](../cli-tools-overview/references/bounded-output-patterns.md).
+- Default is dry-run; pass `--run` only for selected gates.
+- See [bounded-output-patterns.md](../cli-tools-overview/references/bounded-output-patterns.md).
 
 ## Commands Requiring Confirmation
 
-See [commands-requiring-confirmation.md](../cli-tools-overview/references/commands-requiring-confirmation.md).; `docker system prune`, broad `pip install`, production deploy scripts.
+See [commands-requiring-confirmation.md](../cli-tools-overview/references/commands-requiring-confirmation.md).
+`docker system prune`, broad `pip install`, production deploy scripts need confirmation.
 
 ## Troubleshooting
 
-- Sync drift: run `python scripts/sync_assistant_trees.py` after editing `.claude/` to update Cursor and Codex mirrors.
+- Sync drift: harness `--profile agent-assets --run`, or `python scripts/sync_assistant_trees.py`.
 - pytest failures: narrow to failing test file first.
 
 ## Windows Notes
@@ -96,5 +91,6 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 
 ## Verification Checklist
 
+- [ ] Harness profile/gates match the change
 - [ ] `${TEST_CMD}` or pytest green for touched area
 - [ ] sync + frontmatter checks when agent assets changed
