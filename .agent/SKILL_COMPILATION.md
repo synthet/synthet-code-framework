@@ -34,7 +34,7 @@ Shared parsers live in [`scripts/skill_harness/`](../scripts/skill_harness/).
 Author under `.claude/` only; run `python scripts/sync_assistant_trees.py` so
 `.cursor/skills/` and `.agents/skills/` mirrors include `scripts/`.
 
-## Compiled in this repo (first pass)
+## Compiled in this repo
 
 | Skill | Harness | LLM slots |
 |-------|---------|-----------|
@@ -44,6 +44,9 @@ Author under `.claude/` only; run `python scripts/sync_assistant_trees.py` so
 | `search-tool-selection` | `.claude/skills/search-tool-selection/scripts/harness.py` | Map ask → task type |
 | `commit-and-push` | `.claude/skills/commit-and-push/scripts/harness.py` | Commit message; human must request ship |
 | `agent-memory` | `scripts/agent-memory/*.py` (pre-existing) | Phrase candidates; review dreams |
+| `task-env-package-tools` | `.claude/skills/task-env-package-tools/scripts/harness.py` | Choose profile/gates; interpret failures |
+| `lint-format-security` | `.claude/skills/lint-format-security/scripts/harness.py` | Map ask/paths → stack; approve auto-fix |
+| `eval` | `.claude/skills/eval/scripts/harness.py` | Score signals; phrase memory candidates |
 
 ## How to compile another skill
 

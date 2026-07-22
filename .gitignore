@@ -29,6 +29,9 @@ venv/
 node_modules/
 dist/
 
+# Opt-in Graphify local graph (operator-built; not part of scaffold)
+graphify-out/
+
 # OS / editor
 .DS_Store
 Thumbs.db
