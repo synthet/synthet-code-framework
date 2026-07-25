@@ -50,6 +50,8 @@ Author under `.claude/` only; run `python scripts/sync_assistant_trees.py` so
 
 ## How to compile another skill
 
+Run [`/compile-skill <name>`](../.claude/commands/compile-skill.md), which drives this checklist:
+
 1. Confirm the workflow is stable (repeated traces / inventory usage).
 2. Partition steps into code / LLM / human — do not freeze judgment into brittle rules.
 3. Implement `scripts/harness.py` with dry-run default and `--json`.
