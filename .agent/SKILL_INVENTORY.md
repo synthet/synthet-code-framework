@@ -1,6 +1,6 @@
 # Skill inventory — ${PROJECT_NAME}
 
-**Last reviewed:** 2026-07-21. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
+**Last reviewed:** 2026-07-25. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
 and [SKILL_COMPILATION.md](SKILL_COMPILATION.md).
 Update this file (new row or **Last reviewed** date) in the same PR as any skill change.
 
@@ -14,12 +14,14 @@ commands or edit code/config as part of its procedure.
 | Skill | Purpose | Risk | Last reviewed |
 |-------|---------|------|---------------|
 | agent-memory | Log sessions, dream consolidation, promote memory, load context (bootloader over `scripts/agent-memory/`) | L2 | 2026-07-19 |
+| autonomous-run-contract | Metric, budget, revert rule, and stop conditions before an unattended or fanned-out run | L1 | 2026-07-25 |
 | backlog-queue | Provider-oriented backlog queue; local markdown, GitHub Issues, optional GitHub Projects | L2 | 2026-07-01 |
 | commit-conventions | Conventional Commits and PR title wording | L1 | 2026-07-01 |
 | commit-and-push | Stage, commit, and push with git safety rules; pairs with release-bump (**compiled harness**) | L2 | 2026-07-19 |
 | critical-commit-audit | Deep post-commit hunt for high-severity bugs | L2 | 2026-07-01 |
 | eval | Capture task quality signals to agent memory (**compiled harness**) | L2 | 2026-07-21 |
 | karpathy-guidelines | Deliberate coding checklist: assumptions, simplicity, surgical diffs, verifiable goals | L2 | 2026-07-14 |
+| lesson-to-skill | Turn session corrections, mistakes, and repetitions into enriched or new agent assets | L2 | 2026-07-25 |
 | mcp-server-design | Design MCP servers with safe transport, discoverable tools, pagination, and validation | L1 | 2026-07-14 |
 | release-bump | Semver bump, changelog promotion, release commit prep (**compiled harness**) | L2 | 2026-07-19 |
 | security-review | Lightweight pre-merge security sanity check | L1 | 2026-07-01 |

@@ -20,6 +20,12 @@ or run in parallel branches by separate agents.
 - Epic description or linked issue number.
 - Current architecture context (see **AGENTS.md**); note any known constraints or dependencies.
 
+## Before splitting
+
+Some work is worse when divided: architecture design, tightly coupled refactors, and changes whose
+correctness depends on holding the whole picture at once. If the epic is one of those, say so and
+recommend a single `/plan` instead of producing a subtask list.
+
 ## Output
 
 1. **Subtask list** — For each subtask:
@@ -38,11 +44,16 @@ or run in parallel branches by separate agents.
 4. **Test boundaries** — For each subtask, the minimal test or assertion that confirms
    it is done without depending on other subtasks being complete.
 
+5. **Reducer** — How the finished subtasks come back together: integration order, who merges,
+   the check that proves the reassembled whole works, and what to do when two subtasks conflict.
+   Write this *before* work fans out — otherwise you get N finished branches and no integration.
+
 ## Done when
 
 - Each subtask can be passed to `/plan` without the planner needing to know about any other subtask.
 - The dependency graph has no hidden chains (all blockers are explicit).
 - Every subtask has a test boundary that validates it independently.
+- The reducer is written down and names an integration check.
 
 ## Note
 
