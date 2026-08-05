@@ -13,6 +13,7 @@ _KEY_RE = re.compile(r"^([A-Za-z][A-Za-z0-9_-]*):(.*)$")
 _MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 SIDE_EFFECT_LEVELS = {"read_only", "local_write", "remote_write", "external_export"}
 RISK_CLASSES = {"low", "medium", "high"}
+MODEL_ALIASES = {"opus", "sonnet", "haiku", "fable"}
 REQUIRED_METADATA = (
     "capability",
     "side_effect_level",
@@ -159,6 +160,25 @@ def check_metadata_contract(
         )
 
 
+def check_model_alias(rel: str, pairs: list[tuple[str, str]], errors: list[str]) -> None:
+    """If frontmatter pins a `model`, require a bare tier alias, not a version ID.
+
+    Tier aliases resolve at dispatch, so one definition follows the asset across model
+    generations and providers. A pinned version ID keeps pointing at that generation after a
+    switch (and fails at the provider on Bedrock/Vertex/proxies); a ``[1m]``-suffixed ID cannot be
+    inherited by subagents. Only fires when a `model` key is present, so it is a preventive guard.
+    """
+    model = _value(pairs, "model")
+    if model is None or model == "":
+        return
+    if model not in MODEL_ALIASES:
+        errors.append(
+            f"{rel}: `model` must be a bare tier alias (one of {sorted(MODEL_ALIASES)}), "
+            f"not {model!r}; pinned version IDs and [1m]-suffixed IDs break alias resolution "
+            "across generations/providers and subagent inheritance"
+        )
+
+
 def check_relative_markdown_links(path: Path, rel: str, text: str, errors: list[str]) -> None:
     """Require relative Markdown links in skill bodies to resolve on disk."""
     for match in _MARKDOWN_LINK_RE.finditer(text):
@@ -203,6 +223,7 @@ def check_skills(root: Path, errors: list[str]) -> None:
         if not _value(pairs, "description"):
             errors.append(f"{rel}: missing or empty `description`")
         check_metadata_contract(rel, pairs, errors, text)
+        check_model_alias(rel, pairs, errors)
         if name:
             if name in seen:
                 errors.append(
@@ -233,6 +254,7 @@ def check_agents(root: Path, errors: list[str]) -> None:
         if not _value(pairs, "description"):
             errors.append(f"{rel}: missing or empty `description`")
         check_metadata_contract(rel, pairs, errors, text)
+        check_model_alias(rel, pairs, errors)
         if name:
             if name in seen:
                 errors.append(
@@ -270,6 +292,7 @@ def check_commands(root: Path, errors: list[str]) -> None:
             errors.append(f"{rel}: missing or unterminated YAML frontmatter")
         else:
             check_metadata_contract(rel, pairs, errors, text)
+            check_model_alias(rel, pairs, errors)
         expected = f"# /{md.stem}"
         for line in text.splitlines():
             if line.startswith(expected) and (
