@@ -1,6 +1,6 @@
 # Skill inventory — ${PROJECT_NAME}
 
-**Last reviewed:** 2026-08-05. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
+**Last reviewed:** 2026-08-05 (skill-authoring cross-harness + vocabulary enrichment). Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
 and [SKILL_COMPILATION.md](SKILL_COMPILATION.md).
 Update this file (new row or **Last reviewed** date) in the same PR as any skill change.
 
@@ -25,7 +25,7 @@ commands or edit code/config as part of its procedure.
 | mcp-server-design | Design MCP servers with safe transport, discoverable tools, pagination, and validation | L1 | 2026-07-14 |
 | release-bump | Semver bump, changelog promotion, release commit prep (**compiled harness**) | L2 | 2026-07-19 |
 | security-review | Lightweight pre-merge security sanity check | L1 | 2026-07-01 |
-| skill-authoring | Create and improve first-party skills with progressive disclosure and eval guidance | L2 | 2026-07-14 |
+| skill-authoring | Create and improve first-party skills with progressive disclosure, cross-harness portability, and eval guidance | L2 | 2026-08-05 |
 | subagent-review | Review-only external CLI orchestration via MCP | L1 | 2026-07-01 |
 | systematic-debugging | Evidence-first root-cause debugging with reproduce/minimise/hypothesis/regression loop | L2 | 2026-07-14 |
 | test-driven-development | Red-green-refactor workflow for behavior changes with practical test seams | L2 | 2026-07-14 |

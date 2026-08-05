@@ -124,6 +124,24 @@ single file to open for each variant. Do not make every invocation read every re
 - Include concrete command templates, output formats, and examples when they reduce ambiguity.
 - Avoid overfitting to one prompt. Generalize from examples into reusable heuristics.
 - Remove instructions that cause repeated unproductive exploration.
+- **Give exposed vocabulary operational meaning.** If a skill exposes terms or knobs — a mode name,
+  an adjective like "strict", a parameter — define what the agent concretely *does* for each (the
+  specific checks, defaults, or steps), not a bare label. An undefined term collapses to the model's
+  generic prior and yields convergent, unsteerable output; a defined one is a real control.
+
+## Cross-harness portability
+
+Canonical skills here are mirrored to Cursor (`.cursor/`) and Codex (`.agents/`, `.codex/`), and the
+same body may run under harnesses that do **not** expose identical capabilities — subagents,
+permission gates, hooks, and MCP surfaces differ between Claude Code, Cursor, and Codex. Do not assume
+a feature exists on every target.
+
+- **Gate harness-specific steps.** If a step depends on subagents, a specific permission prompt, or an
+  MCP tool, give a degraded path for harnesses that lack it rather than letting the step fail silently.
+- **Name the target when a capability is required.** "Uses the `subagent-orchestrator` MCP (Claude
+  Code / Cursor); on a harness without it, run the review inline" beats an unqualified instruction.
+- **Keep the canonical body harness-neutral** and push harness-specific detail into `references/`, so
+  the generated mirror stays a faithful copy and the exception is opt-in, not baked into every target.
 
 ## Evaluation and Iteration
 
@@ -163,3 +181,6 @@ When improving an existing skill, compare against the previous version and look 
 - [ ] `python scripts/ci/check_agent_frontmatter.py` passes
 - [ ] `.agent/SKILL_INVENTORY.md` updated for new or materially changed skills
 - [ ] AST10 review considerations documented in the PR summary for material changes
+
+Sources: "Skill engineering and the case against one-shot AI design" — Richard MacManus interviewing
+Paul Bakaus, Latent.Space (2026-07-02); Impeccable skill system (github.com/pbakaus/impeccable).
