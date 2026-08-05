@@ -130,6 +130,55 @@ def test_external_export_high_risk_assets_require_approval(tmp_path: Path) -> No
     assert "require `approval_required: true`" in output
 
 
+def test_bare_tier_alias_model_passes(tmp_path: Path) -> None:
+    write_asset(
+        tmp_path,
+        ".claude/skills/demo/SKILL.md",
+        skill_frontmatter(model="opus"),
+    )
+    status, output = run_check(tmp_path)
+    assert status == 0, output
+
+
+def test_pinned_version_model_fails(tmp_path: Path) -> None:
+    write_asset(
+        tmp_path,
+        ".claude/agents/demo.md",
+        "\n".join(
+            [
+                "---",
+                "name: demo",
+                "description: Demo agent.",
+                "model: claude-sonnet-4-6",
+                "capability: Read repository context.",
+                "side_effect_level: read_only",
+                "approval_required: false",
+                "requires_tools: rg",
+                "output_schema: Markdown report.",
+                "risk_class: low",
+                "---",
+                "",
+                "# Demo",
+                "",
+            ]
+        ),
+    )
+    status, output = run_check(tmp_path)
+    assert status == 1
+    assert "`model` must be a bare tier alias" in output
+
+
+def test_extended_context_suffix_model_fails(tmp_path: Path) -> None:
+    write_asset(
+        tmp_path,
+        ".claude/skills/demo/SKILL.md",
+        skill_frontmatter(model="opus[1m]"),
+    )
+    status, output = run_check(tmp_path)
+    assert status == 1
+    assert "`model` must be a bare tier alias" in output
+
+
 def test_pr_issue_project_mutation_commands_require_remote_write(
     tmp_path: Path,
 ) -> None:
