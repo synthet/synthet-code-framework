@@ -1,6 +1,6 @@
 # Skill inventory — ${PROJECT_NAME}
 
-**Last reviewed:** 2026-07-25. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
+**Last reviewed:** 2026-08-05. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
 and [SKILL_COMPILATION.md](SKILL_COMPILATION.md).
 Update this file (new row or **Last reviewed** date) in the same PR as any skill change.
 
@@ -89,6 +89,11 @@ Commands (`.claude/commands/`) and rules (`.claude/rules/`) are catalogued in
   assets must also set `side_effect_level: external_export` and `approval_required: true`.
 - **PR/issue/project mutation commands:** commands that mutate GitHub PRs, issues, or Project
   boards must set `side_effect_level: remote_write`.
+- **Model pins:** if a command/skill/agent frontmatter sets `model`, the value must be a bare tier
+  alias (`opus`, `sonnet`, `haiku`, `fable`) — never a pinned version ID or a `[1m]`-suffixed ID.
+  Aliases resolve at dispatch so one definition follows the asset across model generations and
+  providers; a pinned ID silently keeps pointing at its generation after a switch, and a suffixed ID
+  cannot be inherited by subagents. Only enforced when a `model` key is present.
 - **All files:** plain scalar frontmatter keys only — no exotic YAML tags (`!!`).
 
 Use `python scripts/migrate_agent_frontmatter.py` to populate missing command, skill, and agent

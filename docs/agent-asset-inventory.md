@@ -19,6 +19,7 @@ This inventory lists the canonical Claude-authored assets that are mirrored to C
 | Name | Canonical path | Description |
 |------|----------------|-------------|
 | `/analyze` | `.claude/commands/analyze.md` | /analyze — Cross-artifact consistency and coverage check |
+| `/audit-instructions` | `.claude/commands/audit-instructions.md` | /audit-instructions — Sort instruction files into three piles and prune the dated one |
 | `/check-subagents` | `.claude/commands/check-subagents.md` | /check-subagents — Check external CLI sub-agents |
 | `/clarify` | `.claude/commands/clarify.md` | /clarify — Resolve material ambiguities before planning |
 | `/compile-skill` | `.claude/commands/compile-skill.md` | /compile-skill — Lower a stable skill into a deterministic harness |
