@@ -32,14 +32,14 @@ python .claude/skills/validate-implementation/scripts/harness.py \
 
 ## LLM judgment slots
 
-For each AC, assign **Verified**, **Failed**, or **Unknown** with evidence:
+For each AC, assign **Verified**, **Failed**, or **Unknown** with evidence. **Evidence or it didn't happen.**
 
 - Reading code alone is not enough — prefer the narrowest relevant test/command.
-- Unknown is never an implicit pass.
+- **Unknown is never an implicit pass.** Do not round Unknown up to Verified.
 - Do not weaken criteria; propose a rewrite if untestable.
 
 ## Rules enforced by harness
 
 - Verdict enum only: Verified | Failed | Unknown
 - **Verified requires non-empty evidence** (fails otherwise)
-- Only claim the spec satisfied when every AC is Verified (`all_verified` in `--json`)
+- Only claim the spec is satisfied when **every** AC is Verified. (`all_verified` in `--json`)
