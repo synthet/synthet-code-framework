@@ -138,6 +138,22 @@ def test_detect_generic_supported_signals(tmp_path: Path, filename: str, content
                 "LINT_CMD": "make lint",
             },
         ),
+        (
+            "script-clippy",
+            {
+                "BUILD_CMD": "cargo build",
+                "TEST_CMD": "cargo test",
+                "LINT_CMD": "./script/clippy",
+            },
+        ),
+        (
+            "script-clippy-ps1",
+            {
+                "BUILD_CMD": "cargo build",
+                "TEST_CMD": "cargo test",
+                "LINT_CMD": "./script/clippy",
+            },
+        ),
     ],
 )
 def test_detect_rust_supported_signals(tmp_path: Path, signal: str, expected: dict[str, str]) -> None:
@@ -146,5 +162,9 @@ def test_detect_rust_supported_signals(tmp_path: Path, signal: str, expected: di
         write(tmp_path / ".config" / "nextest.toml", "[profile.default]\n")
     if signal == "makefile":
         write(tmp_path / "Makefile", "build:\n\ttouch build\ntest:\n\ttouch test\nlint:\n\ttouch lint\n")
+    if signal == "script-clippy":
+        write(tmp_path / "script" / "clippy", "#!/bin/sh\ncargo clippy\n")
+    if signal == "script-clippy-ps1":
+        write(tmp_path / "script" / "clippy.ps1", "cargo clippy\n")
 
     assert detect_commands(tmp_path, "rust") == expected

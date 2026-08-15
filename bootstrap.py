@@ -315,8 +315,32 @@ def merge_mcp_json(dst: Path, incoming_text: str, vals: dict[str, str]) -> None:
     _write_text(dst, json.dumps(current, indent=2) + "\n")
 
 
+def _is_instruction_pointer(path: Path) -> bool:
+    """True when path is a short pointer file (e.g. AGENTS.md containing `.rules`).
+
+    Zed-style instruction files store a single relative path token that resolves to an
+    existing sibling file. `--adopt` must not prepend a scaffold into those pointers or
+    replace them with templates; the project writes full guides afterwards if it wants.
+    """
+    if not path.is_file() or path.is_dir():
+        return False
+    try:
+        text = path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return False
+    if not text or "\n" in text or len(text) > 256:
+        return False
+    candidate = Path(text)
+    if candidate.is_absolute() or ".." in candidate.parts:
+        return False
+    resolved = (path.parent / candidate).resolve()
+    return resolved.is_file()
+
+
 def merge_agents_md(dst: Path, vals: dict[str, str]) -> None:
     section = agent_scaffold_section(vals)
+    if _is_instruction_pointer(dst):
+        return
     if not dst.is_file():
         _write_text(dst, substitute((FRAMEWORK_ROOT / "AGENTS.md").read_text(encoding="utf-8"), vals))
         return
@@ -419,7 +443,7 @@ def _adopt_copy_sources(target: Path, vals: dict[str, str]) -> int:
             continue
         if rel in ADOPT_MERGE_FILES:
             continue
-        if dst.exists() or dst.is_symlink():
+        if dst.exists() or dst.is_symlink() or _is_instruction_pointer(dst):
             continue
         _copy_file(src, dst, vals)
         count += 1
@@ -542,7 +566,7 @@ def main() -> int:
             merge_mcp_json(target / ".mcp.json", mcp_src.read_text(encoding="utf-8"), vals)
         merge_agents_md(target / "AGENTS.md", vals)
         claude_md = target / "CLAUDE.md"
-        if not claude_md.is_file():
+        if not claude_md.is_file() and not _is_instruction_pointer(claude_md):
             src = FRAMEWORK_ROOT / "CLAUDE.md"
             if src.is_file():
                 _copy_file(src, claude_md, vals)
@@ -656,7 +680,7 @@ def _apply_detected_commands(
     """
     for filename in ("CLAUDE.md", "AGENTS.md"):
         path = target / filename
-        if not path.is_file():
+        if not path.is_file() or _is_instruction_pointer(path):
             continue
         text = path.read_text(encoding="utf-8")
         if (
