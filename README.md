@@ -34,7 +34,9 @@ copy-if-missing for `.claude/`, `.agent/`, `scripts/`, and `docs/`; merges `.git
 `.mcp.json`; prepends a short agent-scaffold section to `AGENTS.md`; writes `CLAUDE.md` only if
 missing; and imports project skills from a `.claude/skills` symlink (or git-symlink text file)
 into a real `.claude/skills/` tree before regenerating Cursor/Codex mirrors. CI workflows are
-skipped unless you pass `--include-ci`.
+skipped unless you pass `--include-ci`. Instruction files that are short pointers to a sibling
+path (for example Zed's `AGENTS.md` / `CLAUDE.md` / `GEMINI.md` containing `.rules`) are left
+untouched so `--adopt` does not rewrite the pointer or the target `.rules` file.
 
 ```bash
 python bootstrap.py --target ../warp --name "Synth Warp" --stack rust --adopt --auto-detect --no-include-ci

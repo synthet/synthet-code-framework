@@ -13,11 +13,15 @@ All notable changes to this framework are documented here. The format follows
 - Generic `rust-testing` skill for cargo/nextest unit tests beside modules.
 - `bootstrap.py --adopt` merges the scaffold into an existing repo without overwriting product
   files; imports project skills from a `.claude/skills` symlink; defaults to `--no-include-ci`.
+- Rust command detection uses `./script/clippy` when `script/clippy` or `script/clippy.ps1` exists.
 
 ### Fixed
 
 - `--adopt --auto-detect` only rewrites commands inside the AGENTS.md scaffold block, so an
   existing engineering guide is not rewritten (for example `cargo test --doc`).
+- `--adopt` skips instruction-file pointers (`AGENTS.md` / `CLAUDE.md` / `GEMINI.md` whose
+  entire contents are a sibling path such as `.rules`), so Zed-style shared `.rules` files
+  are not rewritten.
 
 ## [0.2.0] — 2026-07-21
 

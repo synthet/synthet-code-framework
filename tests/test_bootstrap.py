@@ -488,6 +488,49 @@ def test_adopt_auto_detect_does_not_rewrite_existing_agents_guide(tmp_path: Path
     assert "cargo nextest run" in claude
 
 
+def test_adopt_skips_rules_instruction_pointers(tmp_path: Path) -> None:
+    target = tmp_path / "existing"
+    target.mkdir()
+    (target / "README.md").write_text("# Keep me\n", encoding="utf-8")
+    (target / ".rules").write_text("# Rust coding guidelines\nUse ./script/clippy\n", encoding="utf-8")
+    pointer = ".rules\n"
+    for name in ("AGENTS.md", "CLAUDE.md", "GEMINI.md"):
+        (target / name).write_text(pointer, encoding="utf-8")
+    (target / "Cargo.toml").write_text(
+        '[package]\nname = "demo"\nversion = "0.1.0"\nedition = "2021"\n',
+        encoding="utf-8",
+    )
+    (target / ".config" / "nextest.toml").parent.mkdir(parents=True)
+    (target / ".config" / "nextest.toml").write_text("[profile.default]\n", encoding="utf-8")
+
+    argv = [
+        "bootstrap.py",
+        "--target",
+        str(target),
+        "--name",
+        "Demo App",
+        "--stack",
+        "rust",
+        "--adopt",
+        "--auto-detect",
+    ]
+    old_argv = sys.argv
+    sys.argv = argv
+    try:
+        assert bootstrap.main() == 0
+    finally:
+        sys.argv = old_argv
+
+    for name in ("AGENTS.md", "CLAUDE.md", "GEMINI.md"):
+        assert (target / name).read_text(encoding="utf-8") == pointer
+    assert (target / ".rules").read_text(encoding="utf-8") == (
+        "# Rust coding guidelines\nUse ./script/clippy\n"
+    )
+    assert bootstrap.ADOPT_SCAFFOLD_BEGIN not in pointer
+    assert (target / ".agent" / "SAFETY.md").is_file()
+    assert (target / ".claude" / "skills" / "validate-implementation" / "SKILL.md").is_file()
+
+
 def test_adopt_imports_git_symlink_skills(tmp_path: Path) -> None:
     target = tmp_path / "existing"
     target.mkdir()

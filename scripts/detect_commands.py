@@ -194,6 +194,9 @@ def detect_rust_commands(target: Path) -> dict[str, str]:
 
     make_targets = _makefile_targets(target)
     has_nextest = (target / "nextest.toml").is_file() or (target / ".config" / "nextest.toml").is_file()
+    has_script_clippy = (target / "script" / "clippy").is_file() or (
+        target / "script" / "clippy.ps1"
+    ).is_file()
 
     result["BUILD_CMD"] = "make build" if "build" in make_targets else "cargo build"
     if "test" in make_targets:
@@ -202,11 +205,12 @@ def detect_rust_commands(target: Path) -> dict[str, str]:
         result["TEST_CMD"] = "cargo nextest run"
     else:
         result["TEST_CMD"] = "cargo test"
-    result["LINT_CMD"] = (
-        "make lint"
-        if "lint" in make_targets
-        else "cargo fmt --check && cargo clippy --all-targets -- -D warnings"
-    )
+    if "lint" in make_targets:
+        result["LINT_CMD"] = "make lint"
+    elif has_script_clippy:
+        result["LINT_CMD"] = "./script/clippy"
+    else:
+        result["LINT_CMD"] = "cargo fmt --check && cargo clippy --all-targets -- -D warnings"
 
     return result
 
