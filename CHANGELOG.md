@@ -6,6 +6,19 @@ All notable changes to this framework are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Restored the `rust` bootstrap stack (`cargo build` / `cargo test` / `cargo fmt` + clippy),
+  including command detection, starter boilerplate, and a lint-router stack.
+- Generic `rust-testing` skill for cargo/nextest unit tests beside modules.
+- `bootstrap.py --adopt` merges the scaffold into an existing repo without overwriting product
+  files; imports project skills from a `.claude/skills` symlink; defaults to `--no-include-ci`.
+
+### Fixed
+
+- `--adopt --auto-detect` only rewrites commands inside the AGENTS.md scaffold block, so an
+  existing engineering guide is not rewritten (for example `cargo test --doc`).
+
 ## [0.2.0] — 2026-07-21
 
 ### Added

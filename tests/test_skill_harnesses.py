@@ -223,6 +223,12 @@ def test_lint_router() -> None:
     assert any("ruff check scripts" in c for c in rec.check_commands)
     assert "ruff check --fix" in rec.confirmation_gates
 
+    rust = lint_recommend("clippy", paths="crates/foo")
+    assert rust.stack == "rust"
+    assert any("cargo fmt --check" in c for c in rust.check_commands)
+    assert any("cargo clippy --all-targets" in c for c in rust.check_commands)
+    assert "cargo clippy --fix" in rust.confirmation_gates
+
 
 def test_eval_signals_build_log_command() -> None:
     payload = build_log_command(

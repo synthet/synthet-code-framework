@@ -7,6 +7,8 @@ Usage:
     python bootstrap.py --target ../my-app --name "My App" --stack python
     python bootstrap.py --target ../my-app --name "My App" --desc "..." --stack node \
         --repo-url https://github.com/me/my-app
+    python bootstrap.py --target ../warp --name "Synth Warp" --stack rust --adopt \
+        --auto-detect --no-include-ci
 
 Placeholders resolved here:
     PROJECT_NAME, PROJECT_SLUG, PROJECT_DESC, REPO_URL, STACK,
@@ -22,10 +24,12 @@ them in.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 # Import lazily to avoid hard dependency when running --detect-only without full install
@@ -89,6 +93,11 @@ STACK_DEFAULTS = {
         "TEST_CMD": "go test ./...",
         "LINT_CMD": "go vet ./... && gofmt -l .",
     },
+    "rust": {
+        "BUILD_CMD": "cargo build",
+        "TEST_CMD": "cargo test",
+        "LINT_CMD": "cargo fmt --check && cargo clippy --all-targets -- -D warnings",
+    },
     "generic": {
         "BUILD_CMD": "<build command>",
         "TEST_CMD": "<test command>",
@@ -104,6 +113,10 @@ BOARD_KEYS = [
 ]
 
 TEXT_SUFFIXES = {".md", ".mdc", ".json", ".txt", ".py", ".yml", ".yaml", ".toml", ".cfg", ".gitignore"}
+
+ADOPT_MERGE_FILES = {Path(".gitignore"), Path(".mcp.json"), Path("AGENTS.md")}
+ADOPT_SCAFFOLD_BEGIN = "<!-- BEGIN SYNTHET-CODE-FRAMEWORK -->"
+ADOPT_SCAFFOLD_END = "<!-- END SYNTHET-CODE-FRAMEWORK -->"
 
 
 def slugify(name: str) -> str:
@@ -223,19 +236,214 @@ def project_readme(vals: dict[str, str]) -> str:
     )
 
 
+def _write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def _copy_file(src: Path, dst: Path, vals: dict[str, str]) -> None:
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    if is_text(src):
+        dst.write_text(substitute(src.read_text(encoding="utf-8"), vals), encoding="utf-8")
+    else:
+        shutil.copy2(src, dst)
+
+
+def agent_scaffold_section(vals: dict[str, str]) -> str:
+    return substitute(
+        f"{ADOPT_SCAFFOLD_BEGIN}\n"
+        "## Authoring & skill source of truth\n\n"
+        "- **Canonical** assets are authored under `.claude/` (+ `.agent/`).\n"
+        "- The **`.cursor/`** tree and Codex-native **`.agents/skills/`** + **`.codex/agents/`**\n"
+        "  trees are **generated** by `python scripts/sync_assistant_trees.py` — do not hand-edit\n"
+        "  generated files.\n"
+        "- Install shared common-skills **globally** (`~/.agents/skills`). An in-repo common-skills\n"
+        "  install into `.agents/skills` is wiped the next time assistant trees are synced.\n\n"
+        "## Commands\n\n"
+        "```bash\n"
+        "${BUILD_CMD}\n"
+        "${TEST_CMD}\n"
+        "${LINT_CMD}\n"
+        "```\n\n"
+        "See [`.agent/SAFETY.md`](.agent/SAFETY.md) and [`docs/ai-workflow/README.md`]"
+        "(docs/ai-workflow/README.md).\n\n"
+        "## Test vocabulary\n\n"
+        "| You say | Canonical name | Where | How to run |\n"
+        "|---------|----------------|-------|------------|\n"
+        "| unit | crate unit tests | `*_tests.rs` / `#[cfg(test)]` | `${TEST_CMD}` |\n\n"
+        f"{ADOPT_SCAFFOLD_END}\n",
+        vals,
+    )
+
+
+def merge_gitignore(dst: Path, incoming: str) -> None:
+    if not dst.is_file():
+        _write_text(dst, incoming)
+        return
+    existing = dst.read_text(encoding="utf-8")
+    existing_lines = set(existing.splitlines())
+    missing = [
+        line
+        for line in incoming.splitlines()
+        if line.strip() and not line.strip().startswith("#") and line not in existing_lines
+    ]
+    if not missing:
+        return
+    block = "\n# --- synthet-code-framework agent paths ---\n" + "\n".join(missing) + "\n"
+    if existing and not existing.endswith("\n"):
+        existing += "\n"
+    _write_text(dst, existing + block)
+
+
+def merge_mcp_json(dst: Path, incoming_text: str, vals: dict[str, str]) -> None:
+    incoming = json.loads(substitute(incoming_text, vals))
+    if not dst.is_file():
+        _write_text(dst, json.dumps(incoming, indent=2) + "\n")
+        return
+    try:
+        current = json.loads(dst.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        _write_text(dst, json.dumps(incoming, indent=2) + "\n")
+        return
+    if not isinstance(current, dict):
+        current = {}
+    if "_comment" not in current and "_comment" in incoming:
+        current["_comment"] = incoming["_comment"]
+    if "_examples" not in current and "_examples" in incoming:
+        current["_examples"] = incoming["_examples"]
+    current.setdefault("mcpServers", incoming.get("mcpServers", {}))
+    _write_text(dst, json.dumps(current, indent=2) + "\n")
+
+
+def merge_agents_md(dst: Path, vals: dict[str, str]) -> None:
+    section = agent_scaffold_section(vals)
+    if not dst.is_file():
+        _write_text(dst, substitute((FRAMEWORK_ROOT / "AGENTS.md").read_text(encoding="utf-8"), vals))
+        return
+    existing = dst.read_text(encoding="utf-8")
+    if ADOPT_SCAFFOLD_BEGIN in existing or "scripts/sync_assistant_trees.py" in existing:
+        return
+    lines = existing.splitlines(keepends=True)
+    insert_at = 0
+    for i, line in enumerate(lines):
+        if line.startswith("# "):
+            insert_at = i + 1
+            break
+    insertion = "\n" + section + "\n"
+    updated = "".join(lines[:insert_at]) + insertion + "".join(lines[insert_at:])
+    _write_text(dst, updated)
+
+
+def _skills_pointer_target(path: Path) -> Path | None:
+    """Return the directory a skills path points at (symlink or git-symlink text file)."""
+    if not path.exists():
+        return None
+    if path.is_symlink():
+        resolved = path.resolve()
+        return resolved if resolved.is_dir() else None
+    if path.is_file():
+        try:
+            text = path.read_text(encoding="utf-8").strip()
+        except OSError:
+            return None
+        if not text or "\n" in text or len(text) > 256:
+            return None
+        candidate = (path.parent / text).resolve()
+        return candidate if candidate.is_dir() else None
+    if path.is_dir():
+        return path.resolve()
+    return None
+
+
+def _snapshot_project_skills(target: Path, snapshot_root: Path) -> list[str]:
+    names: list[str] = []
+    seen: set[Path] = set()
+    for root in (target / ".claude" / "skills", target / ".agents" / "skills"):
+        resolved = _skills_pointer_target(root)
+        if resolved is None or resolved in seen:
+            continue
+        seen.add(resolved)
+        for child in resolved.iterdir():
+            if not child.is_dir() or child.name in names:
+                continue
+            shutil.copytree(child, snapshot_root / child.name, dirs_exist_ok=True)
+            names.append(child.name)
+    return names
+
+
+def _replace_skills_symlink(target: Path) -> None:
+    claude_skills = target / ".claude" / "skills"
+    if claude_skills.is_symlink() or (
+        claude_skills.is_file() and _skills_pointer_target(claude_skills) is not None
+    ):
+        claude_skills.unlink()
+
+
+def _restore_project_skills(target: Path, snapshot_root: Path, names: list[str]) -> None:
+    dest_root = target / ".claude" / "skills"
+    dest_root.mkdir(parents=True, exist_ok=True)
+    for name in names:
+        dest = dest_root / name
+        if dest.exists():
+            continue
+        shutil.copytree(snapshot_root / name, dest)
+
+
+def _sync_target_trees(target: Path) -> None:
+    script = target / "scripts" / "sync_assistant_trees.py"
+    if not script.is_file():
+        return
+    proc = subprocess.run(
+        [sys.executable, str(script)],
+        cwd=target,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if proc.returncode != 0:
+        sys.stderr.write(proc.stdout)
+        sys.stderr.write(proc.stderr)
+        print("Adopt: assistant-tree sync failed; run python scripts/sync_assistant_trees.py later.")
+    else:
+        print("Adopt: synced Cursor and Codex mirrors from .claude/")
+
+
+def _adopt_copy_sources(target: Path, vals: dict[str, str]) -> int:
+    count = 0
+    for src in iter_sources():
+        rel = src.relative_to(FRAMEWORK_ROOT)
+        dst = target / rel
+        if src.is_dir():
+            if not dst.exists():
+                dst.mkdir(parents=True, exist_ok=True)
+            continue
+        if rel in ADOPT_MERGE_FILES:
+            continue
+        if dst.exists() or dst.is_symlink():
+            continue
+        _copy_file(src, dst, vals)
+        count += 1
+    return count
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Seed a project from synthet-code-framework")
     ap.add_argument("--target", required=True, type=Path, help="Destination directory")
     ap.add_argument("--name", help="Project display name (required unless --detect-only)")
     ap.add_argument("--slug", help="Project slug (default: derived from name)")
     ap.add_argument("--desc", help="One-line description")
-    ap.add_argument("--stack", default="generic", help="python|node|go|generic")
+    ap.add_argument("--stack", default="generic", help="python|node|go|rust|generic")
     ap.add_argument("--repo-url", help="Git remote URL")
     ap.add_argument("--mcp-prefix", help="MCP server name prefix (default: slug)")
     ap.add_argument("--board-url", help="GitHub Project board URL")
     ap.add_argument("--owner", help="GitHub owner")
     ap.add_argument("--repo", help="GitHub repo name (default: slug)")
-    ap.add_argument("--force", action="store_true", help="Allow non-empty target")
+    ap.add_argument("--force", action="store_true", help="Allow non-empty target (overwrite seed)")
+    ap.add_argument(
+        "--adopt",
+        action="store_true",
+        help="Merge agent scaffolding into an existing project without overwriting product files",
+    )
     ap.add_argument(
         "--auto-detect",
         action="store_true",
@@ -264,9 +472,11 @@ def main() -> int:
     ap.add_argument(
         "--include-boilerplate",
         action="store_true",
-        help="Generate minimal stack-specific starter code/resources for python, node, or go",
+        help="Generate minimal stack-specific starter code/resources for python, node, go, or rust",
     )
     args = ap.parse_args()
+    if args.adopt and "--include-ci" not in sys.argv:
+        args.include_ci = False
 
     target: Path = args.target.resolve()
 
@@ -296,47 +506,69 @@ def main() -> int:
         if args.include_ci:
             files.extend(f".github/workflows/{src.name}" for src in iter_ci_templates())
             files.sort()
-        print(f"DRY RUN: would seed '{vals['PROJECT_NAME']}' into {target}")
+        mode = "adopt into" if args.adopt else "seed"
+        print(f"DRY RUN: would {mode} '{vals['PROJECT_NAME']}' into {target}")
         print("Substitutions:")
         for key in sorted(vals):
             print(f"  {key} = {vals[key]}")
-        if args.include_boilerplate and vals["STACK"] in {"python", "node", "go"}:
+        if args.include_boilerplate and vals["STACK"] in {"python", "node", "go", "rust"}:
             files.append(f"<generated {vals['STACK']} boilerplate>")
-        print(f"Files ({len(files)} + generated README.md, CHANGELOG.md):")
+        extra = "copy-if-missing; README.md and CHANGELOG.md preserved" if args.adopt else (
+            " + generated README.md, CHANGELOG.md"
+        )
+        print(f"Files ({len(files)}; {extra}):")
         for f in files:
             print(f"  {f}")
         return 0
 
-    if target.exists() and any(target.iterdir()) and not args.force:
-        print(f"ERROR: target {target} is not empty (use --force)", file=sys.stderr)
+    if target.exists() and any(target.iterdir()) and not args.force and not args.adopt:
+        print(f"ERROR: target {target} is not empty (use --force or --adopt)", file=sys.stderr)
         return 1
 
     count = 0
-    for src in iter_sources():
-        rel = src.relative_to(FRAMEWORK_ROOT)
-        dst = target / rel
-        if src.is_dir():
-            dst.mkdir(parents=True, exist_ok=True)
-            continue
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        if is_text(src):
-            dst.write_text(substitute(src.read_text(encoding="utf-8"), vals), encoding="utf-8")
-        else:
-            shutil.copy2(src, dst)
-        count += 1
+    skill_snapshot_names: list[str] = []
+    if args.adopt:
+        with tempfile.TemporaryDirectory() as tmp:
+            snapshot_root = Path(tmp)
+            skill_snapshot_names = _snapshot_project_skills(target, snapshot_root)
+            _replace_skills_symlink(target)
+            count += _adopt_copy_sources(target, vals)
+            _restore_project_skills(target, snapshot_root, skill_snapshot_names)
+        gitignore_src = FRAMEWORK_ROOT / ".gitignore"
+        if gitignore_src.is_file():
+            merge_gitignore(target / ".gitignore", gitignore_src.read_text(encoding="utf-8"))
+        mcp_src = FRAMEWORK_ROOT / ".mcp.json"
+        if mcp_src.is_file():
+            merge_mcp_json(target / ".mcp.json", mcp_src.read_text(encoding="utf-8"), vals)
+        merge_agents_md(target / "AGENTS.md", vals)
+        claude_md = target / "CLAUDE.md"
+        if not claude_md.is_file():
+            src = FRAMEWORK_ROOT / "CLAUDE.md"
+            if src.is_file():
+                _copy_file(src, claude_md, vals)
+                count += 1
+    else:
+        for src in iter_sources():
+            rel = src.relative_to(FRAMEWORK_ROOT)
+            dst = target / rel
+            if src.is_dir():
+                dst.mkdir(parents=True, exist_ok=True)
+                continue
+            _copy_file(src, dst, vals)
+            count += 1
 
     if args.include_ci:
         for src in iter_ci_templates():
             dst = target / ".github" / "workflows" / src.name
+            if args.adopt and dst.exists():
+                continue
             dst.parent.mkdir(parents=True, exist_ok=True)
-            if is_text(src):
-                dst.write_text(substitute(src.read_text(encoding="utf-8"), vals), encoding="utf-8")
-            else:
-                shutil.copy2(src, dst)
+            _copy_file(src, dst, vals)
             count += 1
 
-    (target / "README.md").write_text(project_readme(vals), encoding="utf-8")
-    (target / "CHANGELOG.md").write_text(project_changelog(vals), encoding="utf-8")
+    if not args.adopt:
+        (target / "README.md").write_text(project_readme(vals), encoding="utf-8")
+        (target / "CHANGELOG.md").write_text(project_changelog(vals), encoding="utf-8")
 
     boilerplate_count = 0
     if args.include_boilerplate:
@@ -358,7 +590,8 @@ def main() -> int:
             print("Starter boilerplate skipped: generic stack has no code template.")
 
     extra = f" plus {boilerplate_count} boilerplate files" if boilerplate_count else ""
-    print(f"Seeded '{vals['PROJECT_NAME']}' into {target} ({count} files{extra}).")
+    verb = "Adopted" if args.adopt else "Seeded"
+    print(f"{verb} '{vals['PROJECT_NAME']}' into {target} ({count} files{extra}).")
 
     if args.auto_detect:
         stack = args.stack if args.stack in STACK_DEFAULTS else "generic"
@@ -374,8 +607,16 @@ def main() -> int:
         else:
             print("\nAuto-detect: no recognised config files found — fill in commands manually.")
 
+    if args.adopt:
+        _sync_target_trees(target)
+
     print("\nNext steps:")
-    if not args.auto_detect:
+    if args.adopt:
+        print("  1. Review CLAUDE.md + AGENTS.md (existing engineering guide is preserved).")
+        print("  2. Keep authoring skills under .claude/skills/; run python scripts/sync_assistant_trees.py after edits.")
+        print("  3. Install common-skills globally (~/.agents/skills), not into this repo's .agents/skills.")
+        print("  4. Map backlog work onto the project's existing specs/issues provider.")
+    elif not args.auto_detect:
         print("  1. cd into the target and `git init` (or push to your remote).")
         print("  2. Fill in build/test/lint commands in CLAUDE.md + AGENTS.md.")
         print("  3. Choose a backlog provider; fill GitHub Projects TODO(...) IDs only if you use that provider.")
@@ -389,6 +630,19 @@ def main() -> int:
     return 0
 
 
+def _replace_command_values(
+    text: str, detected: dict[str, str], seeded_vals: dict[str, str]
+) -> str:
+    for key, new_value in detected.items():
+        old_value = seeded_vals.get(key, "")
+        replacement = f"{new_value}  # auto-detected"
+        if old_value and old_value != new_value:
+            text = text.replace(old_value, replacement)
+        elif not old_value:
+            text = text.replace(f"TODO({key})", replacement)
+    return text
+
+
 def _apply_detected_commands(
     target: Path, detected: dict[str, str], seeded_vals: dict[str, str]
 ) -> None:
@@ -396,19 +650,26 @@ def _apply_detected_commands(
 
     Replaces the value that was substituted during seeding (e.g. 'pip install -e .') with the
     detected value (e.g. 'poetry install  # auto-detected'). Only replaces when the detected
-    value actually differs from the default.
+    value actually differs from the default. In adopted repos, AGENTS.md replacements stay
+    inside the synthet-code-framework scaffold block so the existing engineering guide is
+    not rewritten.
     """
     for filename in ("CLAUDE.md", "AGENTS.md"):
         path = target / filename
         if not path.is_file():
             continue
         text = path.read_text(encoding="utf-8")
-        for key, new_value in detected.items():
-            old_value = seeded_vals.get(key, "")
-            if old_value and old_value != new_value:
-                text = text.replace(old_value, f"{new_value}  # auto-detected")
-            elif not old_value:
-                text = text.replace(f"TODO({key})", f"{new_value}  # auto-detected")
+        if (
+            filename == "AGENTS.md"
+            and ADOPT_SCAFFOLD_BEGIN in text
+            and ADOPT_SCAFFOLD_END in text
+        ):
+            start = text.index(ADOPT_SCAFFOLD_BEGIN)
+            end = text.index(ADOPT_SCAFFOLD_END) + len(ADOPT_SCAFFOLD_END)
+            inner = _replace_command_values(text[start:end], detected, seeded_vals)
+            text = text[:start] + inner + text[end:]
+        else:
+            text = _replace_command_values(text, detected, seeded_vals)
         path.write_text(text, encoding="utf-8")
 
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -266,6 +267,19 @@ def test_include_boilerplate_generates_go_starter(tmp_path: Path) -> None:
     assert "func Greeting() string" in (target / "main.go").read_text(encoding="utf-8")
 
 
+def test_include_boilerplate_generates_rust_starter(tmp_path: Path) -> None:
+    target = run_bootstrap(tmp_path, "rust", ["--include-boilerplate"])
+
+    assert (target / "Cargo.toml").is_file()
+    assert (target / "src" / "lib.rs").is_file()
+    assert (target / "tests" / "smoke.rs").is_file()
+    cargo = (target / "Cargo.toml").read_text(encoding="utf-8")
+    assert 'name = "demo_app"' in cargo
+    assert 'description = "A demo project"' in cargo
+    lib = (target / "src" / "lib.rs").read_text(encoding="utf-8")
+    assert "hello from demo-app" in lib
+
+
 def test_generate_project_boilerplate_does_not_overwrite_without_force(tmp_path: Path) -> None:
     from scripts.generate_project_boilerplate import generate_boilerplate
 
@@ -310,6 +324,11 @@ def test_boilerplate_sanitizes_identifiers_and_escapes_metadata(tmp_path: Path) 
     generate_boilerplate(tmp_path / "go", "go", "!!!")
     go_mod = (tmp_path / "go" / "go.mod").read_text(encoding="utf-8")
     assert go_mod.startswith("module app")
+
+    generate_boilerplate(tmp_path / "rust", "rust", "123 Demo!", 'A "quoted" demo')
+    cargo = (tmp_path / "rust" / "Cargo.toml").read_text(encoding="utf-8")
+    assert 'name = "project_123_demo"' in cargo
+    assert 'description = "A \\"quoted\\" demo"' in cargo
 
 
 def test_dry_run_shows_boilerplate_marker(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
@@ -374,6 +393,140 @@ def test_non_empty_target_rejected(tmp_path: Path) -> None:
         assert bootstrap.main() == 1
     finally:
         sys.argv = old_argv
+
+
+def test_adopt_preserves_readme_agents_and_skips_ci(tmp_path: Path) -> None:
+    target = tmp_path / "existing"
+    target.mkdir()
+    (target / "README.md").write_text("# Keep me\n", encoding="utf-8")
+    (target / "CHANGELOG.md").write_text("## Kept\n", encoding="utf-8")
+    (target / "AGENTS.md").write_text("# Engineering\n\nDo not lose this paragraph.\n", encoding="utf-8")
+    (target / ".gitignore").write_text("/target\n", encoding="utf-8")
+    (target / ".mcp.json").write_text('{"mcpServers":{"github":{"command":"npx"}}}\n', encoding="utf-8")
+    workflows = target / ".github" / "workflows"
+    workflows.mkdir(parents=True)
+    (workflows / "ci.yml").write_text("name: existing\n", encoding="utf-8")
+    specs = target / ".agents" / "specs"
+    specs.mkdir(parents=True)
+    (specs / "kept.md").write_text("keep-spec\n", encoding="utf-8")
+
+    argv = [
+        "bootstrap.py",
+        "--target",
+        str(target),
+        "--name",
+        "Demo App",
+        "--stack",
+        "rust",
+        "--adopt",
+    ]
+    old_argv = sys.argv
+    sys.argv = argv
+    try:
+        assert bootstrap.main() == 0
+    finally:
+        sys.argv = old_argv
+
+    assert (target / "README.md").read_text(encoding="utf-8") == "# Keep me\n"
+    assert (target / "CHANGELOG.md").read_text(encoding="utf-8") == "## Kept\n"
+    agents = (target / "AGENTS.md").read_text(encoding="utf-8")
+    assert "Do not lose this paragraph." in agents
+    assert bootstrap.ADOPT_SCAFFOLD_BEGIN in agents
+    assert "cargo test" in agents
+    assert (target / "CLAUDE.md").is_file()
+    gitignore = (target / ".gitignore").read_text(encoding="utf-8")
+    assert "/target" in gitignore
+    assert ".agent-runs/" in gitignore
+    mcp = json.loads((target / ".mcp.json").read_text(encoding="utf-8"))
+    assert "github" in mcp["mcpServers"]
+    assert "_examples" in mcp
+    assert (workflows / "ci.yml").read_text(encoding="utf-8") == "name: existing\n"
+    assert not (workflows / "project-ci.yml").exists()
+    assert (specs / "kept.md").read_text(encoding="utf-8") == "keep-spec\n"
+    leftover = unresolved_placeholders((target / "CLAUDE.md").read_text(encoding="utf-8"))
+    assert not leftover
+
+
+def test_adopt_auto_detect_does_not_rewrite_existing_agents_guide(tmp_path: Path) -> None:
+    target = tmp_path / "existing"
+    target.mkdir()
+    (target / "README.md").write_text("# Keep me\n", encoding="utf-8")
+    (target / "AGENTS.md").write_text(
+        "# Engineering\n\n- `cargo test --doc` - Run doc tests\n- `cargo test` - crate tests\n",
+        encoding="utf-8",
+    )
+    (target / "Cargo.toml").write_text(
+        '[package]\nname = "demo"\nversion = "0.1.0"\nedition = "2021"\n',
+        encoding="utf-8",
+    )
+    (target / ".config" / "nextest.toml").parent.mkdir(parents=True)
+    (target / ".config" / "nextest.toml").write_text("[profile.default]\n", encoding="utf-8")
+
+    argv = [
+        "bootstrap.py",
+        "--target",
+        str(target),
+        "--name",
+        "Demo App",
+        "--stack",
+        "rust",
+        "--adopt",
+        "--auto-detect",
+    ]
+    old_argv = sys.argv
+    sys.argv = argv
+    try:
+        assert bootstrap.main() == 0
+    finally:
+        sys.argv = old_argv
+
+    agents = (target / "AGENTS.md").read_text(encoding="utf-8")
+    assert "- `cargo test --doc` - Run doc tests" in agents
+    assert "- `cargo test` - crate tests" in agents
+    assert "cargo nextest run" in agents
+    claude = (target / "CLAUDE.md").read_text(encoding="utf-8")
+    assert "cargo nextest run" in claude
+
+
+def test_adopt_imports_git_symlink_skills(tmp_path: Path) -> None:
+    target = tmp_path / "existing"
+    target.mkdir()
+    (target / "README.md").write_text("# App\n", encoding="utf-8")
+    (target / "AGENTS.md").write_text("# Guide\n", encoding="utf-8")
+    skill_dir = target / ".agents" / "skills" / "warp-only"
+    skill_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text(
+        "---\nname: warp-only\ndescription: Warp-only skill\n---\n# Warp only\n",
+        encoding="utf-8",
+    )
+    claude_skills = target / ".claude" / "skills"
+    claude_skills.parent.mkdir(parents=True, exist_ok=True)
+    claude_skills.write_text("../.agents/skills\n", encoding="utf-8")
+
+    argv = [
+        "bootstrap.py",
+        "--target",
+        str(target),
+        "--name",
+        "Demo App",
+        "--stack",
+        "rust",
+        "--adopt",
+    ]
+    old_argv = sys.argv
+    sys.argv = argv
+    try:
+        assert bootstrap.main() == 0
+    finally:
+        sys.argv = old_argv
+
+    claude_skills = target / ".claude" / "skills"
+    assert claude_skills.is_dir()
+    assert not claude_skills.is_file()
+    assert (claude_skills / "warp-only" / "SKILL.md").is_file()
+    assert (claude_skills / "validate-implementation" / "SKILL.md").is_file()
+    assert (claude_skills / "rust-testing" / "SKILL.md").is_file()
+
 
 def test_private_and_working_dir_files_are_not_seeded_from_source_manifest(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch

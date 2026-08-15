@@ -44,7 +44,7 @@ Thirteen skills under `.claude/skills/` cover agent-safe CLI usage (see [`.agent
 | `git-and-diff-workflows` | git, gh |
 | `data-config-tools` | jq, yq, curl |
 | `task-env-package-tools` | Task runners, framework quality gates |
-| `lint-format-security` | ruff, eslint, trivy |
+| `lint-format-security` | ruff, eslint, clippy, trivy |
 | `mcp-code-intelligence` | MCP tiers (incl. optional fff) |
 | `install-checklist` | Human workstation provisioning |
 | `windows-agent-tooling` / `wsl2-agent-tooling` | Platform split |
