@@ -9,7 +9,7 @@ all domain specifics so any new project starts mature instead of from scratch.
 
 ```bash
 python bootstrap.py --target ../my-app --name "My App" --stack python --desc "What it does"
-# Optionally include runnable starter code/resources for python, node, or go:
+# Optionally include runnable starter code/resources for python, node, go, or rust:
 python bootstrap.py --target ../my-api --name "My API" --stack python --include-boilerplate
 ```
 
@@ -21,10 +21,27 @@ marked `TODO(...)` for things only you know (repo URL and optional backlog-provi
 3. Choose a backlog provider in `.agent/backlog/`; fill GitHub Projects `TODO(...)` markers only if you use that provider.
 4. Run `python scripts/sync_assistant_trees.py` whenever you edit `.claude/` assets.
 
-`--stack` accepts `python | node | go | generic` (sets default build/test/lint commands). Use
-`--include-boilerplate` to generate lightweight starter code/resources for `python`, `node`, or `go`;
+`--stack` accepts `python | node | go | rust | generic` (sets default build/test/lint commands). Use
+`--include-boilerplate` to generate lightweight starter code/resources for `python`, `node`, `go`, or `rust`;
 the same generator is available later via
 `python scripts/generate_project_boilerplate.py --stack <stack> --project-slug <slug> --project-desc '...'`.
+
+## Adopt into an existing project
+
+`--adopt` merges agent scaffolding into a non-empty repo without replacing product files
+(`README.md`, `CHANGELOG.md`, licenses, existing GitHub workflows, `AGENTS.md` body). It
+copy-if-missing for `.claude/`, `.agent/`, `scripts/`, and `docs/`; merges `.gitignore` and
+`.mcp.json`; prepends a short agent-scaffold section to `AGENTS.md`; writes `CLAUDE.md` only if
+missing; and imports project skills from a `.claude/skills` symlink (or git-symlink text file)
+into a real `.claude/skills/` tree before regenerating Cursor/Codex mirrors. CI workflows are
+skipped unless you pass `--include-ci`.
+
+```bash
+python bootstrap.py --target ../warp --name "Synth Warp" --stack rust --adopt --auto-detect --no-include-ci
+```
+
+Keep authoring skills under `.claude/skills/`. Install shared common-skills globally
+(`~/.agents/skills`); an in-repo install into `.agents/skills` is wiped on the next sync.
 
 ## What's inside
 

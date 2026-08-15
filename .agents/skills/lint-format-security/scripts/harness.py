@@ -23,7 +23,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--stack",
-        help="python|js_ts|shell|container|secrets",
+        help="python|js_ts|rust|shell|container|secrets",
     )
     parser.add_argument(
         "--paths",

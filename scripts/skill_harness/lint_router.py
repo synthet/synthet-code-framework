@@ -62,6 +62,16 @@ TABLE: dict[str, LintRecommendation] = {
         [],
         "Never paste secret values into prompts or logs. Prefer project CI config when present.",
     ),
+    "rust": LintRecommendation(
+        "rust",
+        [
+            "cargo fmt --check",
+            "cargo clippy --all-targets -- -D warnings",
+        ],
+        "cargo clippy --fix or cargo fmt (write) on a broad tree without approval",
+        ["cargo fmt", "cargo clippy --fix"],
+        "Prefer the repo's AGENTS.md lint command when it is stricter. Scope clippy to the touched crate when practical.",
+    ),
 }
 
 ALIASES: dict[str, str] = {
@@ -83,6 +93,10 @@ ALIASES: dict[str, str] = {
     "trivy": "container",
     "gitleaks": "secrets",
     "secret": "secrets",
+    "cargo": "rust",
+    "clippy": "rust",
+    "rustfmt": "rust",
+    "rs": "rust",
 }
 
 
