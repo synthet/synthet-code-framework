@@ -39,5 +39,5 @@ python scripts/ci/check_agent_frontmatter.py
 ## Seed a new project from this framework
 
 ```bash
-python bootstrap.py --target <dir> --name "<Project Name>" --stack <python|node|...>
+python bootstrap.py --target <dir> --name "<Project Name>" --stack <python|node|go|rust|generic>
 ```

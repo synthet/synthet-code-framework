@@ -62,6 +62,8 @@ Task types: `filename`, `content`, `syntax`, `security`, `symbols`, `layout`, `c
 
 **fff MCP:** When connected, prefer fff for repo-wide search; keep one-off probes as `rg`/`fd`.
 
+**Graphify (optional):** For architecture / “how does A connect to B” / community questions when `graphify-out/graph.json` exists (or Graphify MCP is connected), use [graphify-knowledge-graph](../graphify-knowledge-graph/SKILL.md) (`query_graph` / `path` / `explain`). Fall back to rg/fff when the graph is absent. Do not run bare `graphify cursor install` in this scaffold.
+
 **fzf:** Humans only — agents use `--max-count`, `-l`, `-g`, explicit paths.
 
 Exclude globs: `node_modules`, `dist`, `build`, `.git`.
@@ -79,6 +81,7 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 
 - Too many rg hits: narrow path, add `-g '!tests'`, or switch to `--task-type syntax`.
 - fff MCP unavailable: fall back to `rg`/`fd`; see mcp-code-intelligence for setup.
+- Architecture questions with no graph: fall back to rg/fff; Graphify setup in mcp-code-intelligence.
 - Unknown task type: run harness `--list` and pick the closest id.
 
 ## Windows Notes
@@ -97,3 +100,4 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 - [ ] Picked tool matches task type (name vs text vs syntax)
 - [ ] Output bounded before reading files
 - [ ] fff MCP used only when server is connected
+- [ ] Graphify used only when graph/MCP is available

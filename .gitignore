@@ -7,6 +7,8 @@ secrets.json
 # Local machine-specific agent config
 .claude/settings.local.json
 .cursor/mcp.json
+.agent/local/
+.agents/mcp_config.json
 
 # Agent working dirs (gitignored; only curated memory.md is shared)
 .agent/scratch/*
@@ -28,6 +30,9 @@ venv/
 # Node
 node_modules/
 dist/
+
+# Opt-in Graphify local graph (operator-built; not part of scaffold)
+graphify-out/
 
 # OS / editor
 .DS_Store

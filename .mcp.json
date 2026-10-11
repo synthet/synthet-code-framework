@@ -9,6 +9,13 @@
       "args": [],
       "env": { "WORKSPACE_ROOT": "${workspaceFolder}" }
     },
+    "proj-ro-graphify": {
+      "_comment": "Optional local stdio read-only knowledge graph — https://github.com/Graphify-Labs/graphify . Requires: uv tool install \"graphifyy[mcp]\"; build graphify-out/graph.json first (graphify .). Tools: query_graph, get_node, get_neighbors, shortest_path, …",
+      "side_effects": "read-only",
+      "command": "graphify-mcp",
+      "args": ["graphify-out/graph.json"],
+      "env": { "WORKSPACE_ROOT": "${workspaceFolder}" }
+    },
     "proj-ro-docs": {
       "_comment": "Example remote HTTP read-only MCP server. Remote examples are disabled by default; set enabled=true only after review.",
       "side_effects": "read-only",
