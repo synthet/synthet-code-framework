@@ -52,6 +52,14 @@ SECRET_PATH_PATTERNS = [
     re.compile(r"(?i)\.p12$"),
 ]
 
+# Named gate subsets for task-env-package-tools harness profiles.
+VERIFY_PROFILES: dict[str, list[str]] = {
+    "framework": [cid for cid, _ in FRAMEWORK_VERIFY_COMMANDS],
+    "agent-assets": ["sync_check", "frontmatter", "cli_skills"],
+    "tests": ["pytest"],
+    "lint": ["okf_lint"],
+}
+
 
 def is_secret_path(path: str | Path) -> bool:
     text = str(path).replace("\\", "/")
@@ -60,3 +68,35 @@ def is_secret_path(path: str | Path) -> bool:
 
 def framework_verify_commands() -> list[dict[str, str]]:
     return [{"id": cid, "command": cmd} for cid, cmd in FRAMEWORK_VERIFY_COMMANDS]
+
+
+def gate_command_map() -> dict[str, str]:
+    return {cid: cmd for cid, cmd in FRAMEWORK_VERIFY_COMMANDS}
+
+
+def resolve_gates(*, profile: str | None = None, gate_ids: list[str] | None = None) -> list[dict[str, str]]:
+    """Resolve a profile and/or explicit gate ids to ordered command rows."""
+    known = gate_command_map()
+    ordered_ids: list[str] = []
+    if profile:
+        key = profile.strip().lower()
+        if key not in VERIFY_PROFILES:
+            known_profiles = ", ".join(sorted(VERIFY_PROFILES))
+            raise ValueError(f"unknown profile {profile!r}; known: {known_profiles}")
+        ordered_ids.extend(VERIFY_PROFILES[key])
+    if gate_ids:
+        for gid in gate_ids:
+            gid = gid.strip()
+            if not gid:
+                continue
+            if gid not in known:
+                raise ValueError(f"unknown gate id {gid!r}; known: {', '.join(sorted(known))}")
+            if gid not in ordered_ids:
+                ordered_ids.append(gid)
+    if not ordered_ids:
+        ordered_ids = list(known.keys())
+    return [{"id": gid, "command": known[gid]} for gid in ordered_ids]
+
+
+def list_profiles() -> dict[str, list[str]]:
+    return {name: list(ids) for name, ids in VERIFY_PROFILES.items()}

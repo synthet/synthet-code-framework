@@ -14,6 +14,17 @@ sync_assistant_trees = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sync_assistant_trees)
 
 
+def test_antigravity_native_rules_and_agents_have_valid_adapters():
+    rules = sync_assistant_trees._antigravity_expected("rules")
+    agents = sync_assistant_trees._antigravity_expected("agents")
+    assert "trigger: always_on" in rules["safety-and-secrets.md"]
+    assert "alwaysApply:" not in rules["safety-and-secrets.md"].split("---")[1]
+    for text in agents.values():
+        assert "model: inherit" in text
+        assert "tools: [view_file, grep_search, run_command" in text
+        assert "commandExecutionPolicy: sandbox" in text
+
+
 def test_tree_diff_detects_nested_file_content_drift(tmp_path: Path) -> None:
     src = tmp_path / ".claude" / "skills"
     dst = tmp_path / ".cursor" / "skills"
@@ -25,6 +36,17 @@ def test_tree_diff_detects_nested_file_content_drift(tmp_path: Path) -> None:
     (dst / "demo" / "references" / "guide.md").write_text("same\n", encoding="utf-8")
 
     assert sync_assistant_trees._diff(src, dst, "tree") == ["differs: skills/demo/SKILL.md"]
+
+
+def test_sync_ignores_interpreter_caches(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(sync_assistant_trees, 'ROOT', tmp_path)
+    src, dst = tmp_path / 'src', tmp_path / 'dst'
+    (src / 'demo/__pycache__').mkdir(parents=True)
+    (src / 'demo/SKILL.md').write_text('same')
+    (src / 'demo/__pycache__/generated.pyc').write_bytes(b'cache')
+    sync_assistant_trees._copy_cursor_target(src, dst, 'tree')
+    assert not (dst / 'demo/__pycache__').exists()
+    assert sync_assistant_trees._diff(src, dst, 'tree') == []
 
 
 def test_tree_diff_detects_nested_missing_and_stale_files(tmp_path: Path) -> None:

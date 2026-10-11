@@ -83,3 +83,16 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 
 - [ ] `git status` clean or changes understood
 - [ ] Diff reviewed before commit
+
+## Integrating a pull-request stack or upstream fork
+
+Verify the repository, default branch, clean/understood working state and task authority.
+Determine dependency order from actual diffs; identify already-landed changes before merging.
+Preserve unrelated work without automatically stashing or committing it. Never weaken required
+checks, use admin bypass, or make failed deployment checks optional merely to unblock a merge.
+
+For an upstream fork, record the fork's behavioral boundaries before integration. Resolve
+signature/rename/module-move conflicts using upstream's new structure while preserving intentional
+fork behavior. Inspect clean auto-merges for duplicate methods, removed types, stale variants and
+silently restored upstream features. Verify those boundaries and the affected tests after merging.
+Fetch a verified upstream URL when needed; never change `.git/config` to add remotes.

@@ -40,7 +40,7 @@ per-criterion verification; do not conflate "meets spec" with "mergeable".
 ## Definition of done
 
 - Lint/test commands from **AGENTS.md** ran and are green (state actual results; never "probably green").
-- Spec ACs are Verified per `validate-implementation`, or open Unknowns/Failures are listed explicitly.
+- Spec ACs are Verified per `validate-implementation`, or open Unknowns/Failures are listed explicitly. Only claim the spec is satisfied when **every** AC is Verified.
 - Optional trace artifacts are sanitized, referenced by path, and summarized rather than pasted wholesale.
 - PR references its backlog item using the selected provider's convention (`Refs <ID>` or `Closes #<N>`); if the provider tracks status, the item is marked review-ready; providers without status fields only need the PR reference.
 - No GitHub Projects board/card status is required unless GitHub Projects is the selected provider.
