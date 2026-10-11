@@ -6,8 +6,18 @@ All notable changes to this framework are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-10-11
+
 ### Added
 
+- Explicit multi-harness inventory, reviewed plan, apply, receipt verification and rollback
+  for user/global and project agent setups, with ownership tracking and per-file backups.
+- A portable library of 55 core and specialist skills, including `resume-task`, transcript
+  archiving, native setup, database/container workflows and evaluation panels.
+- Generated Antigravity rules and subagents alongside the existing Claude, Cursor and Codex
+  assets; preserve each adopted project's canonical source and native sync conversions.
+- `/mine`, `/compile-skill`, `/audit-instructions` and expanded decomposition workflows,
+  plus `lesson-to-skill` and `autonomous-run-contract` skills.
 - Restored the `rust` bootstrap stack (`cargo build` / `cargo test` / `cargo fmt` + clippy),
   including command detection, starter boilerplate, and a lint-router stack.
 - Generic `rust-testing` skill for cargo/nextest unit tests beside modules.
@@ -17,11 +27,24 @@ All notable changes to this framework are documented here. The format follows
 
 ### Fixed
 
+- Portable helpers resolve bundled runtimes from their skill directory; mirror generation
+  and comparison exclude Python interpreter caches without relaxing content checks.
+- Preserve live harness configuration when applying reviewed additive MCP registrations;
+  retain existing credentials, permissions, model settings, hooks and provider packages.
+- Restore protected acceptance-verification wording in `pr-ready` and
+  `validate-implementation` assets.
 - `--adopt --auto-detect` only rewrites commands inside the AGENTS.md scaffold block, so an
   existing engineering guide is not rewritten (for example `cargo test --doc`).
 - `--adopt` skips instruction-file pointers (`AGENTS.md` / `CLAUDE.md` / `GEMINI.md` whose
   entire contents are a sibling path such as `.rules`), so Zed-style shared `.rules` files
   are not rewritten.
+
+### Security
+
+- Resume recovery uses explicit profile scope, redacts serialized report fields and rejects
+  output inside harness stores or on input transcripts.
+- Agent frontmatter validation requires supported model aliases; evaluation panels require
+  explicit export authorization, and MCP adapters exclude unsupported literal credentials.
 
 ## [0.2.0] — 2026-07-21
 
