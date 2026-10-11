@@ -326,3 +326,114 @@ def test_eval_harness_schema_and_emit() -> None:
     out = json.loads(good.stdout)
     assert out["outcome"] == "partial"
     assert out["test_results"] == "partial"
+
+
+EXPORT_CHAT = ROOT / ".claude" / "skills" / "export-chat" / "scripts" / "export_chat.py"
+
+
+def _load_export_chat():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("export_chat", EXPORT_CHAT)
+    module = importlib.util.module_from_spec(spec)
+    # Bytecode under .claude/skills would be copied into the synced mirrors.
+    previous, sys.dont_write_bytecode = sys.dont_write_bytecode, True
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        sys.dont_write_bytecode = previous
+    return module
+
+
+def _write_transcript(path: Path, prompt: str, mtime: float) -> None:
+    import os
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        {
+            "role": "user",
+            "message": {
+                "content": [
+                    {
+                        "type": "text",
+                        "text": f"<system_reminder>hidden</system_reminder>\n<user_query>\n{prompt}\n</user_query>",
+                    }
+                ]
+            },
+        },
+        {
+            "role": "assistant",
+            "message": {
+                "content": [
+                    {"type": "text", "text": "Reading the file."},
+                    {"type": "tool_use", "name": "Read", "input": {"path": "a.py"}},
+                ]
+            },
+        },
+        {"type": "turn_ended", "status": "success"},
+    ]
+    path.write_text("\n".join(json.dumps(line) for line in lines) + "\n", encoding="utf-8")
+    os.utime(path, (mtime, mtime))
+
+
+def test_export_chat_finds_newest_transcript_case_insensitive(tmp_path: Path) -> None:
+    mod = _load_export_chat()
+    workspace = tmp_path / "Work" / "my-app"
+    slug = mod.workspace_slug(workspace).lower()
+    transcripts = tmp_path / "cursor" / "projects" / slug / "agent-transcripts"
+    _write_transcript(transcripts / "old-uuid.jsonl", "old flat chat", 1_000)
+    _write_transcript(transcripts / "new-uuid" / "new-uuid.jsonl", "new nested chat", 2_000)
+
+    found = mod.find_transcript_dir(tmp_path / "cursor", workspace)
+    assert found == transcripts
+    assert [p.stem for p in mod.list_transcripts(found)] == ["new-uuid", "old-uuid"]
+    assert mod.resolve_transcript("old", found).stem == "old-uuid"
+
+
+def test_export_chat_render_and_default_filename(tmp_path: Path) -> None:
+    from datetime import datetime
+
+    mod = _load_export_chat()
+    path = tmp_path / "t.jsonl"
+    _write_transcript(path, "Fix the login bug!", 1_000)
+    events = mod.load_events(path)
+
+    markdown, stats = mod.render_markdown(events, transcript_id="t", workspace="ws")
+    assert "## User\n\nFix the login bug!" in markdown
+    assert "hidden" not in markdown
+    assert "**Tool: Read**" in markdown and '"path": "a.py"' in markdown
+    assert stats == {"user_messages": 1, "assistant_messages": 1, "tool_calls": 1, "turns": 1}
+
+    raw, _ = mod.render_markdown(events, transcript_id="t", workspace="ws", raw=True)
+    assert "<system_reminder>hidden</system_reminder>" in raw
+
+    name = mod.default_filename(mod.first_prompt(events), datetime(2026, 10, 1, 17, 5, 9))
+    assert name == "2026-10-01-170509-fix-the-login-bug.md"
+
+
+def test_export_chat_cli_writes_file(tmp_path: Path) -> None:
+    mod = _load_export_chat()
+    workspace = tmp_path / "ws"
+    workspace.mkdir()
+    transcripts = tmp_path / "cursor" / "projects" / mod.workspace_slug(workspace) / "agent-transcripts"
+    _write_transcript(transcripts / "abc" / "abc.jsonl", "hello", 1_000)
+    out = tmp_path / "out" / "chat.md"
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(EXPORT_CHAT),
+            str(out),
+            "--workspace",
+            str(workspace),
+            "--cursor-home",
+            str(tmp_path / "cursor"),
+            "--json",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc.returncode == 0, proc.stderr
+    assert json.loads(proc.stdout)["output"] == str(out.resolve())
+    assert "## User\n\nhello" in out.read_text(encoding="utf-8")

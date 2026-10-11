@@ -56,3 +56,11 @@ risk_class: medium
 - An inventory/reference doc is regenerated when the tool set changes.
 
 References: [MCP docs](https://modelcontextprotocol.io), Cursor / Claude Code MCP configuration guides.
+
+## Diagnosing an existing MCP integration
+
+Discover the actual connected tool schema before choosing a call. For broad domains, use the
+server's documented search/dispatch surface and bounded read-only health, job and error queries.
+Trace one concrete failure from tool response to the owning service and stored state; distinguish
+transport/auth failures from application errors and missing/queued results. Do not invent tools,
+repair data, retry side effects or promote a localhost endpoint globally merely because it exists.
