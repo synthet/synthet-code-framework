@@ -14,7 +14,7 @@ import json
 import re
 from pathlib import Path
 
-SUPPORTED_STACKS = ("python", "node", "go")
+SUPPORTED_STACKS = ("python", "node", "go", "rust")
 DEFAULT_PROJECT_DESC = "TODO(PROJECT_DESC)"
 
 
@@ -49,6 +49,13 @@ def _python_package_name(project_slug: str) -> str:
 def _go_module_name(project_slug: str) -> str:
     module = re.sub(r"[^a-zA-Z0-9_./-]+", "", project_slug).strip("./-").lower()
     return module or "app"
+
+
+def _rust_crate_name(project_slug: str) -> str:
+    crate = re.sub(r"[^a-zA-Z0-9]+", "_", project_slug).strip("_").lower()
+    if not crate or crate[0].isdigit():
+        crate = f"project_{crate or 'app'}"
+    return crate
 
 
 def generate_python(
@@ -179,6 +186,36 @@ func TestGreeting(t *testing.T) {{
     return _write_files(target, files, force=force)
 
 
+def generate_rust(
+    target: Path,
+    project_slug: str,
+    project_desc: str = DEFAULT_PROJECT_DESC,
+    *,
+    force: bool = False,
+) -> list[Path]:
+    crate = _rust_crate_name(project_slug)
+    files = {
+        Path("Cargo.toml"): f"""[package]
+name = {_toml_string(crate)}
+version = "0.1.0"
+edition = "2021"
+description = {_toml_string(project_desc)}
+""",
+        Path("src") / "lib.rs": f'''pub fn hello() -> &'static str {{
+    "hello from {project_slug}"
+}}
+''',
+        Path("tests") / "smoke.rs": f'''use {crate}::hello;
+
+#[test]
+fn hello_returns_known_greeting() {{
+    assert_eq!(hello(), "hello from {project_slug}");
+}}
+''',
+    }
+    return _write_files(target, files, force=force)
+
+
 def generate_boilerplate(
     target: Path,
     stack: str,
@@ -191,6 +228,7 @@ def generate_boilerplate(
         "python": generate_python,
         "node": generate_node,
         "go": generate_go,
+        "rust": generate_rust,
     }
     generator = generators.get(stack)
     if generator is None:

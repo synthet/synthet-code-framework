@@ -68,6 +68,7 @@ All install/uninstall commands require user initiation. See [commands-requiring-
 
 - winget may need elevation for some packages.
 - fff-mcp: optional; install from [fff](https://github.com/dmtrKovalenko/fff) releases.
+- graphify: optional; `uv tool install graphifyy` (MCP: `uv tool install "graphifyy[mcp]"`) — see [Graphify](https://github.com/Graphify-Labs/graphify).
 
 ## WSL2 Notes
 
