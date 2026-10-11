@@ -94,3 +94,11 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 - [ ] Harness profile/gates match the change
 - [ ] `${TEST_CMD}` or pytest green for touched area
 - [ ] sync + frontmatter checks when agent assets changed
+
+## Reusing this workflow outside the framework
+
+Choose gates from the current repository's contract and declared task runner. Framework-only
+profiles are examples for this scaffold, not universal acceptance checks. Use the existing
+uv, Poetry, Pipenv, Conda or virtualenv environment; do not introduce another manager or install
+dependencies globally. Preserve the declared dependency/lock workflow and do not replace it
+with an unsolicited `pip freeze`. Read current CLI help when a helper or gate is unavailable.

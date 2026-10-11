@@ -7,6 +7,8 @@ secrets.json
 # Local machine-specific agent config
 .claude/settings.local.json
 .cursor/mcp.json
+.agent/local/
+.agents/mcp_config.json
 
 # Agent working dirs (gitignored; only curated memory.md is shared)
 .agent/scratch/*

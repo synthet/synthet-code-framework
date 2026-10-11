@@ -16,6 +16,7 @@ import argparse
 import json
 import re
 import shutil
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,6 +24,8 @@ CLAUDE = ROOT / ".claude"
 CURSOR = ROOT / ".cursor"
 CODEX_SKILLS = ROOT / ".agents" / "skills"
 CODEX_AGENTS = ROOT / ".codex" / "agents"
+ANTIGRAVITY_RULES = ROOT / ".agents" / "rules"
+ANTIGRAVITY_AGENTS = ROOT / ".agents" / "agents"
 
 # (source subdir, destination subdir, mode)
 SUBDIRS = [
@@ -88,7 +91,7 @@ def _copy_cursor_target(src: Path, dst: Path, mode: str) -> None:
     if mode == "tree":
         for child in sorted(src.iterdir()):
             if child.is_dir():
-                shutil.copytree(child, dst / child.name)
+                shutil.copytree(child, dst / child.name, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo"))
             else:
                 shutil.copy2(child, dst / child.name)
     elif mode == "rules":
@@ -103,7 +106,7 @@ def _sync_codex() -> None:
     _reset_dir(CODEX_SKILLS)
     for child in sorted((CLAUDE / "skills").iterdir()):
         if child.is_dir():
-            shutil.copytree(child, CODEX_SKILLS / child.name)
+            shutil.copytree(child, CODEX_SKILLS / child.name, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo"))
         else:
             shutil.copy2(child, CODEX_SKILLS / child.name)
     _reset_dir(CODEX_AGENTS)
@@ -111,6 +114,33 @@ def _sync_codex() -> None:
         (CODEX_AGENTS / f"{md.stem}.toml").write_text(
             _render_codex_agent(md), encoding="utf-8", newline="\n"
         )
+
+
+def _antigravity_expected(kind: str) -> dict[str, str]:
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from scripts.agent_setup import antigravity_agent, antigravity_rule
+    render = antigravity_rule if kind == "rules" else antigravity_agent
+    return {path.name: render(path.read_text(encoding="utf-8"))
+            for path in sorted((CLAUDE / kind).glob("*.md"))}
+
+
+def _sync_antigravity(check: bool = False) -> list[str]:
+    changes = []
+    for kind, directory in [("rules", ANTIGRAVITY_RULES), ("agents", ANTIGRAVITY_AGENTS)]:
+        expected = _antigravity_expected(kind)
+        if not check:
+            _reset_dir(directory)
+            for name, text in expected.items():
+                (directory / name).write_text(text, encoding="utf-8", newline="\n")
+            continue
+        actual = {p.name: p for p in directory.glob("*.md")}
+        label = ".agents/" + kind
+        changes.extend(f"missing in {label}: {n}" for n in sorted(expected.keys() - actual.keys()))
+        changes.extend(f"stale in {label}: {n}" for n in sorted(actual.keys() - expected.keys()))
+        changes.extend(f"differs: {label}/{n}" for n in sorted(expected.keys() & actual.keys())
+                       if actual[n].read_text(encoding="utf-8") != expected[n])
+    return changes
 
 
 def sync(
@@ -138,6 +168,7 @@ def sync(
         if using_default_roots:
             changes.extend(_diff_tree(CLAUDE / "skills", CODEX_SKILLS, ".agents/skills"))
             changes.extend(_diff_codex_agents())
+            changes.extend(_sync_antigravity(check=True))
         if changes:
             print("OUT OF SYNC:")
             for change in changes:
@@ -150,6 +181,8 @@ def sync(
         _sync_codex()
         print("synced skills -> .agents/skills")
         print("synced agents -> .codex/agents")
+        _sync_antigravity()
+        print("synced rules and agents -> .agents/{rules,agents}")
     return 0
 
 
@@ -159,6 +192,8 @@ def _tree_paths(root: Path) -> tuple[dict[str, Path], set[str]]:
     files: dict[str, Path] = {}
     dirs: set[str] = set()
     for path in root.rglob("*"):
+        if "__pycache__" in path.relative_to(root).parts or path.suffix in {".pyc", ".pyo"}:
+            continue
         relative = path.relative_to(root).as_posix()
         if path.is_file():
             files[relative] = path

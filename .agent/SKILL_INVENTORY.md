@@ -1,6 +1,6 @@
 # Skill inventory — ${PROJECT_NAME}
 
-**Last reviewed:** 2026-08-14. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
+**Last reviewed:** 2026-10-11. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
 and [SKILL_COMPILATION.md](SKILL_COMPILATION.md).
 Update this file (new row or **Last reviewed** date) in the same PR as any skill change.
 
@@ -20,6 +20,7 @@ commands or edit code/config as part of its procedure.
 | commit-and-push | Stage, commit, and push with git safety rules; pairs with release-bump (**compiled harness**) | L2 | 2026-07-19 |
 | critical-commit-audit | Deep post-commit hunt for high-severity bugs | L2 | 2026-07-01 |
 | eval | Capture task quality signals to agent memory (**compiled harness**) | L2 | 2026-07-21 |
+| export-chat | Export the Cursor agent transcript to Markdown or the clipboard, like Claude Code `/export` | L2 | 2026-10-01 |
 | karpathy-guidelines | Deliberate coding checklist: assumptions, simplicity, surgical diffs, verifiable goals | L2 | 2026-07-14 |
 | lesson-to-skill | Turn session corrections, mistakes, and repetitions into enriched or new agent assets | L2 | 2026-07-25 |
 | mcp-server-design | Design MCP servers with safe transport, discoverable tools, pagination, and validation | L1 | 2026-07-14 |
@@ -52,6 +53,39 @@ commands or edit code/config as part of its procedure.
 | graphify-knowledge-graph | Query/refresh Graphify MCP or CLI for architecture paths and communities | L2 | 2026-07-21 |
 | windows-agent-tooling | Native Windows agent workflows | L2 | 2026-07-03 |
 | wsl2-agent-tooling | WSL2 build/test/MCP workflows | L2 | 2026-07-03 |
+
+### Consolidated reusable setup library
+
+Routing and native discovery: [agent setup](../docs/agent-setup.md).
+Jev evidence and reviewed choices: [decision ledger](setup/decisions.json).
+
+| Skill | Purpose | Risk | Last reviewed |
+|-------|---------|------|---------------|
+| agent-setup | Inventory, review, install, check and roll back native harness setup | L2 | 2026-10-11 |
+| resume-task | Recover unfinished local cross-harness work with evidence and a continuation brief | L2 | 2026-10-11 |
+| architecture-decisions | Compare consequential alternatives and record ADRs | L1 | 2026-10-11 |
+| agent-runtime-handoff | Application agent-runtime contracts and handoff | L2 | 2026-10-11 |
+| archive-session-transcripts | Hash-verified, privacy-reviewed transcript archiving | L2 | 2026-10-11 |
+| codebase-size-audit | Read-only file and Python AST size report | L1 | 2026-10-11 |
+| container-operations | Volume-aware Docker/Compose diagnostics | L2 | 2026-10-11 |
+| database-backups | Verified backups and recovery evidence | L2 | 2026-10-11 |
+| database-migrations | Schema rollout and rollback contracts | L2 | 2026-10-11 |
+| electron-development | Main/preload/renderer and desktop testing contracts | L2 | 2026-10-11 |
+| feature-flag-lifecycle | Flag promotion, rollback and removal | L2 | 2026-10-11 |
+| gradio-development | Blocks/session/event graphs and diagnostics | L2 | 2026-10-11 |
+| hook-loopback-safety | Authenticated local hook queues and event handling | L2 | 2026-10-11 |
+| judge-panel | Authorized external vision review and Jev adjudication | L2 | 2026-10-11 |
+| logging-and-error-reporting | Bounded, redacted observability and failures | L2 | 2026-10-11 |
+| typescript-monorepo-quality | Workspace boundaries, shared schemas and checks | L2 | 2026-10-11 |
+| unity-testing | Unity compile/EditMode/PlayMode validation | L2 | 2026-10-11 |
+| windows-keep-awake | Explicit bounded Windows sleep prevention | L2 | 2026-10-11 |
+| jev-mcp | Typed semantic Choice/Score/Noul decisions over sanitized state | L2 | 2026-10-11 |
+| llm-wiki | Explicit-root local wiki query, ingestion and validation | L2 | 2026-10-11 |
+
+Git/fork/PR guidance, environment/dependency guidance and MCP diagnostics were
+merged into their existing skills. Existing inventory entries and project-native
+specializations remain authoritative. Review notes and trigger cases are in
+[setup/review.md](setup/review.md).
 
 ## Subagents (`.claude/agents/`)
 
