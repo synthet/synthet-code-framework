@@ -44,7 +44,7 @@ Thirteen skills under `.claude/skills/` cover agent-safe CLI usage (see [`.agent
 | `git-and-diff-workflows` | git, gh |
 | `data-config-tools` | jq, yq, curl |
 | `task-env-package-tools` | Task runners, framework quality gates |
-| `lint-format-security` | ruff, eslint, trivy |
+| `lint-format-security` | ruff, eslint, clippy, trivy |
 | `mcp-code-intelligence` | MCP tiers (incl. optional fff) |
 | `install-checklist` | Human workstation provisioning |
 | `windows-agent-tooling` / `wsl2-agent-tooling` | Platform split |
@@ -87,6 +87,9 @@ is unnecessary (trivial fix), say so explicitly. The `/spec` → `/plan` → `/t
   `/run-codex-review` / `/run-gemini-review` for external second opinions. Sanitized JSONL trace artifacts can be linked as optional validation evidence; see [`../agent-observability.md`](../agent-observability.md).
 - **Docs:** `/wiki-ingest`, `/wiki-lint`, `/wiki-query` keep `docs/` healthy (see [WIKI_SCHEMA](../WIKI_SCHEMA.md)).
 - **Memory:** `/log-session` → `/dream-memory` → `/promote-memory` → `/memory-context`.
+- **Asset growth:** `/mine` turns an external document, repo, or transcript into agent assets;
+  `lesson-to-skill` does the same for the current conversation; `/compile-skill` lowers a stable
+  skill into a harness. All three propose before writing.
 
 ## Safety
 

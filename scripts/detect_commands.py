@@ -7,7 +7,7 @@ to stack defaults for any missing keys.
 
 Usage (standalone):
     python scripts/detect_commands.py --target . --stack python
-    python scripts/detect_commands.py --target ../my-app --stack node
+    python scripts/detect_commands.py --target ../my-app --stack rust
 """
 
 from __future__ import annotations
@@ -187,6 +187,34 @@ def detect_go_commands(target: Path) -> dict[str, str]:
     return result
 
 
+def detect_rust_commands(target: Path) -> dict[str, str]:
+    result: dict[str, str] = {}
+    if not (target / "Cargo.toml").is_file():
+        return result
+
+    make_targets = _makefile_targets(target)
+    has_nextest = (target / "nextest.toml").is_file() or (target / ".config" / "nextest.toml").is_file()
+    has_script_clippy = (target / "script" / "clippy").is_file() or (
+        target / "script" / "clippy.ps1"
+    ).is_file()
+
+    result["BUILD_CMD"] = "make build" if "build" in make_targets else "cargo build"
+    if "test" in make_targets:
+        result["TEST_CMD"] = "make test"
+    elif has_nextest:
+        result["TEST_CMD"] = "cargo nextest run"
+    else:
+        result["TEST_CMD"] = "cargo test"
+    if "lint" in make_targets:
+        result["LINT_CMD"] = "make lint"
+    elif has_script_clippy:
+        result["LINT_CMD"] = "./script/clippy"
+    else:
+        result["LINT_CMD"] = "cargo fmt --check && cargo clippy --all-targets -- -D warnings"
+
+    return result
+
+
 def detect_generic_commands(target: Path) -> dict[str, str]:
     result: dict[str, str] = {}
     _apply_runner(result, _makefile_targets(target), "make")
@@ -202,6 +230,7 @@ def detect_commands(target: Path, stack: str) -> dict[str, str]:
         "python": detect_python_commands,
         "node": detect_node_commands,
         "go": detect_go_commands,
+        "rust": detect_rust_commands,
     }
     detector = detectors.get(stack, detect_generic_commands)
     result = detector(target)
@@ -216,7 +245,7 @@ def detect_commands(target: Path, stack: str) -> dict[str, str]:
 def main() -> int:
     ap = argparse.ArgumentParser(description="Detect build/test/lint commands for a project")
     ap.add_argument("--target", type=Path, default=Path("."), help="Project directory to probe")
-    ap.add_argument("--stack", default="generic", help="python|node|go|generic")
+    ap.add_argument("--stack", default="generic", help="python|node|go|rust|generic")
     args = ap.parse_args()
 
     target = args.target.resolve()

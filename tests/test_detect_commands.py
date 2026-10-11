@@ -109,3 +109,62 @@ def test_detect_generic_supported_signals(tmp_path: Path, filename: str, content
     write(tmp_path / filename, contents)
 
     assert detect_commands(tmp_path, "generic") == expected
+
+
+@pytest.mark.parametrize(
+    ("signal", "expected"),
+    [
+        (
+            "cargo",
+            {
+                "BUILD_CMD": "cargo build",
+                "TEST_CMD": "cargo test",
+                "LINT_CMD": "cargo fmt --check && cargo clippy --all-targets -- -D warnings",
+            },
+        ),
+        (
+            "nextest",
+            {
+                "BUILD_CMD": "cargo build",
+                "TEST_CMD": "cargo nextest run",
+                "LINT_CMD": "cargo fmt --check && cargo clippy --all-targets -- -D warnings",
+            },
+        ),
+        (
+            "makefile",
+            {
+                "BUILD_CMD": "make build",
+                "TEST_CMD": "make test",
+                "LINT_CMD": "make lint",
+            },
+        ),
+        (
+            "script-clippy",
+            {
+                "BUILD_CMD": "cargo build",
+                "TEST_CMD": "cargo test",
+                "LINT_CMD": "./script/clippy",
+            },
+        ),
+        (
+            "script-clippy-ps1",
+            {
+                "BUILD_CMD": "cargo build",
+                "TEST_CMD": "cargo test",
+                "LINT_CMD": "./script/clippy",
+            },
+        ),
+    ],
+)
+def test_detect_rust_supported_signals(tmp_path: Path, signal: str, expected: dict[str, str]) -> None:
+    write(tmp_path / "Cargo.toml", '[package]\nname = "demo"\nversion = "0.1.0"\nedition = "2021"\n')
+    if signal == "nextest":
+        write(tmp_path / ".config" / "nextest.toml", "[profile.default]\n")
+    if signal == "makefile":
+        write(tmp_path / "Makefile", "build:\n\ttouch build\ntest:\n\ttouch test\nlint:\n\ttouch lint\n")
+    if signal == "script-clippy":
+        write(tmp_path / "script" / "clippy", "#!/bin/sh\ncargo clippy\n")
+    if signal == "script-clippy-ps1":
+        write(tmp_path / "script" / "clippy.ps1", "cargo clippy\n")
+
+    assert detect_commands(tmp_path, "rust") == expected
