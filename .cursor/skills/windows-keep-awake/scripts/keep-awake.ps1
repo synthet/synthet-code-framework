@@ -10,11 +10,11 @@ public static class FrameworkExecutionState {
 }
 '@
 try {
-    if ([FrameworkExecutionState]::SetThreadExecutionState(0x80000003) -eq 0) {
+    if ([FrameworkExecutionState]::SetThreadExecutionState([uint32]2147483651) -eq 0) {
         throw 'SetThreadExecutionState failed.'
     }
     $taskExpiration = [DateTime]::UtcNow.AddMinutes($Minutes)
     Write-Output "Temporary keep-awake expires at $($taskExpiration.ToString('o')). Stop with Ctrl+C."
     while ([DateTime]::UtcNow -lt $taskExpiration) { Start-Sleep -Seconds 5 }
 }
-finally { [void][FrameworkExecutionState]::SetThreadExecutionState(0x80000000) }
+finally { [void][FrameworkExecutionState]::SetThreadExecutionState([uint32]2147483648) }
