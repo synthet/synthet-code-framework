@@ -22,6 +22,9 @@ okf_version: 0.1
 - [agent-observability.md](agent-observability.md) — JSONL trace artifacts for agent workflow observability
 - [security.md](security.md) — security model & checklist
 
+## Guides
+- [guides/INDEX.md](guides/INDEX.md) — operator how-tos and setup recipes
+
 ## Project
 - [project/INDEX.md](project/INDEX.md) — project governance index
 - [project/00-backlog-workflow.md](project/00-backlog-workflow.md) — backlog/board contract

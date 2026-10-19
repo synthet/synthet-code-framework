@@ -59,6 +59,7 @@ This inventory lists the canonical Claude-authored assets mirrored to Cursor, Co
 | `codebase-size-audit` | `.claude/skills/codebase-size-audit/SKILL.md` | Use for a read-only large-file and function-size audit, god-module investigation, or refactoring hotspot report. |
 | `commit-and-push` | `.claude/skills/commit-and-push/SKILL.md` | Use when the user asks to commit and push, publish, ship, or prepare a release commit. Guides staging only intended changes, writing a Conventional Commit, committing, and pushing to origin after verifying status and diff. |
 | `commit-conventions` | `.claude/skills/commit-conventions/SKILL.md` | Use when drafting commit messages, PR titles, branch names, changelog entries, or release notes. Always apply for Conventional Commit wording, scoped commit subjects, breaking-change footers, or PR-ready messaging. |
+| `consume` | `.claude/skills/consume/SKILL.md` | Use when ingesting, compiling, rendering, or cleaning up documents from Downloads folders (user Downloads, D:/Downloads, or custom allowed_roots). Also when the user invokes /consume. Batch dry-run, ingest, auto-compile, validate, render, and safely verify/clean via scripts/wiki_ingest_pipeline.py. |
 | `container-operations` | `.claude/skills/container-operations/SKILL.md` | Use for Docker or Compose service diagnostics, local rebuilds, container health checks, and safe volume-aware maintenance. |
 | `critical-commit-audit` | `.claude/skills/critical-commit-audit/SKILL.md` | Use for a deep, high-severity bug audit of recent commits after /critical-commit-audit or when the user asks for post-commit critical review. Focus only on concrete correctness, security, data loss, crash, and major breakage triggers with minimal fixes and tests. |
 | `data-config-tools` | `.claude/skills/data-config-tools/SKILL.md` | Use when inspecting, querying, validating, or editing JSON, YAML, TOML, CSV, HTTP responses, or local SQLite/config data. Prefer jq/yq/sqlite/curl over raw text search, especially for minified or structured data. |
@@ -68,6 +69,31 @@ This inventory lists the canonical Claude-authored assets mirrored to Cursor, Co
 | `eval` | `.claude/skills/eval/SKILL.md` | Use at the end of an implemented task, merged PR, or multi-iteration agent workflow to capture quality signals in project memory. Apply when the user mentions eval, feedback loop, task quality, regression learnings, or session scoring. |
 | `export-chat` | `.claude/skills/export-chat/SKILL.md` | Use when the user types /export or /export-chat, or asks to export, save, dump, copy, or share the current chat, conversation, or agent transcript as a file or to the clipboard. Mimics Claude Code's /export for Cursor by rendering the Cursor agent transcript (user/assistant text plus full tool-call inputs) to Markdown. Also use to export an earlier Cursor chat by id. |
 | `feature-flag-lifecycle` | `.claude/skills/feature-flag-lifecycle/SKILL.md` | Use when adding, promoting, testing, or removing a feature flag or staged rollout. |
+| `framework-analyze` | `.claude/skills/framework-analyze/SKILL.md` | Explicit framework workflow: analyze |
+| `framework-audit-instructions` | `.claude/skills/framework-audit-instructions/SKILL.md` | Explicit framework workflow: audit-instructions |
+| `framework-check-subagents` | `.claude/skills/framework-check-subagents/SKILL.md` | Explicit framework workflow: check-subagents |
+| `framework-clarify` | `.claude/skills/framework-clarify/SKILL.md` | Explicit framework workflow: clarify |
+| `framework-compile-skill` | `.claude/skills/framework-compile-skill/SKILL.md` | Explicit framework workflow: compile-skill |
+| `framework-decompose` | `.claude/skills/framework-decompose/SKILL.md` | Explicit framework workflow: decompose |
+| `framework-dream-memory` | `.claude/skills/framework-dream-memory/SKILL.md` | Explicit framework workflow: dream-memory |
+| `framework-implement` | `.claude/skills/framework-implement/SKILL.md` | Explicit framework workflow: implement |
+| `framework-log-session` | `.claude/skills/framework-log-session/SKILL.md` | Explicit framework workflow: log-session |
+| `framework-memory-context` | `.claude/skills/framework-memory-context/SKILL.md` | Explicit framework workflow: memory-context |
+| `framework-mine` | `.claude/skills/framework-mine/SKILL.md` | Explicit framework workflow: mine |
+| `framework-plan` | `.claude/skills/framework-plan/SKILL.md` | Explicit framework workflow: plan |
+| `framework-pr-ready` | `.claude/skills/framework-pr-ready/SKILL.md` | Explicit framework workflow: pr-ready |
+| `framework-promote-memory` | `.claude/skills/framework-promote-memory/SKILL.md` | Explicit framework workflow: promote-memory |
+| `framework-release-notes` | `.claude/skills/framework-release-notes/SKILL.md` | Explicit framework workflow: release-notes |
+| `framework-run-codex-review` | `.claude/skills/framework-run-codex-review/SKILL.md` | Explicit framework workflow: run-codex-review |
+| `framework-run-gemini-review` | `.claude/skills/framework-run-gemini-review/SKILL.md` | Explicit framework workflow: run-gemini-review |
+| `framework-run-subagent-review` | `.claude/skills/framework-run-subagent-review/SKILL.md` | Explicit framework workflow: run-subagent-review |
+| `framework-spec` | `.claude/skills/framework-spec/SKILL.md` | Explicit framework workflow: spec |
+| `framework-task-claim` | `.claude/skills/framework-task-claim/SKILL.md` | Explicit framework workflow: task-claim |
+| `framework-tasks` | `.claude/skills/framework-tasks/SKILL.md` | Explicit framework workflow: tasks |
+| `framework-test-and-fix` | `.claude/skills/framework-test-and-fix/SKILL.md` | Explicit framework workflow: test-and-fix |
+| `framework-wiki-ingest` | `.claude/skills/framework-wiki-ingest/SKILL.md` | Explicit framework workflow: wiki-ingest |
+| `framework-wiki-lint` | `.claude/skills/framework-wiki-lint/SKILL.md` | Explicit framework workflow: wiki-lint |
+| `framework-wiki-query` | `.claude/skills/framework-wiki-query/SKILL.md` | Explicit framework workflow: wiki-query |
 | `git-and-diff-workflows` | `.claude/skills/git-and-diff-workflows/SKILL.md` | Use for safe Git and GitHub workflows: status, diffs, logs, branches, staging, commits, PR/issue inspection, and secret checks. Always apply before committing or when the user asks about git state, PRs, issues, or reviewing repository changes. |
 | `gradio-development` | `.claude/skills/gradio-development/SKILL.md` | Use when extending a Gradio Blocks app, event graph, session state, background job UI, or interactive model demo. |
 | `graphify-knowledge-graph` | `.claude/skills/graphify-knowledge-graph/SKILL.md` | Use when querying architecture, concept paths, god nodes, or communities via Graphify MCP or CLI; when the user mentions graphify, knowledge graph, GRAPH_REPORT, graphify-out, query_graph, or asks how two modules connect. Prefer this over broad rg/fff for structural “how does A relate to B” questions when the graph or MCP is available. Do not use for setup-tier comparisons (see mcp-code-intelligence) or ordinary text/filename search. |
