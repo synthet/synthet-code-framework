@@ -6,6 +6,7 @@ Format: `- YYYY-MM-DD: <verb> — <details and paths>` (verbs: `created`, `updat
 
 ## 2026-10
 
+- 2026-10-19: created — `synthet-agent-swarm-setup.md` (Guide); updated `INDEX.md` and `EXTERNAL_CLI_REVIEWS.md`.
 - 2026-10-18: created — copied the MCP multi-harness cookbook, synthet-agent-swarm user MCP cookbook, and Windows agent CLI recipes into `guides/`.
 
 ## 2026-07

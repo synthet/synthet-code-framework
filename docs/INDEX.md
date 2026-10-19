@@ -19,6 +19,7 @@ okf_version: 0.1
 ## Agent workflow
 - [ai-workflow/README.md](ai-workflow/README.md) — asset map & SDLC loop
 - [EXTERNAL_CLI_REVIEWS.md](EXTERNAL_CLI_REVIEWS.md) — external CLI review setup
+- [synthet-agent-swarm-setup.md](synthet-agent-swarm-setup.md) — build, user MCP, and skill install for the judge swarm
 - [agent-observability.md](agent-observability.md) — JSONL trace artifacts for agent workflow observability
 - [security.md](security.md) — security model & checklist
 
