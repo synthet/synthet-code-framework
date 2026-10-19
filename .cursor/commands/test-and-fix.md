@@ -1,4 +1,5 @@
 ---
+description: "/test-and-fix — Run tests and repair failures"
 capability: "test-and-fix agent asset workflow"
 side_effect_level: local_write
 approval_required: false

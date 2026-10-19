@@ -1,0 +1,14 @@
+{
+  "name": "synthet-code-framework",
+  "description": "SDLC commands, review agents, and reusable agent skills from the synthet code framework.",
+  "owner": {
+    "name": "synthet"
+  },
+  "plugins": [
+    {
+      "name": "agent-workflow",
+      "source": "./.claude",
+      "description": "SDLC commands, review agents, and reusable agent skills from the synthet code framework."
+    }
+  ]
+}

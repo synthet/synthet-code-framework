@@ -1,4 +1,5 @@
 ---
+description: "/mine — Turn a source into repo agent assets"
 capability: "mine agent asset workflow"
 side_effect_level: local_write
 approval_required: false

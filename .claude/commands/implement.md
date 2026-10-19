@@ -1,4 +1,5 @@
 ---
+description: "/implement — Execute an approved plan"
 capability: "implement agent asset workflow"
 side_effect_level: local_write
 approval_required: false

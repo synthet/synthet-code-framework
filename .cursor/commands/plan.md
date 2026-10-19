@@ -1,4 +1,5 @@
 ---
+description: "/plan — Implementation plan"
 capability: "plan agent asset workflow"
 side_effect_level: local_write
 approval_required: false

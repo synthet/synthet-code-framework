@@ -1,4 +1,5 @@
 ---
+description: "/wiki-lint — Health-check the docs wiki"
 capability: "wiki-lint agent asset workflow"
 side_effect_level: local_write
 approval_required: false

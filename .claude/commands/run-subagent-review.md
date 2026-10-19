@@ -1,4 +1,5 @@
 ---
+description: "/run-subagent-review — Run external sub-agent review (MCP)"
 capability: "run-subagent-review agent asset workflow"
 side_effect_level: external_export
 approval_required: true

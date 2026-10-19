@@ -1,4 +1,5 @@
 ---
+description: "/pr-ready — Prepare for pull request"
 capability: "pr-ready agent asset workflow"
 side_effect_level: remote_write
 approval_required: true

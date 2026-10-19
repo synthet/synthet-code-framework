@@ -1,4 +1,5 @@
 ---
+description: "/release-notes — User-facing changelog slice"
 capability: "release-notes agent asset workflow"
 side_effect_level: local_write
 approval_required: false

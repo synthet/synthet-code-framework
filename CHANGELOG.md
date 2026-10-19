@@ -6,6 +6,17 @@ All notable changes to this framework are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Claude Code and Cursor marketplaces for the `agent-workflow` plugin. Manifests point at
+  the existing `.claude` and `.cursor` trees and are refreshed by
+  `scripts/build_plugin_manifests.py`.
+
+### Changed
+
+- `consume` examples use the user Downloads directory and no longer name personal
+  filename patterns.
+
 ## [0.3.0] — 2026-10-11
 
 ### Added

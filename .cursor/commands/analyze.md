@@ -1,4 +1,5 @@
 ---
+description: "/analyze — Cross-artifact consistency and coverage check"
 capability: "analyze agent asset workflow"
 side_effect_level: local_write
 approval_required: false

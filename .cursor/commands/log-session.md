@@ -1,4 +1,5 @@
 ---
+description: "/log-session — Log agent session to raw memory"
 capability: "log-session agent asset workflow"
 side_effect_level: local_write
 approval_required: false

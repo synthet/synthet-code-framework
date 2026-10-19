@@ -1,4 +1,5 @@
 ---
+description: "/memory-context — Print memory for a new session"
 capability: "memory-context agent asset workflow"
 side_effect_level: local_write
 approval_required: false

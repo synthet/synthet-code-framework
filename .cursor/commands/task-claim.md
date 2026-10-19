@@ -1,4 +1,5 @@
 ---
+description: "/task-claim — claim a backlog item"
 capability: "task-claim agent asset workflow"
 side_effect_level: remote_write
 approval_required: true

@@ -69,7 +69,21 @@ After editing `.claude/`, run:
 ```bash
 python scripts/sync_assistant_trees.py          # regenerate Cursor + Codex mirrors
 python scripts/sync_assistant_trees.py --check  # CI: fail if out of sync
+python scripts/build_plugin_manifests.py        # refresh plugin manifests after a version bump
 ```
+
+## Install the agent-workflow plugin
+
+The manifests point at the trees above. They do not copy skills into a third directory.
+
+Claude Code, from a clone of this repo:
+
+```bash
+claude plugin marketplace add ./ --scope user
+claude plugin install agent-workflow@synthet-code-framework --scope user
+```
+
+Cursor uses `.cursor-plugin/marketplace.json`. Add this repository as a local marketplace and install `agent-workflow`. That install includes the Cursor rules. Claude Code has no plugin rules component; the rules in `.claude/rules` apply when this repo is the open project.
 
 ## Optional dependency
 
