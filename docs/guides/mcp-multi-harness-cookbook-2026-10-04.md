@@ -156,8 +156,8 @@ them; plain `agent -p` does not.
 **Cause** (agent CLI 2026.10.01). A project server is approved when
 `<name>-<first 16 hex of sha256(JSON.stringify({path, server}))>` is in
 `~/.cursor/projects/<slug>/mcp-approvals.json`, where `server` is the config entry without `_`
-keys. `mcp list`/`mcp enable` hash `path` as `D:\Projects\repo`; chat sessions hash it as
-`D:/Projects/repo`. Only the backslash key ever gets stored, so chat sessions treat the server as
+keys. `mcp list`/`mcp enable` hash `path` with backslashes; chat sessions hash the same
+`<local-project>` path with forward slashes. Only the backslash key ever gets stored, so chat sessions treat the server as
 unapproved and drop it without logging why.
 
 **Fix.** From the repo root, add both path forms:

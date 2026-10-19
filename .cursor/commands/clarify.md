@@ -1,4 +1,5 @@
 ---
+description: "/clarify — Resolve material ambiguities before planning"
 capability: "clarify agent asset workflow"
 side_effect_level: local_write
 approval_required: false

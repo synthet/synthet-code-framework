@@ -1,4 +1,5 @@
 ---
+description: "/decompose — Break a large task into parallelizable subtasks"
 capability: "decompose agent asset workflow"
 side_effect_level: local_write
 approval_required: false

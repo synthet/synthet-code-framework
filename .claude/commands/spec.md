@@ -1,4 +1,5 @@
 ---
+description: "/spec — Feature or change specification"
 capability: "spec agent asset workflow"
 side_effect_level: local_write
 approval_required: false

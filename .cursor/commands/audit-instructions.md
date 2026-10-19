@@ -1,4 +1,5 @@
 ---
+description: "/audit-instructions — Sort instruction files into three piles and prune the dated one"
 capability: "audit-instructions agent asset workflow"
 side_effect_level: local_write
 approval_required: false

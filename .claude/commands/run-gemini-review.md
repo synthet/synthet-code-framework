@@ -1,4 +1,5 @@
 ---
+description: "/run-gemini-review — Run Gemini review (MCP)"
 capability: "run-gemini-review agent asset workflow"
 side_effect_level: external_export
 approval_required: true

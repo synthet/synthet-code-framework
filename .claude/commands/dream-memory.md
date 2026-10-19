@@ -1,4 +1,5 @@
 ---
+description: "/dream-memory — Propose consolidated project memory"
 capability: "dream-memory agent asset workflow"
 side_effect_level: local_write
 approval_required: false

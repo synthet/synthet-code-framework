@@ -1,4 +1,5 @@
 ---
+description: "/wiki-ingest — Process a source into the wiki"
 capability: "wiki-ingest agent asset workflow"
 side_effect_level: local_write
 approval_required: false

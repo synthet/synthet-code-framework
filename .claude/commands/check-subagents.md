@@ -1,4 +1,5 @@
 ---
+description: "/check-subagents — Check external CLI sub-agents"
 capability: "check-subagents agent asset workflow"
 side_effect_level: external_export
 approval_required: true

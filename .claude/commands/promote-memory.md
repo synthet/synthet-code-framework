@@ -1,4 +1,5 @@
 ---
+description: "/promote-memory — Approve dream into active memory"
 capability: "promote-memory agent asset workflow"
 side_effect_level: local_write
 approval_required: false

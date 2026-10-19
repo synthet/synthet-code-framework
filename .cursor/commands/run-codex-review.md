@@ -1,4 +1,5 @@
 ---
+description: "/run-codex-review — Run Codex review (MCP)"
 capability: "run-codex-review agent asset workflow"
 side_effect_level: external_export
 approval_required: true

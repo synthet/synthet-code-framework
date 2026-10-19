@@ -1,4 +1,5 @@
 ---
+description: "/compile-skill — Lower a stable skill into a deterministic harness"
 capability: "compile-skill agent asset workflow"
 side_effect_level: local_write
 approval_required: false

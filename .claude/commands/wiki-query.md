@@ -1,4 +1,5 @@
 ---
+description: "/wiki-query — Query the wiki and optionally file the answer"
 capability: "wiki-query agent asset workflow"
 side_effect_level: local_write
 approval_required: false
