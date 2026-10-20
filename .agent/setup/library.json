@@ -466,6 +466,51 @@
       "pack": "core",
       "global": true,
       "projects": []
+    },
+    {
+      "id": "consume",
+      "source": ".claude/skills/consume",
+      "pack": "knowledge",
+      "global": true,
+      "projects": [
+        "vault",
+        "synthet-llm-wiki"
+      ]
+    },
+    {
+      "id": "threejs-frame-conventions",
+      "source": ".claude/skills/threejs-frame-conventions",
+      "pack": "core",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "accidental-data-loss-prevention",
+      "source": ".claude/skills/accidental-data-loss-prevention",
+      "pack": "core",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "next-steps",
+      "source": ".claude/skills/next-steps",
+      "pack": "core",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "step-by-step",
+      "source": ".claude/skills/step-by-step",
+      "pack": "core",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "managing-python-dependencies",
+      "source": ".claude/skills/managing-python-dependencies",
+      "pack": "core",
+      "global": true,
+      "projects": []
     }
   ],
   "reviewed_project_adoptions": [
