@@ -1,6 +1,6 @@
 # Skill inventory — ${PROJECT_NAME}
 
-**Last reviewed:** 2026-10-11. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
+**Last reviewed:** 2026-10-25. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
 and [SKILL_COMPILATION.md](SKILL_COMPILATION.md).
 Update this file (new row or **Last reviewed** date) in the same PR as any skill change.
 
@@ -27,7 +27,7 @@ commands or edit code/config as part of its procedure.
 | release-bump | Semver bump, changelog promotion, release commit prep (**compiled harness**) | L2 | 2026-07-19 |
 | security-review | Lightweight pre-merge security sanity check | L1 | 2026-07-01 |
 | skill-authoring | Create and improve first-party skills with progressive disclosure and eval guidance | L2 | 2026-07-14 |
-| subagent-review | Review-only external CLI orchestration via MCP | L1 | 2026-07-01 |
+| subagent-review | Review-only external CLI orchestration and structured lightweight decisions (`swarm_decide`) via MCP | L1 | 2026-10-25 |
 | systematic-debugging | Evidence-first root-cause debugging with reproduce/minimise/hypothesis/regression loop | L2 | 2026-07-14 |
 | test-driven-development | Red-green-refactor workflow for behavior changes with practical test seams | L2 | 2026-07-14 |
 | rust-testing | Cargo/nextest unit tests beside modules | L2 | 2026-08-14 |
@@ -81,6 +81,7 @@ Jev evidence and reviewed choices: [decision ledger](setup/decisions.json).
 | windows-keep-awake | Explicit bounded Windows sleep prevention | L2 | 2026-10-11 |
 | jev-mcp | Typed semantic Choice/Score/Noul decisions over sanitized state | L2 | 2026-10-11 |
 | llm-wiki | Explicit-root local wiki query, ingestion and validation | L2 | 2026-10-11 |
+| centralized-permissions | Centralized cross-harness permission gate (`infra/jev` + `_agent-infra/jev`), T0-T4 classification, and coin-flip adjudication | L2 | 2026-10-25 |
 
 Git/fork/PR guidance, environment/dependency guidance and MCP diagnostics were
 merged into their existing skills. Existing inventory entries and project-native

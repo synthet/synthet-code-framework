@@ -1,0 +1,125 @@
+"""Render the policy's ``native`` section into each harness's own permission syntax.
+
+Native rules are the enforcement floor that works even when the hook is not running:
+deny (T0) and ask (T1) prefixes, plus broad allows for the static-safe (T2) families.
+The hook adds Jev-approved T3 on top; it never loosens a native deny or ask.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import re
+import shlex
+from typing import Any
+
+from .grammar import Policy
+
+
+def _native(policy: Policy) -> dict[str, list[str]]:
+    n = policy.raw.get("native") or {}
+    return {k: list(n.get(k) or []) for k in ("allow", "ask", "deny", "deny_read", "allow_read_exceptions")}
+
+
+def render_claude(policy: Policy) -> dict[str, Any]:
+    n = _native(policy)
+
+    def shell(prefixes: list[str]) -> list[str]:
+        return [f"{tool}({p}:*)" for p in prefixes for tool in ("Bash", "PowerShell")]
+
+    return {
+        "defaultMode": "auto",
+        "allow": shell(n["allow"]) + [f"Read({p})" for p in n["allow_read_exceptions"]],
+        "ask": shell(n["ask"]),
+        "deny": shell(n["deny"]) + [f"Read({p})" for p in n["deny_read"]] + [f"Edit({p})" for p in n["deny_read"]],
+    }
+
+
+def render_cursor(policy: Policy) -> dict[str, Any]:
+    n = _native(policy)
+    return {
+        "approvalMode": "auto-review",
+        "sandbox": {"readBoundary": "workspace"},
+        "terminalAllowlist": n["allow"],
+        "allow": [f"Shell({p})" for p in n["allow"]],
+        "deny": [f"Shell({p})" for p in n["deny"]] + [f"Read({p})" for p in n["deny_read"]],
+        "autoRun": {
+            "allow_instructions": [
+                "Allow read-only inspection, searches, git status/diff/log, and the project's own tests, linters, "
+                "type checks and builds inside the workspace.",
+            ],
+            "block_instructions": [
+                "Require approval before deleting files outside the scratch area or discarding uncommitted work.",
+                "Require approval for git push, force push, merges, rebases and any GitHub write (PRs, issues, releases).",
+                "Require approval before installing dependencies, deploying, or changing remote/shared resources.",
+                "Require approval before reading or transmitting credentials, keys, tokens or .env files.",
+                "Require approval for network calls to non-local hosts and for killing processes.",
+            ],
+        },
+    }
+
+
+def render_antigravity(policy: Policy) -> dict[str, Any]:
+    n = _native(policy)
+    # Antigravity terminal sandbox throws:
+    #   - 'globs not supported' if deny paths contain * or ?
+    #   - 'non-absolute file path' if deny paths start with ~
+    # Strip trailing wildcard dir slashes, omit patterns with unresolvable wildcards (e.g. **/.env),
+    # and expand ~ to an absolute path.
+    deny_paths: list[str] = []
+    for p in n["deny_read"]:
+        cleaned = re.sub(r"[\\/]\*+$", "", p)
+        if "*" not in cleaned and "?" not in cleaned:
+            expanded = os.path.normpath(os.path.expanduser(cleaned))
+            if os.path.isabs(expanded):
+                deny_paths.append(expanded)
+
+    return {
+        "agentMode": "auto",
+        # Note: On Windows, allowNonWorkspaceAccess=False causes Antigravity's sandbox to emit
+        # 'readonly /', failing with 'sandbox configuration error: readonly /: non-absolute file path'.
+        # Keep True on Windows while enforcing workspace boundaries via PreToolUse hook & explicit deny_paths.
+        "allowNonWorkspaceAccess": True,
+        "permissions": {
+            "allow": [f"command({p})" for p in n["allow"]] + [f"command({p}:*)" for p in n["allow"]],
+            "ask": [f"command({p})" for p in n["ask"]] + [f"command({p}:*)" for p in n["ask"]],
+            "deny": [f"command({p})" for p in n["deny"]] + [f"command({p}:*)" for p in n["deny"]]
+                    + [f"read_file({p})" for p in deny_paths] + [f"write_file({p})" for p in deny_paths],
+        },
+    }
+
+
+def render_grok(policy: Policy) -> dict[str, Any]:
+    n = _native(policy)
+    return {
+        "ui": {"permission_mode": "auto"},
+        "permission": {
+            "allow": [f"Bash({p} *)" for p in n["allow"]] + [f"Bash({p})" for p in n["allow"]],
+            "ask": [f"Bash({p} *)" for p in n["ask"]] + [f"Bash({p})" for p in n["ask"]],
+            "deny": [f"Bash({p} *)" for p in n["deny"]] + [f"Read({p})" for p in n["deny_read"]],
+        },
+    }
+
+
+def render_codex(policy: Policy) -> dict[str, Any]:
+    """Codex on Windows wraps commands as ``pwsh -Command <script>``, so argv prefix rules rarely
+    match; the PermissionRequest hook and auto_review carry the policy. The rules file keeps the
+    T0/T1 floor for direct (unwrapped) invocations only."""
+    n = _native(policy)
+
+    def rule(prefix: str, decision: str) -> str:
+        return f"prefix_rule(pattern={json.dumps(shlex.split(prefix))}, decision=\"{decision}\")"
+
+    lines = ["# Generated by jev_engineering.permission render --harness codex. Edit permission-policy.json instead."]
+    lines += [rule(p, "forbidden") for p in n["deny"]]
+    lines += [rule(p, "prompt") for p in n["ask"]]
+    return {"config": {"approval_policy": "on-request", "sandbox_mode": "workspace-write", "approvals_reviewer": "auto_review"},
+            "rules_file": "\n".join(lines) + "\n"}
+
+
+RENDERERS = {"claude": render_claude, "cursor": render_cursor, "antigravity": render_antigravity,
+             "grok": render_grok, "codex": render_codex}
+
+
+def render(harness: str, policy: Policy) -> dict[str, Any]:
+    return RENDERERS[harness](policy)
