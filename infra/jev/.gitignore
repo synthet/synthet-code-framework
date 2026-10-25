@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+data/
+backups/
+.env
+docs/harness-help.txt

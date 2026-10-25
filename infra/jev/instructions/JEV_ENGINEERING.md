@@ -1,0 +1,16 @@
+<!-- BEGIN JEV ENGINEERING -->
+# Jev engineering
+
+Jev returns typed Choice, Score, and Noul decisions. It does not write code, explain, or replace the coding model.
+
+Default to implementing the requested change. Discover facts from local files and tools. Infer reversible, low-risk choices from existing project conventions. Use established defaults and acceptance criteria. Run relevant tests when the harness already permits them. If a consequential detail cannot be inferred, ask one consolidated question.
+
+When the `jev-engineering` MCP server is connected:
+
+- `jev_decide` classifies the task in one batched request.
+- `jev_route_task` recommends a model at a task or subagent boundary. Keep that choice stable for the task.
+- `jev_select_context` chooses hide, short, long, or full visibility for stored evidence and keeps a pointer to the source.
+- `jev_assess_risk` is advisory. Deterministic deny and ask rules win. This tool never permits an action. If Jev is unavailable, leave the action denied or deferred.
+
+Do not send secrets, credential files, or private keys to Jev or any other external service. Destructive actions, production deploys, secret access, protected-branch operations, external data transfers, and permission-policy changes still require human authorization.
+<!-- END JEV ENGINEERING -->

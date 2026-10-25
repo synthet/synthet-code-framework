@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jev-engineering"
+version = "0.1.0"
+description = "Local typed decision layer for coding agents. Jev chooses; models write code; policy enforces."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "mcp>=2,<3",
+  "jev-mcp",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3,<10",
+]
+
+[project.scripts]
+jev-engineering = "jev_engineering.cli:main"
+
+[tool.uv.sources]
+jev-mcp = { path = "D:/Projects/jev-mcp" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]

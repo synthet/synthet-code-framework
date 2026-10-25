@@ -76,6 +76,7 @@ ${LINT_CMD}      # lint / typecheck / format
 - **Remote writes are higher risk than local writes.** `gh pr:*`, `gh issue:*`, and `gh project:*` can mutate GitHub state and notify collaborators. Enable them only for a specific task and verify the target repo/project before use.
 - **External export requires explicit approval.** Sending source, prompts, logs, artifacts, or review bundles to external services/providers is not covered by local-write approval; get explicit approval for the export and exclude secrets.
 - **Seeded projects inherit this safer default.** Because `.claude/settings.json` is part of the scaffold, newly bootstrapped projects start in read-only mode unless a maintainer deliberately opts into write permissions.
+- **Centralized auto-approval gate.** Complete architecture, command tiers (T0-T4), cross-harness hook contracts, and setup/reconfigure/restore workflows across Claude Code, Codex, Cursor, Antigravity, and Grok are documented in [`docs/centralized-permissions.md`](docs/centralized-permissions.md). Manage with `python -m scripts.manage_permissions {plan|apply|rollback|audit|verify}`.
 
 ## Common workflows
 
@@ -124,6 +125,8 @@ that was not obvious from the error message. Keep entries short: date, symptom, 
 | 2026-10-11 | Setup plan conflicted with active harness state | Native clients update their configuration/cache while an install is planned | Replay only reviewed additive MCP entries onto current state; preserve other keys and verify registration intent |
 | 2026-10-11 | A global skill lost a bundled rule reference | Packaging filtered any path containing `/rules/` | Filter only native rule roots; compare complete bundles before disabling duplicate discovery |
 | 2026-10-11 | Sync drift appeared after tests | Imported skill helpers created interpreter caches | Exclude `__pycache__`, `.pyc` and `.pyo` from mirrors and comparisons |
+| 2026-10-24 | Claude Code UserPromptSubmit hook timed out after 3s | `pwsh` + Python startup on Windows takes 2.5-3.5s under system load | Raised hook timeouts to 15s in `~/.claude/settings.json` and `install_config.py` |
+| 2026-10-24 | Antigravity PreToolUse hook failed with exit status 1 | GUI desktop process environment lacks terminal PATH containing `uv` | Invoke `.venv\Scripts\python.exe` directly rather than bare `uv run` in hook specs |
 
 ## AI workspace assets
 

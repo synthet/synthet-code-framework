@@ -2,7 +2,7 @@
 
 Server display name: **synthet-agent-swarm**. The field contract is `docs/api.md` in the synthet-agent-swarm checkout.
 
-Tools are read-only. `swarm_search` lists harnesses. `swarm_run` runs one task. `run_judge_panel` runs a frozen manifest. The server does not call Jev or render images.
+Tools are read-only. `swarm_search` lists harnesses. `swarm_run` runs one task. `swarm_decide` evaluates structured `noul`/`choice`/`score` questions in one zero-tool turn using lightweight Flash/Mini models. `run_judge_panel` runs a frozen manifest. The server does not call Jev or render images.
 
 ## swarm_search
 
@@ -64,6 +64,21 @@ Same manifest as before, plus optional `harnesses`, `model`, and `transport`. Bl
   "task": "Choose A or B for each item.",
   "items": [{ "id": "a", "files": ["blind/a.jpg"] }],
   "harnesses": ["codex", "agy"],
+  "dryRun": true
+}
+```
+
+## swarm_decide
+
+Evaluates Jev-compatible `noul`, `choice`, and `score` questions in one turn with tools disabled, using synchronous `PATHEXT` discovery (~34ms startup) and each harness's default lightweight model (`claude: "haiku"`, `codex: "gpt-6-luna"`, `cursor: "composer-2.5"`, `agy: "gemini-3.8-flash-medium"`, `grok: "grok-build-0.1"`).
+
+```json
+{
+  "state": { "command": "npm test", "project": "D:\\Projects\\app" },
+  "questions": {
+    "in_scope": { "type": "noul", "instructions": "Command is within approved dev/test scope." }
+  },
+  "harnesses": ["claude"],
   "dryRun": true
 }
 ```
