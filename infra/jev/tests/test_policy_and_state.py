@@ -63,10 +63,50 @@ def test_pre_tool_hook_denies_without_allow(monkeypatch, tmp_path):
     assert decision != "allow"
 
 
-def test_pre_tool_hook_defers_ordinary_test(monkeypatch, tmp_path):
+def test_pre_tool_hook_preserves_native_permissions_for_ordinary_test(monkeypatch, tmp_path):
     monkeypatch.setenv("JEV_ENGINEERING_ROOT", str(tmp_path))
     monkeypatch.delenv("JEV_HOOK_LIVE", raising=False)
     result = pre_tool_decision(
         {"tool_name": "Bash", "tool_input": {"command": "python -m pytest tests/test_app.py"}}
     )
-    assert result["hookSpecificOutput"]["permissionDecision"] == "defer"
+    assert result == {}
+
+
+def test_pre_tool_hook_asks_cursor_without_allowing(monkeypatch, tmp_path):
+    monkeypatch.setenv("JEV_ENGINEERING_ROOT", str(tmp_path))
+    monkeypatch.delenv("JEV_HOOK_LIVE", raising=False)
+    result = pre_tool_decision({
+        "hook_event_name": "preToolUse",
+        "tool_name": "Shell",
+        "tool_input": {"command": "Get-Content -Path D:\\Projects\\image-scoring-skills\\notes.md -TotalCount 200"},
+    })
+    assert result["permission"] == "ask"
+    assert "allow" not in result.values()
+
+
+def test_pre_tool_hook_denies_cursor_shell(monkeypatch, tmp_path):
+    monkeypatch.setenv("JEV_ENGINEERING_ROOT", str(tmp_path))
+    monkeypatch.delenv("JEV_HOOK_LIVE", raising=False)
+    result = pre_tool_decision({
+        "hook_event_name": "beforeShellExecution",
+        "command": "rm -rf /tmp/app",
+        "conversation_id": "c1",
+    })
+    assert result["permission"] == "deny"
+    assert result["permission"] != "allow"
+
+
+def test_pre_tool_hook_preserves_native_permissions_for_image_read(monkeypatch, tmp_path):
+    monkeypatch.setenv("JEV_ENGINEERING_ROOT", str(tmp_path))
+    monkeypatch.delenv("JEV_HOOK_LIVE", raising=False)
+    result = pre_tool_decision({"tool_name": "Read", "tool_input": {
+        "file_path": str(tmp_path / "calibration" / "p01_overview.jpg")}})
+    assert result == {}
+
+
+def test_pre_tool_hook_preserves_consequential_ask(monkeypatch, tmp_path):
+    monkeypatch.setenv("JEV_ENGINEERING_ROOT", str(tmp_path))
+    monkeypatch.delenv("JEV_HOOK_LIVE", raising=False)
+    result = pre_tool_decision({"tool_name": "Bash", "tool_input": {
+        "command": "git push origin feature/example"}})
+    assert result["hookSpecificOutput"]["permissionDecision"] == "ask"
