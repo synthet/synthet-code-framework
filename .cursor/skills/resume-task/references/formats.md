@@ -39,6 +39,13 @@ Other users' profiles are never discovered automatically.
   - That folder's `state.vscdb` `ItemTable['composer.composerData'].allComposers[]` maps each composer id to its workspace.
 - **Locking:** opened with `mode=ro`. If Cursor holds a lock, the DB is copied to a temp dir first.
 
+## Cursor agent transcripts (source `cursor-transcripts`)
+- **Path:** `~/.cursor/projects/<workspace-slug>/agent-transcripts/<id>/<id>.jsonl` (older builds: flat `<id>.jsonl`). Written for IDE agent chats.
+- **Line format:** `{role, message: {content: [text | tool_use]}}` plus `{type: "turn_ended", status}`. User text is wrapped in `<user_query>` next to injected `<user_info>`, `<rules>`, `<git_status>`… blocks.
+- **Project:** the slug is lossy (`D-Projects-my-app`). `slug_to_path` walks the drive to find the folder whose slug matches.
+- **Files touched:** `Write`, `StrReplace`, `Delete`, `EditNotebook` inputs (`path`).
+- **Dedupe:** the id equals the IDE `composerData` id; the richer of the two sessions is kept.
+
 ## cursor-agent (Cursor CLI)
 - **Path:** `~/.cursor/chats/<hash>/<id>/store.db`, a SQLite database with `meta` and content-addressed `blobs` tables.
 - **Parsing:** best effort only. JSON blobs with a `role` are read; protobuf blobs are skipped. Expect partial coverage.
@@ -48,11 +55,24 @@ Other users' profiles are never discovered automatically.
   - Conversations are `conversations/<uuid>.pb`. They are encrypted or compressed and **not readable**.
   - Readable working files are in `brain/<conversation-id>/`: `task.md` (checklist; `[x]` done, `[/]` in progress, `[ ]` open), `implementation_plan.md`, `walkthrough.md`, `*.md.resolved` and `*.metadata.json`.
   - IDE sessions therefore show plan artifacts but no dialogue.
-- **CLI (`agy`):** `~/.gemini/antigravity-cli/`.
-  - `conversations/<uuid>.db` (SQLite, schema undocumented) is not read.
-  - The display log `brain/<id>/.system_generated/logs/transcript_full.jsonl` is parsed generically: the role comes from `role`, `type`, `author` or `source` fields, and the text from `content`, `text` or `message`.
-- **Project:** guessed from `file://` URIs and `cwd`/`workspace` keys, then collapsed to the git root.
+- **CLI (`agy`):** `~/.gemini/antigravity-cli/`. Newer IDE builds also write `~/.gemini/antigravity-ide/brain/`.
+  - `conversations/<uuid>.db` (SQLite with protobuf `steps` blobs) is not read.
+  - The step log `brain/<id>/.system_generated/logs/transcript_full.jsonl` has one step per line: `{step_index, source, type, status, created_at, content, tool_calls[{name, args}]}`.
+    - `USER_EXPLICIT`/`USER_INPUT` is the user. The request is inside `<USER_REQUEST>`; `<ADDITIONAL_METADATA>` and `<USER_SETTINGS_CHANGE>` are injected and dropped.
+    - `MODEL`/`PLANNER_RESPONSE` is assistant text plus tool calls (`run_command.CommandLine`, `write_file.Path`, `edit_file.Path`, `read_file.Path`).
+    - `MODEL`/`GENERIC` is tool output and `SYSTEM`/`SYSTEM_MESSAGE` is injected context; neither is dialogue.
+  - Lines without `step_index` fall back to generic parsing (role from `role`/`type`/`author`/`source`).
+- **Project:** steps carry no cwd. It is guessed from absolute paths in tool arguments and `file://` URIs, then collapsed to the git root.
+- **Resume:** `agy --conversation <id>` for CLI conversations; IDE conversations are opened in the Agent Manager.
 - **Exports:** Antigravity can export a conversation to Markdown, and SpecStory (`specstory sync antigravity`) can too. Pass those with `--md` for full dialogue.
+
+## Grok CLI
+- **Path:** `$GROK_HOME` or `~/.grok`, under `sessions/<url-encoded-cwd>/<session-id>/`.
+- **Files:**
+  - `summary.json` is the index: `generated_title`, `session_summary`, `info.cwd`, `created_at`, `last_recap`.
+  - `updates.jsonl` is the authoritative ACP log: `params.update.sessionUpdate` is `user_message_chunk` / `agent_message_chunk` (text chunks, concatenated), `tool_call` (`rawInput`, `_meta["x.ai/tool"].{name, kind, read_only}`), `plan` (`entries[]` with `content`/`status`), `turn_completed` (`stop_reason`), `hook_execution`, `session_recap`.
+  - `chat_history.jsonl` holds raw model messages (`type` user/assistant/tool_result/reasoning) and is a fallback only.
+- **Resume:** `grok --resume <session-id>`. Grok also has a native `/export`; pass such files with `--md`.
 
 ## Markdown / text exports
 - **Input:** any `.md`, `.markdown` or `.txt` passed with `--md`, plus `<project>/.specstory/history/*.md` for every project found.
@@ -63,4 +83,9 @@ Other users' profiles are never discovered automatically.
   - plain prefixes: `Human:` and `Assistant:`
   - Claude Code export: `>` and `⏺`
   - A file with no markers is treated as one document.
+- **Fenced code:** speaker markers inside ``` fences are content, not turn boundaries.
+- **export-chat files** (`# Chat export` header) are parsed by `parse_chat_export`:
+  - `- Harness:` sets the tool to `<harness> (export)`; files without it are pre-2026-10-24 exports (Cursor, or Antigravity when tool calls read ``**Tool Call: `name`**``).
+  - `- Transcript:` is the session id, `- Workspace:` the project, `- Exported:` the start time, `- Resume:` the native resume command.
+  - `**Tool: <name>**` + fenced input blocks are removed from the dialogue; edit-tool inputs (`file_path`, `path`, `Path`, `TargetFile`, apply_patch headers) become files touched.
 - **Date:** taken from the filename (`2026-10-10_14-30Z-…`), otherwise from mtime.

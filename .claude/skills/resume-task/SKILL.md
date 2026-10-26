@@ -1,6 +1,6 @@
 ---
 name: resume-task
-description: Resume a previous or ongoing piece of work from wherever it was left — in Claude Code, OpenAI Codex CLI, Cursor (IDE or cursor-agent), Google Antigravity (IDE or agy CLI) or an exported .md/.txt transcript (SpecStory, /export). Finds the in-flight thread across those tools, reconstructs its goal, what's done, where it stopped, files touched and what's left, checks that against the repo, and hands it back ready to continue with a resume command and a paste-ready continuation prompt. Use whenever the user types /resume-task or says "resume", "continue where I left off", "pick up the X work", "what was I doing in Codex/Cursor/Antigravity", "carry on with yesterday's task", "move this task to Claude Code", or comes back to unfinished work after a break — even if they don't say which tool it was in.
+description: Resume a previous or ongoing piece of work from wherever it was left — in Claude Code, OpenAI Codex CLI, Cursor (IDE, agent transcripts or cursor-agent), Google Antigravity (IDE or agy CLI), Grok CLI or an exported .md/.txt transcript (export-chat, SpecStory, native /export). Finds the in-flight thread across those tools, reconstructs its goal, what's done, where it stopped, files touched and what's left, checks that against the repo, and hands it back ready to continue with a resume command and a paste-ready continuation prompt. Use whenever the user types /resume-task or says "resume", "continue where I left off", "pick up the X work", "what was I doing in Codex/Cursor/Antigravity/Grok", "carry on with yesterday's task", "move this task to Claude Code", or comes back to unfinished work after a break — even if they don't say which tool it was in.
 capability: "Recover unfinished local cross-harness work and produce an evidence-backed continuation brief."
 side_effect_level: local_write
 approval_required: false
@@ -48,14 +48,14 @@ standard library and redacts common secret formats. It writes two local files:
 - `digest.md`: grouped by project. For each session it shows the state, goal, last user message, the agent's last words, plan progress, files touched, a resume command and open-item candidates.
 - `candidates.json`: the same, plus `recent_turns`, the last few exchanges of each session in fuller form. Read `recent_turns` for the thread you're resuming; that is where "where it stopped" really lives.
 
-Project-local `.specstory/history/` exports are picked up automatically. Pass other exports with `--md`. Use `--probe` to see which tools have stores on this machine.
+Project-local `.specstory/history/` exports are picked up automatically. Pass other exports with `--md`. Files written by the export-chat skill (`# Chat export` header) are attributed to their harness, keep their session id and workspace, and get the native resume command back. Use `--probe` to see which tools have stores on this machine.
 
 **If nothing is found:**
 1. Widen `--days` once.
 2. If still empty, say which stores were missing.
 3. If this session isn't running on the machine where the agents run (a cloud sandbox, say), ask the user to run `/resume-task` from Claude Code on that machine, or to attach the exported transcript.
 
-`references/formats.md` covers where each tool stores sessions and the known gaps. One gap in particular: Antigravity IDE conversations are encrypted, so only its plan files are readable. Read the reference only when a source misbehaves or the user asks why a tool is missing.
+`references/formats.md` covers where each tool stores sessions and the known gaps. One gap in particular: Antigravity IDE `.pb` conversations are encrypted, so IDE sessions without a `brain/<id>/.system_generated/logs` step log show only their plan files. Read the reference only when a source misbehaves or the user asks why a tool is missing.
 
 ## 3. Reconstruct the thread
 
