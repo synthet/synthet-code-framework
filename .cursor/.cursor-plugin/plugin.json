@@ -1,6 +1,6 @@
 {
   "name": "agent-workflow",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "SDLC commands, review agents, and reusable agent skills from the synthet code framework.",
   "author": {
     "name": "synthet"

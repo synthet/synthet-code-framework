@@ -6,11 +6,35 @@ All notable changes to this framework are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-10-25
+
 ### Added
 
+- Centralized AI agent permission governance control plane with Git-backed hosting in
+  `infra/jev/` (46 tracked files), managed via `scripts/manage_permissions.py` (`bootstrap`,
+  `sync-infra`, `plan`, `apply`, `rollback`, `audit`, `verify`).
+- Cross-harness permission inventory, live telemetry audit, and October 2026 lightweight model
+  matrix in `docs/permissions-full-inventory.md` and `docs/centralized-permissions.md`.
+- Two-stage T3 auto-permission gate with calibrated per-question Noul thresholds
+  (`in_scope >= 0.88`, `local_effects >= 0.80`, `recoverable >= 0.75`) and Tier-2 Coin-Flip
+  Adjudication (`0.45 <= min(scores) < threshold`) calling `synthet-agent-swarm decide`.
+- Enriched `subagent-review` skill with `swarm_decide` structured decision support and
+  synchronous `PATHEXT` discovery (~34ms startup).
+- Enforced explicit `--harness` selection across all 5 harnesses in `export-chat` and enriched
+  transcript format parsing in `resume-task`.
 - Claude Code and Cursor marketplaces for the `agent-workflow` plugin. Manifests point at
   the existing `.claude` and `.cursor` trees and are refreshed by
   `scripts/build_plugin_manifests.py`.
+
+### Fixed
+
+- Antigravity Windows terminal sandbox compatibility: expanded tilde paths in `deny_read`
+  rules to absolute Windows paths (`C:\Users\dmnsy\.ssh`) and enforced
+  `allowNonWorkspaceAccess: true` on Windows to eliminate `readonly /: non-absolute file path`.
+- Claude Code `PermissionRequest` hook ordering: placed the Jev gate hook (`timeout: 15s`)
+  at index 0 ahead of notification hooks.
+- Closed T4 regex classification blindspots for `git -C <repo>` and Antigravity brain scratchpad
+  paths (`~/.gemini/antigravity-cli/brain/<id>/scratch/`).
 
 ### Changed
 
