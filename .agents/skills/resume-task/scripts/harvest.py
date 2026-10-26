@@ -74,12 +74,21 @@ def redact_report(value):
 
 NOISE_BLOCKS = re.compile(
     r"<(system-reminder|environment_context|user_instructions|command-message|command-args|"
-    r"local-command-stdout|local-command-stderr|ide_opened_file|ide_selection)>[\s\S]*?</\1>",
+    r"local-command-stdout|local-command-stderr|ide_opened_file|ide_selection|"
+    # Cursor / Grok user-message wrappers
+    r"user_info|rules|agent_skills|agent_transcripts|attached_files|git_status|manually_attached_skills|"
+    r"open_and_recently_viewed_files|system_reminder|system_notification|timestamp|"
+    # Antigravity step wrappers
+    r"ADDITIONAL_METADATA|USER_SETTINGS_CHANGE|CONTEXT_SUMMARY|SYSTEM_MESSAGE)\b[^>]*>[\s\S]*?</\1>",
     re.I,
 )
+USER_WRAPPED = re.compile(r"<(USER_REQUEST|user_query)>([\s\S]*?)</\1>")
 
 
 def clean(s: str) -> str:
+    wrapped = USER_WRAPPED.findall(s or "")
+    if wrapped:
+        return "\n\n".join(inner.strip() for _, inner in wrapped)
     s = NOISE_BLOCKS.sub(" ", s or "")
     s = re.sub(r"<command-name>\s*(\S+)\s*</command-name>", r"\1", s)
     return s.strip()
@@ -220,6 +229,7 @@ class Session:
     plan_docs: list[tuple[str, str]] = field(default_factory=list)  # (name, markdown)
     interrupted: bool = False
     note: str | None = None
+    resume: str | None = None                                # native resume command recorded by an export
     files: list[str] = field(default_factory=list)          # files the agent edited/created
 
     def touch(self, f):
@@ -518,6 +528,95 @@ def parse_cursor_ide(since: datetime) -> list[Session]:
 
 # --------------------------------------------------------------------------- Cursor CLI (cursor-agent)
 
+def cursor_slug(p: str) -> str:
+    return re.sub(r"[^A-Za-z0-9]+", "-", p).strip("-").lower()
+
+
+def slug_to_path(slug: str, max_depth: int = 8) -> str | None:
+    """Map Cursor's lossy project slug (``D-Projects-my-app``) back to an existing folder."""
+    want = slug.lower()
+    starts: list[Path] = []
+    m = re.match(r"^([A-Za-z])-(.*)$", slug)
+    if m and os.name == "nt":
+        starts.append(Path(f"{m.group(1).upper()}:\\"))
+    starts += [Path("/")] if os.name != "nt" else []
+    for start in starts:
+        frontier = [start]
+        for _ in range(max_depth):
+            nxt = []
+            for d in frontier:
+                if cursor_slug(str(d)) == want:
+                    return str(d)
+                try:
+                    for c in d.iterdir():
+                        cs = cursor_slug(str(c))
+                        if c.is_dir() and (want == cs or want.startswith(cs + "-")):
+                            nxt.append(c)
+                except OSError:
+                    continue
+            frontier = nxt
+            if not frontier:
+                break
+        for d in frontier:
+            if cursor_slug(str(d)) == want:
+                return str(d)
+    return None
+
+
+CURSOR_EDIT_TOOLS = {"Write", "StrReplace", "Delete", "EditNotebook", "edit_file", "search_replace", "write"}
+
+
+def parse_cursor_transcripts(since: datetime) -> list[Session]:
+    """``~/.cursor/projects/<slug>/agent-transcripts/[<id>/]<id>.jsonl`` (IDE agent and cursor-agent)."""
+    out = []
+    for h in homes():
+        root = h / ".cursor" / "projects"
+        if not root.is_dir():
+            continue
+        for proj in root.iterdir():
+            tdir = proj / "agent-transcripts"
+            if not tdir.is_dir():
+                continue
+            files = {p for p in tdir.glob("*.jsonl")} | {p for p in tdir.glob("*/*.jsonl") if p.stem == p.parent.name}
+            project = None
+            for p in files:
+                if mtime(p) < since:
+                    continue
+                project = project or slug_to_path(proj.name) or proj.name
+                s = Session(tool="cursor", sid=p.stem, path=str(p), project=project, updated=mtime(p))
+                for o in read_jsonl(p):
+                    if o.get("type") == "turn_ended":
+                        if o.get("status") in ("aborted", "cancelled", "error"):
+                            s.interrupted = True
+                        elif o.get("status") in ("success", "completed"):
+                            s.interrupted = False
+                        continue
+                    role = o.get("role")
+                    if role not in ("user", "assistant"):
+                        continue
+                    content = (o.get("message") or {}).get("content")
+                    blocks = [{"type": "text", "text": content}] if isinstance(content, str) else content or []
+                    for b in blocks:
+                        if not isinstance(b, dict):
+                            continue
+                        if b.get("type") == "tool_use":
+                            inp = b.get("input")
+                            inp = inp if isinstance(inp, dict) else {}
+                            if b.get("name") in CURSOR_EDIT_TOOLS:
+                                s.touch(inp.get("path") or inp.get("file_path") or inp.get("target_file"))
+                            if b.get("name") == "TodoWrite" and isinstance(inp.get("todos"), list):
+                                s.todos = [(t.get("content") or "", str(t.get("status", "")).lower())
+                                           for t in inp["todos"] if isinstance(t, dict)]
+                        elif b.get("type") == "text":
+                            txt = clean(b.get("text") or "")
+                            if txt:
+                                s.turns.append(Turn(role, txt))
+                s.finalize()
+                if s.turns:
+                    out.append(s)
+    return out
+
+
 def parse_cursor_cli(since: datetime) -> list[Session]:
     """Best effort: ~/.cursor/chats/<hash>/<id>/store.db (meta + content-addressed blobs)."""
     out = []
@@ -613,10 +712,40 @@ def guess_project(paths: list[str]) -> str | None:
         return Counter(os.path.dirname(p) for p in paths).most_common(1)[0][0]
 
 
+AG_EDIT_TOOLS = {"write_file", "edit_file", "write_to_file", "replace_file_content", "multi_replace_file_content"}
+AG_PATH_KEYS = ("Path", "TargetFile", "AbsolutePath", "Cwd", "DirectoryPath", "SearchPath", "File")
+
+
+def parse_antigravity_step(s: Session, o: dict, pathhints: list[str]) -> None:
+    """One step of ``transcript_full.jsonl``: USER_INPUT, PLANNER_RESPONSE (text + tool_calls),
+    GENERIC (tool output) or SYSTEM_MESSAGE. Only user input and planner text are dialogue."""
+    ts = parse_time(o.get("created_at"))
+    src, typ = o.get("source"), o.get("type")
+    if typ == "USER_INPUT" or src == "USER_EXPLICIT":
+        txt = clean(o.get("content") or "")
+        if txt:
+            s.turns.append(Turn("user", txt, ts))
+    elif src == "MODEL" and typ == "PLANNER_RESPONSE":
+        txt = clean(o.get("content") or "")
+        if txt:
+            s.turns.append(Turn("assistant", txt, ts))
+        for tc in o.get("tool_calls") or []:
+            args = tc.get("args") or {}
+            for k in AG_PATH_KEYS:
+                v = args.get(k)
+                if isinstance(v, str) and (os.path.isabs(v) or v.startswith("file://")):
+                    pathhints.append(file_uri_to_path(v) or v)
+                    if tc.get("name") in AG_EDIT_TOOLS and k in ("Path", "TargetFile", "AbsolutePath"):
+                        s.touch(file_uri_to_path(v) or v)
+    if o.get("status") in ("CANCELED", "CANCELLED", "ERROR") and src == "MODEL":
+        s.interrupted = True
+
+
 def parse_antigravity(since: datetime) -> list[Session]:
     out = []
     for h in homes():
         for root, label in ((h / ".gemini/antigravity", "antigravity"),
+                            (h / ".gemini/antigravity-ide", "antigravity"),
                             (h / ".gemini/antigravity-cli", "antigravity-cli")):
             brain = root / "brain"
             if not brain.is_dir():
@@ -660,6 +789,9 @@ def parse_antigravity(since: datetime) -> list[Session]:
                     for o in read_jsonl(lf):
                         if not isinstance(o, dict):
                             continue
+                        if "step_index" in o and "source" in o:  # structured CLI/IDE step log
+                            parse_antigravity_step(s, o, pathhints)
+                            continue
                         if len(pathhints) < 20:
                             find_paths(o, pathhints)
                         role = ag_role(o)
@@ -678,6 +810,81 @@ def parse_antigravity(since: datetime) -> list[Session]:
     return out
 
 
+# --------------------------------------------------------------------------- Grok CLI
+
+def grok_roots() -> list[Path]:
+    roots = [Path(os.environ["GROK_HOME"]).expanduser()] if os.environ.get("GROK_HOME") else []
+    roots += [h / ".grok" for h in homes()]
+    return [r for r in dict.fromkeys(roots) if (r / "sessions").is_dir()]
+
+
+GROK_EDIT_KINDS = {"edit", "write", "delete", "move"}
+
+
+def parse_grok(since: datetime) -> list[Session]:
+    """``~/.grok/sessions/<url-encoded-cwd>/<id>/``: summary.json (index) + updates.jsonl (ACP log)."""
+    out = []
+    for root in grok_roots():
+        for cwd_dir in (root / "sessions").iterdir():
+            if not cwd_dir.is_dir():
+                continue
+            for d in cwd_dir.iterdir():
+                log = d / "updates.jsonl"
+                if not log.is_file() or mtime(log) < since:
+                    continue
+                s = Session(tool="grok", sid=d.name, path=str(log), project=unquote(cwd_dir.name), updated=mtime(log))
+                try:
+                    summ = json.loads((d / "summary.json").read_text(encoding="utf-8"))
+                    s.title = one_line(summ.get("generated_title") or summ.get("session_summary") or "", 120) or None
+                    s.project = (summ.get("info") or {}).get("cwd") or s.project
+                    s.started = parse_time(summ.get("created_at"))
+                except (OSError, ValueError, AttributeError):
+                    pass
+                role, buf, ts = None, [], None
+                completed = True
+
+                def flush():
+                    if role and "".join(buf).strip():
+                        txt = clean("".join(buf))
+                        if txt:
+                            s.turns.append(Turn(role, txt, ts))
+
+                for o in read_jsonl(log):
+                    u = (o.get("params") or {}).get("update") or {}
+                    kind = u.get("sessionUpdate")
+                    if kind in ("user_message_chunk", "agent_message_chunk"):
+                        r = "user" if kind == "user_message_chunk" else "assistant"
+                        if r != role:
+                            flush()
+                            role, buf, ts = r, [], parse_time(o.get("timestamp"))
+                        buf.append((u.get("content") or {}).get("text") or "")
+                        if r == "user":
+                            completed = False
+                    elif kind == "tool_call":
+                        meta = (u.get("_meta") or {}).get("x.ai/tool") or {}
+                        raw = u.get("rawInput") or {}
+                        if meta.get("kind") in GROK_EDIT_KINDS or not meta.get("read_only", True):
+                            for key in ("target_file", "file_path", "path"):
+                                if isinstance(raw.get(key), str):
+                                    s.touch(raw[key])
+                    elif kind == "plan" and isinstance(u.get("entries"), list):
+                        s.todos = [(e.get("content") or "", str(e.get("status", "")).lower())
+                                   for e in u["entries"] if isinstance(e, dict)]
+                    elif kind == "turn_completed":
+                        flush()
+                        role, buf = None, []
+                        completed = True
+                        if u.get("stop_reason") in ("cancelled", "canceled", "interrupted", "max_turns"):
+                            s.interrupted = True
+                flush()
+                if not completed and s.turns and s.turns[-1].role == "assistant":
+                    s.interrupted = True
+                s.finalize()
+                if s.turns or s.todos:
+                    out.append(s)
+    return out
+
+
 # --------------------------------------------------------------------------- Markdown / text exports
 
 ROLE_LINE = [
@@ -687,6 +894,13 @@ ROLE_LINE = [
     re.compile(r"^(?P<r>Human|User|Assistant|Claude|AI|Codex|Gemini):\s", re.I),
 ]
 USERISH = re.compile(r"^(user|human|you|me)\b", re.I)
+FENCE = re.compile(r"^\s*(`{3,}|~{3,})")
+# Header written by the export-chat skill (export_chat.py).
+EXPORT_HEADER = re.compile(r"\A\s*# Chat export\s*\n")
+EXPORT_FIELD = re.compile(r"^- (Harness|Transcript|Workspace|Exported|Resume):\s*`?(.+?)`?\s*$", re.M)
+EXPORT_TOOL = re.compile(r"^\*\*Tool(?: Call)?: `?([^`*]+?)`?\*\*\s*\n+(`{3,}|~{3,})[a-z]*\n([\s\S]*?)\n\2", re.M)
+EXPORT_EDIT_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit", "StrReplace", "Delete", "write_file", "edit_file",
+                     "apply_patch", "search_replace", "write_to_file", "replace_file_content"}
 
 
 def split_md_turns(md: str) -> list[Turn]:
@@ -713,17 +927,30 @@ def split_md_turns(md: str) -> list[Turn]:
         flush()
         return turns
 
+    fence = None  # speaker markers inside fenced code (tool inputs, quoted logs) are content
     for ln in lines:
-        role = None
+        fm = FENCE.match(ln)
+        if fm:
+            if fence is None:
+                fence = fm.group(1)
+            elif fm.group(1).startswith(fence[0]) and len(fm.group(1)) >= len(fence) and not ln.strip()[len(fm.group(1)):]:
+                fence = None
+            buf.append(ln)
+            continue
+        if fence is not None:
+            buf.append(ln)
+            continue
+        role, matched = None, None
         for rx in ROLE_LINE:
             m = rx.match(ln)
             if m:
                 role = "user" if USERISH.match(m.group("r").strip()) else "assistant"
+                matched = rx
                 break
         if role:
             flush()
             cur_role, buf = role, []
-            rest = ln.split(":", 1)[1] if rx is ROLE_LINE[3] and ":" in ln else ""
+            rest = ln.split(":", 1)[1] if matched is ROLE_LINE[3] and ":" in ln else ""
             if rest.strip():
                 buf.append(rest)
         else:
@@ -796,6 +1023,8 @@ def parse_md(path: Path, project: str | None) -> Session | None:
         return None
     s = Session(tool=guess_tool_from_md(md, path), sid=path.stem, path=str(path), project=project,
                 updated=mtime(path), started=date_from_name(path.name))
+    if EXPORT_HEADER.match(md):
+        return parse_chat_export(md, s)
     s.turns = split_md_turns(md)
     if not s.turns:
         s.turns = [Turn("assistant", md)]
@@ -812,6 +1041,43 @@ def parse_md(path: Path, project: str | None) -> Session | None:
         else:
             find_paths(re.findall(r"file://[^\s)\]>\"']+", md), hints)
             s.project = guess_project(hints)
+    s.finalize()
+    return s
+
+
+def parse_chat_export(md: str, s: Session) -> Session:
+    """Markdown written by the export-chat skill: header fields, ``## User``/``## Assistant``
+    sections and ``**Tool: name**`` + fenced JSON inputs. Older exports have no Harness line."""
+    head = md[:2000]
+    fields = {k.lower(): v.strip() for k, v in EXPORT_FIELD.findall(head)}
+    harness = (fields.get("harness") or "").split(" ")[0].lower()
+    if not harness:  # pre-2026-10-24 export_chat: Cursor, or Antigravity when tool calls use "Tool Call:"
+        harness = "antigravity" if "**Tool Call: `" in md else "cursor"
+    store = re.search(r"\(([^)]+)\)", fields.get("harness", ""))
+    s.tool = f"{harness} (export)"
+    s.sid = fields.get("transcript") or s.sid
+    s.project = s.project or fields.get("workspace")
+    s.started = parse_time(fields.get("exported")) or s.started
+    s.note = f"export-chat export of a {harness}{' ' + store.group(1) if store else ''} session"
+    if fields.get("resume"):
+        s.resume = fields["resume"]
+    body = md[EXPORT_HEADER.match(md).end():]
+    for name, _, raw in EXPORT_TOOL.findall(body):
+        if name.strip() not in EXPORT_EDIT_TOOLS:
+            continue
+        try:
+            args = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(args, dict):
+            for key in ("file_path", "path", "Path", "TargetFile", "target_file", "notebook_path"):
+                if isinstance(args.get(key), str):
+                    s.touch(args[key])
+        elif isinstance(args, str):
+            for f in re.findall(r"\*\*\* (?:Update|Add) File: ([^\n]+)", args):
+                s.touch(f.strip())
+    dialogue = EXPORT_TOOL.sub("", body)
+    s.turns = split_md_turns(dialogue)
     s.finalize()
     return s
 
@@ -945,12 +1211,18 @@ def thread_state(s: Session, cands: list[dict]) -> str:
 def resume_cmd(s: Session) -> str | None:
     quote = (lambda value: "'" + value.replace("'", "''") + "'") if os.name == "nt" else shlex.quote
     cd = (("Set-Location -LiteralPath " if os.name == "nt" else "cd ") + quote(s.project) + ("; " if os.name == "nt" else " && ")) if s.project and os.path.isabs(s.project) else ""
+    if s.resume:  # recorded by export-chat; rebuild it so the id is quoted like every other command
+        parts = s.resume.split()
+        if len(parts) >= 2 and parts[0] in ("claude", "codex", "grok", "agy"):
+            return f"{cd}{' '.join(parts[:-1])} {quote(s.sid if s.sid == parts[-1] else parts[-1])}"
     if s.tool == "claude-code":
         return f"{cd}claude --resume {quote(s.sid)}"
     if s.tool == "codex":
         return f"{cd}codex resume {quote(s.sid)}"
     if s.tool == "antigravity-cli":
         return f"{cd}agy --conversation {quote(s.sid)}"
+    if s.tool == "grok":
+        return f"{cd}grok --resume {quote(s.sid)}"
     if s.tool == "cursor":
         return f'Cursor: open the project, then the chat named "{one_line(s.title or "", 60)}" in chat history'
     if s.tool == "antigravity":
@@ -1046,10 +1318,14 @@ def probe() -> dict:
                                   for p in glob.glob(str(h / ".cursor/chats/*/*/store.db"))})
     ag = []
     for h in homes():
-        for r in (".gemini/antigravity", ".gemini/antigravity-cli"):
+        for r in (".gemini/antigravity", ".gemini/antigravity-ide", ".gemini/antigravity-cli"):
             if (h / r / "brain").is_dir():
                 ag.append(str(h / r / "brain"))
     rep["antigravity"] = ag
+    rep["cursor-transcripts"] = sorted({str(p.parent.parent) for h in homes()
+                                        for p in (h / ".cursor/projects").glob("*/agent-transcripts/*")}) \
+        if any((h / ".cursor/projects").is_dir() for h in homes()) else []
+    rep["grok"] = [str(r / "sessions") for r in grok_roots()]
     return rep
 
 
@@ -1060,7 +1336,7 @@ def main():
     ap.add_argument("--project", action="append", default=[], help="only sessions in/under this path (repeatable)")
     ap.add_argument("--profile-root", action="append", default=[], help="additional explicitly authorized user profile (repeatable)")
     ap.add_argument("--md", action="append", default=[], help="exported transcript file or folder (repeatable)")
-    ap.add_argument("--sources", default="claude,codex,cursor,cursor-agent,antigravity,md",
+    ap.add_argument("--sources", default="claude,codex,cursor,cursor-transcripts,cursor-agent,antigravity,grok,md",
                     help="comma list of sources to read")
     ap.add_argument("--out", default="resume-task-out", help="output folder")
     ap.add_argument("--grep", action="append", default=[], help="keep only sessions mentioning this text (repeatable, any match)")
@@ -1103,10 +1379,31 @@ def main():
         counts["cursor"] = run("cursor", lambda: parse_cursor_ide(since))
     if "cursor-agent" in src:
         counts["cursor-agent"] = run("cursor-agent", lambda: parse_cursor_cli(since))
+    if "cursor-transcripts" in src:
+        counts["cursor-transcripts"] = run("cursor-transcripts", lambda: parse_cursor_transcripts(since))
     if "antigravity" in src:
         counts["antigravity"] = run("antigravity", lambda: parse_antigravity(since))
+    if "grok" in src:
+        counts["grok"] = run("grok", lambda: parse_grok(since))
     if "md" in src:
         counts["md-exports"] = run("md", lambda: [x for x in (parse_md(f, pr) for f, pr in md_files(a.md, a.project, since, True)) if x])
+
+    # Cursor IDE composerData and agent-transcripts describe the same chat under the same id.
+    merged: dict[tuple[str, str], Session] = {}
+    for s in sessions:
+        key = (s.tool, s.sid)
+        keep = merged.get(key)
+        if keep is None or s.tool != "cursor":
+            merged[key if s.tool == "cursor" else (s.tool, f"{s.sid}#{id(s)}")] = s
+            continue
+        rich, poor = (s, keep) if len(s.turns) > len(keep.turns) else (keep, s)
+        rich.todos = rich.todos or poor.todos
+        rich.project = rich.project or poor.project
+        rich.title = rich.title or poor.title
+        for f in poor.files:
+            rich.touch(f)
+        merged[key] = rich
+    sessions[:] = list(merged.values())
 
     for s in sessions:
         s.project = repo_root(s.project)

@@ -424,6 +424,8 @@ def test_export_chat_cli_writes_file(tmp_path: Path) -> None:
             sys.executable,
             str(EXPORT_CHAT),
             str(out),
+            "--harness",
+            "cursor",
             "--workspace",
             str(workspace),
             "--cursor-home",
