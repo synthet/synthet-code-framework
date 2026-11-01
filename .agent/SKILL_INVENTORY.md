@@ -32,6 +32,7 @@ commands or edit code/config as part of its procedure.
 | test-driven-development | Red-green-refactor workflow for behavior changes with practical test seams | L2 | 2026-07-14 |
 | rust-testing | Cargo/nextest unit tests beside modules | L2 | 2026-08-14 |
 | threat-modeling-agentic-tools | Threat-model MCP/tool abuse and injection | L1 | 2026-07-01 |
+| use-jev | Delegate pending decisions, blocked steps and triage items to Jev in one batched call; act on confident low-risk picks, hand back the rest | L2 | 2026-11-01 |
 | validate-implementation | Per-AC Verified/Failed/Unknown verdicts with evidence (**compiled harness**) | L2 | 2026-07-19 |
 | verification-before-completion | Evidence-backed completion claims with fresh command proof (**compiled harness**) | L1 | 2026-07-19 |
 
