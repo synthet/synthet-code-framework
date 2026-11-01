@@ -1,3 +1,12 @@
+---
+type: Reference
+title: "Full Cross-Harness Permission Inventory, Live Telemetry Analysis & Governance Architecture"
+description: "Permission settings across harnesses and projects, with telemetry analysis and governance architecture."
+resource: permissions-full-inventory.md
+tags: [permissions, inventory, governance]
+timestamp: 2026-10-25T00:00:00Z
+okf_version: 0.1
+---
 # Full Cross-Harness Permission Inventory, Live Telemetry Analysis & Governance Architecture
 
 > **Canonical Reference Document**  
