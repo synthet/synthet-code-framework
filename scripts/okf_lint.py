@@ -25,6 +25,8 @@ from okf_bundle import (  # noqa: E402
 
 PROFILES = ("minimal", "project")
 SEVERITIES = ("error", "warning", "info")
+# Archived pages and git-ignored operator-local notes (`_local/`) are not part of the published bundle.
+DEFAULT_EXCLUDE_PREFIXES = ("archive/", "_local/")
 
 
 @dataclass
@@ -57,7 +59,7 @@ def lint_bundle(
     *,
     profile: str = "project",
     bundle_name: str = "docs",
-    exclude_prefixes: tuple[str, ...] = ("archive/",),
+    exclude_prefixes: tuple[str, ...] = DEFAULT_EXCLUDE_PREFIXES,
     only_paths: frozenset[str] | None = None,
 ) -> BundleReport:
     docs_root = docs_root.resolve()
@@ -232,7 +234,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--exclude-prefix",
         action="append",
-        default=["archive/"],
+        default=list(DEFAULT_EXCLUDE_PREFIXES),
         dest="exclude_prefixes",
         help="Skip frontmatter checks for paths under this prefix (repeatable)",
     )
