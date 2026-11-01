@@ -1,3 +1,12 @@
+---
+type: Report
+title: "Fleet Agent Compendium: Complete Inventory & Architecture"
+description: "Inventory and architecture of agent assets across the project fleet and five harnesses."
+resource: FLEET_AGENT_COMPENDIUM.md
+tags: [agents, inventory, harnesses]
+timestamp: 2026-10-19T00:00:00Z
+okf_version: 0.1
+---
 # Fleet Agent Compendium: Complete Inventory & Architecture
 
 > **Fleet Scope**: 63 Projects across `D:\Projects` + User/Global configuration across 5 harnesses: Claude Code, Cursor, Codex, Grok, and Antigravity (Agy).
