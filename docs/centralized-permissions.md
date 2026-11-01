@@ -1,3 +1,12 @@
+---
+type: Technical Reference
+title: "Centralized Permission Auto-Approval & Harness Governance"
+description: "Unified permission auto-approval gate, command classification tiers and cross-harness hook contracts."
+resource: centralized-permissions.md
+tags: [permissions, hooks, governance]
+timestamp: 2026-10-25T00:00:00Z
+okf_version: 0.1
+---
 # Centralized Permission Auto-Approval & Harness Governance
 
 This document specifies the unified permission auto-approval gate, command classification tiers, cross-harness hook contracts, and operational workflows across Claude Code, OpenAI Codex, Cursor Agent/IDE, Google Antigravity, and Grok CLI.
