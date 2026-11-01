@@ -196,6 +196,25 @@ def check_relative_markdown_links(path: Path, rel: str, text: str, errors: list[
             errors.append(f"{rel}: unresolved relative Markdown link {target!r}")
 
 
+GENERATED_ALIAS_MARKERS = (
+    ("framework-", "Explicit framework workflow:"),
+    ("project-rule-", "Explicit project rule:"),
+)
+
+
+def is_generated_alias(skill_name: str, pairs: list[tuple[str, str]]) -> bool:
+    """True for skills scripts/agent_setup.py generates from a command or rule.
+
+    Their body is a copy of the source asset, which is validated where it lives, so the
+    metadata contract and relative links (written for the source location) do not apply.
+    """
+    description = _value(pairs, "description") or ""
+    return any(
+        skill_name.startswith(prefix) and description.startswith(marker)
+        for prefix, marker in GENERATED_ALIAS_MARKERS
+    )
+
+
 def check_skills(root: Path, errors: list[str]) -> None:
     skills_dir = root / ".claude" / "skills"
     seen: dict[str, str] = {}
@@ -222,7 +241,9 @@ def check_skills(root: Path, errors: list[str]) -> None:
             )
         if not _value(pairs, "description"):
             errors.append(f"{rel}: missing or empty `description`")
-        check_metadata_contract(rel, pairs, errors, text)
+        generated = is_generated_alias(skill_dir.name, pairs)
+        if not generated:
+            check_metadata_contract(rel, pairs, errors, text)
         check_model_alias(rel, pairs, errors)
         if name:
             if name in seen:
@@ -230,7 +251,8 @@ def check_skills(root: Path, errors: list[str]) -> None:
                     f"{rel}: duplicate skill name {name!r} (also in {seen[name]})"
                 )
             seen[name] = rel
-        check_relative_markdown_links(skill_md, rel, text, errors)
+        if not generated:
+            check_relative_markdown_links(skill_md, rel, text, errors)
 
 
 def check_agents(root: Path, errors: list[str]) -> None:
