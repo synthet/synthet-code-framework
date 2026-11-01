@@ -191,3 +191,41 @@ def test_pr_issue_project_mutation_commands_require_remote_write(
     status, output = run_check(tmp_path)
     assert status == 1
     assert "mutation commands require `side_effect_level: remote_write`" in output
+
+
+GENERATED_ALIAS = (
+    "---\n"
+    "name: framework-plan\n"
+    'description: "Explicit framework workflow: plan"\n'
+    "disable-model-invocation: true\n"
+    "---\n\n"
+    "# /plan\n\nSee [overview](architecture/system-overview.md).\n"
+)
+
+
+def test_generated_command_alias_skips_metadata_and_link_checks(tmp_path: Path) -> None:
+    write_asset(tmp_path, ".claude/skills/framework-plan/SKILL.md", GENERATED_ALIAS)
+
+    code, output = run_check(tmp_path)
+
+    assert code == 0, output
+
+
+def test_alias_lookalike_without_generator_marker_is_still_checked(tmp_path: Path) -> None:
+    body = GENERATED_ALIAS.replace("Explicit framework workflow: plan", "Hand-written plan skill")
+    write_asset(tmp_path, ".claude/skills/framework-plan/SKILL.md", body)
+
+    code, output = run_check(tmp_path)
+
+    assert code == 1
+    assert "missing or empty `capability`" in output
+    assert "unresolved relative Markdown link" in output
+
+
+def test_generated_alias_still_requires_matching_name(tmp_path: Path) -> None:
+    write_asset(tmp_path, ".claude/skills/framework-spec/SKILL.md", GENERATED_ALIAS)
+
+    code, output = run_check(tmp_path)
+
+    assert code == 1
+    assert "does not match directory" in output
