@@ -72,6 +72,7 @@ Full diagram: [windows-wsl-split.md](../cli-tools-overview/references/windows-ws
 ## Agent-Safe Patterns
 
 - Avoid mixing `D:\` and `/mnt/d/` in one workflow.
+- In Git Bash, prefix `MSYS_NO_PATHCONV=1` to `docker exec`/`docker run` commands that pass container paths (`-w /app`, `/data/...`); otherwise MSYS rewrites them to Windows paths ("Cwd must be an absolute path").
 - See [bounded-output-patterns.md](../cli-tools-overview/references/bounded-output-patterns.md).
 
 ## Commands Requiring Confirmation
