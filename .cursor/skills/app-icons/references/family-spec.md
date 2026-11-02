@@ -29,6 +29,10 @@ this skill's `templates/` and `scripts/` (canonical copy: synthet/image-scoring-
 | Driftara Video | video-gallery | Driftara D with a play mark | [`icons/projects/driftara-video`](https://github.com/synthet/image-scoring-ui/tree/main/icons/projects/driftara-video) |
 | AI Quotas | ai-quotas | 270° gauge ring with a centre dot | [`icons/projects/ai-quotas`](https://github.com/synthet/image-scoring-ui/tree/main/icons/projects/ai-quotas) |
 | Kestrel | kestrel (desktop review app) | bold K with a raised-wing upper arm | [`icons/projects/kestrel`](https://github.com/synthet/image-scoring-ui/tree/main/icons/projects/kestrel) |
+| Vexlum Mobile | image-scoring-mobile | label tag with a punched hole | [`icons/projects/vexlum-mobile`](https://github.com/synthet/image-scoring-ui/tree/main/icons/projects/vexlum-mobile) |
+| Eye Quality Model | image-scoring-model | almond eye with a pupil | [`icons/projects/eye-quality-model`](https://github.com/synthet/image-scoring-ui/tree/main/icons/projects/eye-quality-model) |
+| Vexlum Skills | image-scoring-skills | four-point spark | [`icons/projects/vexlum-skills`](https://github.com/synthet/image-scoring-ui/tree/main/icons/projects/vexlum-skills) |
+| Design Tokens | image-scoring-ui | three stepped bars | [`icons/projects/design-tokens`](https://github.com/synthet/image-scoring-ui/tree/main/icons/projects/design-tokens) |
 | Zed, Warp | synthet/zed, synthet/warp | labyrinth Z, two-panel mark | in those forks (reference implementation) |
 
 Sub-brands share a base shape and differ by an inner glyph (Driftara: the D).
@@ -53,8 +57,10 @@ Wiring by surface:
 - **Gradio / FastAPI:** pass `favicon_path` to `launch()` or serve `favicon.ico` from the static route.
 - **Electron main:** `new BrowserWindow({ icon })` with `app.ico` on Windows and `png/512.png` elsewhere; point the
   builder config (`win.icon`, `mac.icon`, `linux.icon`) at the same files.
-- **Expo:** `expo.icon` = `png/1024.png`; Android adaptive foreground = the mark on transparent at 1024 with
-  `backgroundColor` `#101014`.
+- **Expo:** run with `--expo` to also write `expo/`: `icon.png` (1024, opaque full-bleed plate; iOS masks it),
+  `adaptive-foreground.png` (mark only on transparent, for `android.adaptiveIcon.foregroundImage`),
+  `monochrome.png` (white mark, for `monochromeImage`), `splash-icon.png` (plated icon) and `favicon.png` (48).
+  Set `android.adaptiveIcon.backgroundColor` to `#101014`.
 - **Windows desktop shortcuts:** `IconLocation` = an installed copy of `app.ico` outside any git checkout (for
   example `%LOCALAPPDATA%\SynthIcons\<project>.ico`), so branch switches cannot remove it.
 

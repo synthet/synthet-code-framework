@@ -49,7 +49,7 @@ Wire only the surfaces the project has (details in the spec):
 | Web / Vite / Electron renderer | `favicon.ico`, `favicon.svg`, `apple-touch-icon.png` in the public folder, linked from `index.html` |
 | Gradio / FastAPI | `favicon.ico` via `favicon_path` or the static route |
 | Electron main and builder | `app.ico` (Windows) and `png/512.png` (macOS/Linux) |
-| Expo | `png/1024.png` as `icon`; adaptive icon background `#101014` |
+| Expo | add `--expo`: `expo/icon.png` as `icon`, `adaptive-foreground.png` and `monochrome.png` for the adaptive icon (background `#101014`), `splash-icon.png`, `favicon.png` |
 | Web manifest | `icon-192.png`, `icon-512.png` |
 | Windows desktop shortcut | an installed copy of `app.ico` outside the checkout, e.g. `%LOCALAPPDATA%\SynthIcons\<project>.ico` |
 
