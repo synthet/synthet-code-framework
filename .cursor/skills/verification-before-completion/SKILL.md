@@ -32,6 +32,7 @@ python .claude/skills/verification-before-completion/scripts/harness.py --framew
 1. **Name the claim** and pick the falsifying proof (catalog ids or custom command).
 2. **Interpret output** after the final edit — exit code, warnings, skipped tests, scope.
 3. Report ✅ / ⚠️ / ❌ with the exact command; never upgrade incomplete verification to pass.
+4. **Prove the real path, not a proxy.** A native addon can import fine and still fail on first use (bindings load lazily): check it with a real call, run by the same interpreter the launcher uses, e.g. `node -e "new (require('better-sqlite3'))(':memory:')"` with the `node` an MCP config starts. An import or `--version` alone does not prove it works.
 
 ## Use with
 
