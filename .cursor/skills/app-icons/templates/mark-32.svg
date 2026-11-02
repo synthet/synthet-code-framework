@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title description">
+  <title id="title">PROJECT — 24/32 px simplification</title>
+  <desc id="description">Hand-simplified mark for 24-32 px: flat silver, bars at least 96 units wide so they land on whole pixels at 32 px.</desc>
+  <g id="foundation">
+    <rect x="64" y="64" width="896" height="896" rx="184" fill="#101014"/>
+  </g>
+  <g id="glyph" fill="#A9B7C6">
+    <!-- MARK: the master's essential silhouette, snapped to a 32-unit grid; bars >= 96 units. -->
+    <path d="M 288,288 H 736 V 384 H 384 V 736 H 288 Z"/>
+    <path d="M 480,480 H 736 V 736 H 480 Z"/>
+  </g>
+</svg>

@@ -14,6 +14,7 @@ commands or edit code/config as part of its procedure.
 | Skill | Purpose | Risk | Last reviewed |
 |-------|---------|------|---------------|
 | agent-memory | Log sessions, dream consolidation, promote memory, load context (bootloader over `scripts/agent-memory/`) | L2 | 2026-07-19 |
+| app-icons | Design, render, verify and wire Synth-family (Zed/Warp-style) app icons and favicons | L1 | 2026-11-01 |
 | autonomous-run-contract | Metric, budget, revert rule, and stop conditions before an unattended or fanned-out run | L1 | 2026-07-25 |
 | backlog-queue | Provider-oriented backlog queue; local markdown, GitHub Issues, optional GitHub Projects | L2 | 2026-07-01 |
 | commit-conventions | Conventional Commits and PR title wording | L1 | 2026-07-01 |

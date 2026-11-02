@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title description">
+  <title id="title">PROJECT — 16 px simplification</title>
+  <desc id="description">Hand-simplified mark for 16 px: one or two shapes, bars at least 128 units wide (2 px at 16 px), 64-unit grid.</desc>
+  <g id="foundation">
+    <rect x="64" y="64" width="896" height="896" rx="184" fill="#101014"/>
+  </g>
+  <g id="glyph" fill="#A9B7C6">
+    <!-- MARK: reduce to the single most recognisable shape; snap to a 64-unit grid; bars >= 128 units. -->
+    <path d="M 256,256 H 768 V 384 H 384 V 768 H 256 Z"/>
+    <path d="M 512,512 H 768 V 768 H 512 Z"/>
+  </g>
+</svg>
