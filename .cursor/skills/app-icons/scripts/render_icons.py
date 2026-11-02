@@ -1,4 +1,4 @@
-"""Vendored from synthet/image-scoring-ui icons/render_icons.py at b6bcbc6 (canonical copy there).
+"""Vendored from synthet/image-scoring-ui icons/render_icons.py at 4037217 (canonical copy there).
 
 Render a project's Synth-family app icon and favicons from its vector masters.
 
@@ -190,6 +190,50 @@ def render(masters: Path, out: Path, tint: str | None) -> list[Path]:
     return written
 
 
+PLATE_RECT = '<rect x="64" y="64" width="896" height="896" rx="184"'
+FULL_BLEED_RECT = '<rect x="0" y="0" width="1024" height="1024" rx="0"'
+
+
+def _variant(source: Path, *, full_bleed: bool = False, glyph_only: bool = False, glyph_fill: str | None = None) -> Path:
+    """Write a variant of a master to a temp file: full-bleed plate (iOS), glyph only (Android adaptive/splash)."""
+    markup = source.read_text(encoding="utf-8")
+    if full_bleed:
+        if PLATE_RECT not in markup:
+            raise SystemExit(f"{source} has no standard plate rect")
+        markup = markup.replace(PLATE_RECT, FULL_BLEED_RECT, 1)
+    if glyph_only:
+        start, end = markup.find('<g id="foundation">'), markup.find("</g>", markup.find('<g id="foundation">'))
+        if start < 0 or end < 0:
+            raise SystemExit(f"{source} has no foundation group")
+        markup = markup[:start] + markup[end + len("</g>"):]
+    if glyph_fill:
+        markup = markup.replace(SILVER_FILL, f'fill="{glyph_fill}"').replace(FLAT_FILL, f'fill="{glyph_fill}"')
+    staged = Path(tempfile.mkdtemp(prefix="synth-icon-variant-")) / source.name
+    staged.write_text(markup, encoding="utf-8")
+    return staged
+
+
+def render_expo(masters: Path, out: Path) -> list[Path]:
+    """Expo assets: opaque full-bleed iOS icon, Android adaptive foreground and monochrome, splash, web favicon."""
+    master = masters / "mark.svg"
+    expo = out / "expo"
+    files = {
+        "icon.png": render_svg(_variant(master, full_bleed=True), 1024),
+        "adaptive-foreground.png": render_svg(_variant(master, glyph_only=True), 1024),
+        "monochrome.png": render_svg(_variant(master, glyph_only=True, glyph_fill="#FFFFFF"), 1024),
+        "splash-icon.png": render_svg(master, 1024),
+        "favicon.png": render_svg(source_for(masters, 48), 48),
+    }
+    corner = files["icon.png"].getpixel((0, 0))[3]
+    if corner != 255:
+        raise SystemExit("expo/icon.png must be opaque for iOS")
+    for name in ("adaptive-foreground.png", "monochrome.png", "splash-icon.png", "favicon.png"):
+        check_transparent_surround(files[name], f"expo/{name}")
+    for name, image in files.items():
+        save_png(expo / name, image)
+    return [expo / name for name in files]
+
+
 def check(out: Path) -> None:
     for size in PNG_SIZES:
         with Image.open(out / "png" / f"{size}.png") as image:
@@ -206,6 +250,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--out", type=Path, help="output folder")
     p.add_argument("--tint", help="optional glyph tint (#RRGGBB), e.g. a release channel")
     p.add_argument("--check", type=Path, metavar="OUT", help="only verify an existing output folder")
+    p.add_argument("--expo", action="store_true", help="also write expo/ (iOS icon, Android adaptive, splash, web favicon)")
     a = p.parse_args(argv)
     if a.check:
         check(a.check)
@@ -214,6 +259,8 @@ def main(argv: list[str] | None = None) -> int:
     if not (a.masters and a.out):
         p.error("--masters and --out are required unless --check is given")
     written = render(a.masters, a.out, a.tint)
+    if a.expo:
+        written += render_expo(a.masters, a.out)
     print(f"Rendered and verified {len(written)} files under {a.out}")
     return 0
 
