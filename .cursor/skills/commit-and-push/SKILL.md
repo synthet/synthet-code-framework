@@ -33,6 +33,7 @@ python .claude/skills/commit-and-push/scripts/harness.py --execute --push --json
 
 - Draft Conventional Commit subject/body (`commit-conventions`).
 - Prefer explicit path staging when unrelated dirty files exist (inspect `paths` first).
+- **Shared checkouts:** before writing in a repo, `git fetch` and check `HEAD..origin/<default>` and peer sessions; commit on a branch but return the checkout to its default branch; stage only your hunks when a file also holds someone else's edits. Recipes: [references/shared-checkouts.md](references/shared-checkouts.md). Why: other sessions merge, switch branches and commit in the same checkout.
 
 ## Human / safety (enforced)
 
