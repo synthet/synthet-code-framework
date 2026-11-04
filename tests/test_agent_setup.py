@@ -698,3 +698,48 @@ def test_bundled_shared_reference_copies_do_not_block_pruning(tmp_path):
     shared.parent.mkdir(parents=True)
     shared.write_text('See .claude/skills/demo/SKILL.md\n')
     assert '.claude/skills/demo/SKILL.md' in _deleted(setup.build_plan(framework, projects, user, state), repo)
+
+
+def test_rollback_restores_the_ownership_ledger(tmp_path):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path)
+    _catalog(framework, 'global', True, [])
+    rel = '.claude/skills/demo/SKILL.md'
+    before = dict(setup.owned_files(state, repo))
+    assert rel in before
+    plan = setup.build_plan(framework, projects, user, state)
+    run = _apply(plan, state, projects, user)
+    assert rel not in setup.owned_files(state, repo)
+    result = setup.rollback(run, [projects, user])
+    assert setup.restore_ownership(state, run, result['restored']) >= 1
+    assert setup.owned_files(state, repo)[rel] == before[rel]
+    # With the ledger back, the same retirement can be planned again.
+    assert rel in _deleted(setup.build_plan(framework, projects, user, state), repo)
+
+
+def test_rollback_drops_ledger_entries_for_files_it_removes(tmp_path):
+    target = tmp_path / 'target'
+    target.mkdir()
+    state = tmp_path / 'state'
+    data = b'New'
+    path = target / 'new.md'
+    operation = {'path': str(path), 'relative': 'new.md', 'action': 'create', 'before_sha256': None, 'after_sha256': setup.digest(data),
+                 'content': base64.b64encode(data).decode(), 'before_content': None}
+    run = setup.apply_operations([operation], state, [target])
+    setup.save_ownership(state, run, target)
+    assert 'new.md' in setup.owned_files(state, target)
+    result = setup.rollback(run, [target])
+    setup.restore_ownership(state, run, result['restored'])
+    assert 'new.md' not in setup.owned_files(state, target)
+
+
+def test_old_receipts_without_a_snapshot_leave_the_ledger_alone(tmp_path):
+    target = tmp_path / 'target'
+    target.mkdir()
+    path = target / 'kept.md'
+    path.write_bytes(b'Original')
+    state = tmp_path / 'state'
+    operation = {'path': str(path), 'relative': 'kept.md', 'action': 'delete', 'before_sha256': setup.digest(b'Original'), 'after_sha256': None,
+                 'content': '', 'before_content': None}
+    run = setup.apply_operations([operation], state, [target])
+    result = setup.rollback(run, [target])
+    assert setup.restore_ownership(state, run, result['restored']) == 0

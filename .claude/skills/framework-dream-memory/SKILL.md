@@ -30,4 +30,4 @@ python scripts/agent-memory/dream.py
 
 ## Skill
 
-`.claude/skills/agent-memory/SKILL.md`
+The `agent-memory` skill
