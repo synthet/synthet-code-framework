@@ -83,6 +83,8 @@ See [commands-requiring-confirmation.md](../cli-tools-overview/references/comman
 
 - Execution policy blocking scripts: user adjusts policy for their profile.
 - Docker not running: start Docker Desktop before compose commands.
+- `node -e` with a regex or nested quotes: PowerShell eats the escapes and Node reports `Unterminated regexp literal`. Write the script to a `.js` file and run `node` on that file.
+- Python in terminal sandboxes: Microsoft Store Python execution aliases (`WindowsApps\python.exe`) fail under process isolation with `ResourceUnavailable`. For sandboxed inspection/scripting, use native PowerShell cmdlets (`Select-String`, `ConvertFrom-Json`, `Get-Content`); invoke `python.exe` with sandbox bypass approval or use standalone Python/uv executables.
 
 ## Windows Notes
 
