@@ -667,3 +667,34 @@ def test_junction_is_a_link_and_not_a_second_project(tmp_path):
     report = setup.inventory(projects, tmp_path / 'absent')
     assert [item['name'] for item in report['projects']] == ['real']
     assert report['aliases'][0]['path'].endswith('alias')
+
+
+def _own(state, repo, path):
+    ledger = next(item for item in (state / 'targets').glob('*.json') if Path(json.loads(item.read_text())['root']) == repo)
+    data = json.loads(ledger.read_text())
+    data['files'][path.relative_to(repo).as_posix()] = {'sha256': setup.digest(path.read_bytes()), 'content': base64.b64encode(path.read_bytes()).decode()}
+    ledger.write_text(json.dumps(data))
+
+
+@pytest.mark.parametrize('edited', [False, True])
+def test_only_unmodified_installer_files_stop_counting_as_references(tmp_path, edited):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path)
+    _catalog(framework, 'global', True, [])
+    doc = repo / '.agent/SKILL_COMPILATION.md'
+    doc.parent.mkdir(exist_ok=True)
+    doc.write_text('See .claude/skills/demo/scripts/harness.py\n')
+    _own(state, repo, doc)
+    if edited:
+        doc.write_text('Project note: run .claude/skills/demo/scripts/harness.py\n')
+    plan = setup.build_plan(framework, projects, user, state)
+    assert ('.claude/skills/demo/SKILL.md' in _deleted(plan, repo)) is not edited
+    assert ('referenced' in _tier_diagnostics(plan, 'tier-collision').get('demo', '')) is edited
+
+
+def test_bundled_shared_reference_copies_do_not_block_pruning(tmp_path):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path)
+    _catalog(framework, 'global', True, [])
+    shared = repo / '.claude/skills/kept/references/shared/.agent/SAFETY.md'
+    shared.parent.mkdir(parents=True)
+    shared.write_text('See .claude/skills/demo/SKILL.md\n')
+    assert '.claude/skills/demo/SKILL.md' in _deleted(setup.build_plan(framework, projects, user, state), repo)
