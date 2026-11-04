@@ -1141,6 +1141,14 @@ def skill_references(project: Path) -> dict[str, set[str]] | None:
     return references
 
 
+def _unmodified(path: Path, entry: dict) -> bool:
+    """True when a file still matches its ownership ledger, ignoring line endings."""
+    if not path.is_file():
+        return False
+    data = path.read_bytes()
+    return digest(data) == entry.get("sha256") or data.replace(b"\r\n", b"\n") == base64.b64decode(entry.get("content") or "").replace(b"\r\n", b"\n")
+
+
 def _prune_blocker(root: Path, skill: Path, owned: dict, references: dict[str, set[str]] | None, retiring: tuple[str, ...]) -> str | None:
     if not owned:
         return "no ownership ledger"
@@ -1154,13 +1162,14 @@ def _prune_blocker(root: Path, skill: Path, owned: dict, references: dict[str, s
             return "linked path: " + rel
         if not path.is_file() or "__pycache__" in path.parts or path.suffix in {".pyc", ".pyo"}:
             continue
-        entry = owned.get(rel)
-        if entry is None:
+        if rel not in owned:
             return "unowned file: " + rel
-        data = path.read_bytes()
-        if digest(data) != entry.get("sha256") and data.replace(b"\r\n", b"\n") != base64.b64decode(entry.get("content") or "").replace(b"\r\n", b"\n"):
+        if not _unmodified(path, owned[rel]):
             return "edited file: " + rel
-    outside = sorted(rel for rel in references.get(skill.name, ()) if not rel.startswith(retiring))
+    # Installer-written docs and bundled copies only describe skills, which stay
+    # available by name at user level. A file the repository owns is a dependency.
+    outside = sorted(rel for rel in references.get(skill.name, ()) if not rel.startswith(retiring)
+                     and "/references/shared/" not in rel and not (rel in owned and _unmodified(root / rel, owned[rel])))
     return "referenced by " + outside[0] if outside else None
 
 

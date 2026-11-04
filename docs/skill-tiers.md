@@ -45,7 +45,7 @@ Skill aliases carry commands to harnesses that have no command concept.
 1. The repository has an ownership ledger.
 2. The repository is a Git checkout, so references can be searched.
 3. Every file in the skill bundle matches the ledger, ignoring line endings and Python caches.
-4. No tracked or untracked file outside retiring skills references `skills/<name>/`.
+4. No file the repository owns or has edited references `skills/<name>/`. Unmodified installer-written files and bundled `references/shared/` copies don't count, because they only describe skills that stay available by name at user level.
 5. The bundle holds no file name the installer may not touch, such as `config.json`.
 
 If any copy fails, the skill stays in every harness tree, and the plan reports why: `tier-collision` when it shares a global name, otherwise `tier-review`. To resolve one, rename it as a project skill, move its changes into the library, or remove it by hand.
