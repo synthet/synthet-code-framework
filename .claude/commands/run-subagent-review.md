@@ -10,7 +10,7 @@ risk_class: high
 
 # /run-subagent-review — Run external sub-agent review (MCP)
 
-Delegate a **review-only** task to one or more external CLIs via **subagent-orchestrator** MCP.
+Delegate a **review-only** task to one or more external CLIs via **synthet-agent-swarm** MCP.
 
 ## Inputs
 
