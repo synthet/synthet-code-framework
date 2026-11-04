@@ -16,6 +16,6 @@ Plans contain exact content and before/after hashes. Receipts, baselines and bac
 
 Claude uses .claude assets and CLAUDE.md; Codex uses .agents/skills, .codex/agents and AGENTS.md; Cursor discovers shared skills and uses .cursor rules/commands/agents; Antigravity uses .agents/skills/rules/agents and native mcp_config.json. User deployments additionally use .gemini/config for Antigravity. Existing legacy installations are retained.
 
-The library manifest selects core and specialist skills. Project-native skills take precedence in packaging. MCP adapters add missing validated registrations, never replace a conflicting user entry or copy literal credentials. Missing executables, paths, disabled sources and unsupported auth are diagnostics, not successful activation.
+The library manifest assigns skills to tiers: shared skills install at user level and stack packs only into repositories that opt in. Plans delete a retired repository copy only when its whole bundle is unmodified and unreferenced; otherwise they report `tier-collision` or `tier-review`. Refresh the user tier before pruning repositories. Project-native skills take precedence in packaging. MCP adapters add missing validated registrations, never replace a conflicting user entry or copy literal credentials. Missing executables, paths, disabled sources and unsupported auth are diagnostics, not successful activation.
 
 Use the local receipt and subsequent plan as evidence; file installation alone does not prove a remote MCP is healthy or an IDE has reloaded it.
