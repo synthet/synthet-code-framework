@@ -64,7 +64,7 @@ Jev evidence and reviewed choices: [decision ledger](setup/decisions.json).
 
 | Skill | Purpose | Risk | Last reviewed |
 |-------|---------|------|---------------|
-| agent-setup | Inventory, review, install, check and roll back native harness setup | L2 | 2026-10-11 |
+| agent-setup | Inventory, review, install, check and roll back native harness setup | L2 | 2026-10-26 |
 | resume-task | Recover unfinished local cross-harness work with evidence and a continuation brief | L2 | 2026-10-11 |
 | architecture-decisions | Compare consequential alternatives and record ADRs | L1 | 2026-10-11 |
 | agent-runtime-handoff | Application agent-runtime contracts and handoff | L2 | 2026-10-11 |
@@ -76,7 +76,7 @@ Jev evidence and reviewed choices: [decision ledger](setup/decisions.json).
 | electron-development | Main/preload/renderer and desktop testing contracts | L2 | 2026-10-11 |
 | feature-flag-lifecycle | Flag promotion, rollback and removal | L2 | 2026-10-11 |
 | gradio-development | Blocks/session/event graphs and diagnostics | L2 | 2026-10-11 |
-| hook-loopback-safety | Authenticated local hook queues and event handling | L2 | 2026-10-11 |
+| hook-loopback-safety | Authenticated local hook queues and event handling | L2 | 2026-10-26 |
 | judge-panel | Authorized external vision review and Jev adjudication | L2 | 2026-10-11 |
 | logging-and-error-reporting | Bounded, redacted observability and failures | L2 | 2026-10-11 |
 | typescript-monorepo-quality | Workspace boundaries, shared schemas and checks | L2 | 2026-10-11 |
