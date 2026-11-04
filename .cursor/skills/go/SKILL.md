@@ -61,6 +61,9 @@ Work through the items as in the `step-by-step` skill, one at a time:
 - Merging the user's own PRs, normally with green CI.
 - Merging without green CI only if CI was already reported to the user as broken for reasons
   unrelated to the change.
+- Merging a PR this run opened, if the item it came from was shown to the user, it's the user's own
+  PR in their own repository, and CI is green on its exact head commit. Wait for CI to finish. No
+  checks at all doesn't count as green, and the known-broken exception doesn't apply here.
 
 ### What `/go` never approves
 
@@ -73,7 +76,7 @@ Leave these for the user, with a paste-ready command:
 - Merging another session's open work, or a PR that isn't the user's.
 - Redoing something the user reversed themselves.
 - Publishing the user's own unpushed commits as a side effect.
-- Anything never shown to the user.
+- Anything else never shown to the user.
 
 Runbook gates and review sign-offs stay blocked; `/go` can't stand in for them.
 

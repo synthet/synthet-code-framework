@@ -10,7 +10,7 @@ All notable changes to this framework are documented here. The format follows
 
 - `/go` skill: takes the recommended options, settles the rest with Jev, works through open items in
   order and reports once. It runs only when the user types it, and it keeps a fixed list of actions
-  it never approves.
+  it never approves. It can merge a PR it opened only when CI is green on that exact commit.
 
 ### Changed
 
