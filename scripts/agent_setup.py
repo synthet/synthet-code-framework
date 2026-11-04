@@ -970,6 +970,10 @@ def owned_files(state: Path, target: Path) -> dict:
 def save_ownership(state: Path, receipt: Path, target: Path) -> None:
     owned = owned_files(state, target)
     run = load_receipt(receipt)
+    key = digest(str(target.resolve()).encode())[:20]
+    touched = [Path(entry["path"]).relative_to(target).as_posix() for entry in run["writes"] if Path(entry["path"]).is_relative_to(target)]
+    # Rollback restores files; this lets it restore what the ledger said about them too.
+    write_json(receipt.parent / f"ownership-{key}.json", {"root": str(target), "files": {rel: owned.get(rel) for rel in touched}})
     for entry in run["writes"]:
         path = Path(entry["path"])
         if path.is_relative_to(target) and entry["status"] == "written":
@@ -978,8 +982,31 @@ def save_ownership(state: Path, receipt: Path, target: Path) -> None:
                 owned.pop(rel, None)
             else:
                 owned[rel] = {"content": entry["content"], "sha256": entry["after_sha256"]}
-    key = digest(str(target.resolve()).encode())[:20]
     write_json(state / "targets" / (key + ".json"), {"root": str(target), "files": owned})
+
+
+def restore_ownership(state: Path, receipt: Path, restored: list[str]) -> int:
+    """Put ledger entries back for rolled-back files; returns how many changed.
+
+    Receipts older than the snapshot have nothing to restore from, so their
+    files stay unowned, which keeps them out of automatic pruning.
+    """
+    changed = 0
+    for snapshot in receipt.parent.glob("ownership-*.json"):
+        data = json.loads(snapshot.read_text(encoding="utf-8"))
+        target = Path(data["root"])
+        owned = owned_files(state, target)
+        for value in restored:
+            rel = Path(value).relative_to(target).as_posix() if Path(value).is_relative_to(target) else None
+            if rel in data["files"]:
+                prior = data["files"][rel]
+                if prior is None:
+                    owned.pop(rel, None)
+                else:
+                    owned[rel] = prior
+                changed += 1
+        write_json(state / "targets" / (digest(str(target.resolve()).encode())[:20] + ".json"), {"root": str(target), "files": owned})
+    return changed
 
 
 def library_sources(framework: Path, manifest: dict, project_name: str | None = None) -> tuple[dict, dict, dict, dict]:
@@ -1540,6 +1567,8 @@ def main(argv: list[str] | None = None) -> int:
         if not args.input:
             parser.error("--input receipt.json is required")
         result = check_run(args.input) if args.action == "check" else rollback(args.input, [args.user_root, args.projects_root])
+        if args.action == "rollback":
+            result["ledger_restored"] = restore_ownership(args.state, args.input, result["restored"])
         print(json.dumps(result, indent=2))
         return 0 if result["ok"] else 1
     if args.action == "plan":

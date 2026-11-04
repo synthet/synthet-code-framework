@@ -33,4 +33,4 @@ Repeat `--file`, `--command`, `--test`, `--decision`, `--error` as needed.
 
 ## Skill
 
-`.claude/skills/agent-memory/SKILL.md`
+The `agent-memory` skill
