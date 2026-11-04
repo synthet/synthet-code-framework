@@ -1,6 +1,12 @@
 ---
 name: threejs-frame-conventions
 description: "Rules and a self-test for writing Three.js and other y-up right-handed game code whose controls, camera, character facing and rendered-vs-collision geometry agree. Use whenever writing or editing movement, camera, input mapping, character orientation, asset mounting, or level/collision geometry code in a 3D game."
+capability: "Keep Three.js controls, camera, facing and collision geometry in one agreed frame"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "The project run or test command for the 3D scene; see body"
+output_schema: "Frame decisions with expected values and evidence from running the code"
+risk_class: low
 metadata:
   short-description: "One frame for Three.js controls, camera, and facing"
 ---
