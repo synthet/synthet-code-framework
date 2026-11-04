@@ -59,11 +59,14 @@ Work through the items as in the `step-by-step` skill, one at a time:
 - Commits on a branch, and branches, worktrees and PRs.
 - Pushes without force.
 - Merging the user's own PRs, normally with green CI.
-- Merging without green CI only if CI was already reported to the user as broken for reasons
-  unrelated to the change.
+- Merging without green CI only in these two cases:
+  - CI was already reported to the user as broken for reasons unrelated to the change.
+  - The repository has no CI at all: the PR was shown to the user, it's their own PR in their own
+    private repository, the PR's head has no workflows, and a local check passes on that exact
+    commit. Failed, pending or never-started checks aren't "no CI".
 - Merging a PR this run opened, if the item it came from was shown to the user, it's the user's own
   PR in their own repository, and CI is green on its exact head commit. Wait for CI to finish. No
-  checks at all doesn't count as green, and the known-broken exception doesn't apply here.
+  checks at all doesn't count as green, and neither exception above applies here.
 
 ### What `/go` never approves
 
