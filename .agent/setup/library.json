@@ -454,6 +454,20 @@
       "pack": "agent-tools",
       "global": true,
       "projects": []
+    },
+    {
+      "id": "go",
+      "source": ".claude/skills/go",
+      "pack": "global",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "use-jev",
+      "source": ".claude/skills/use-jev",
+      "pack": "global",
+      "global": true,
+      "projects": []
     }
   ],
   "reviewed_project_adoptions": [

@@ -6,11 +6,18 @@ All notable changes to this framework are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `/go` skill: takes the recommended options, settles the rest with Jev, works through open items in
+  order and reports once. It runs only when the user types it, and it keeps a fixed list of actions
+  it never approves.
+
 ### Changed
 
 - Skill tiers: shared skills install at user level, and repositories keep only their own skills and
   opted-in stack packs. `agent_setup.py plan` retires unmodified, unreferenced repository copies and
   reports collisions with global names. See `docs/skill-tiers.md`.
+- `use-jev` is now in the library manifest, so it installs for every harness.
 - `release-bump` covers repositories with no tag, changelog reconciliation and sub-package versions.
 
 ### Fixed
