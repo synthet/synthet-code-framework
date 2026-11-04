@@ -7,6 +7,12 @@ description: |
   - SQL: DROP TABLE/VIEW/SCHEMA/DATABASE, TRUNCATE, or broad DELETE (missing WHERE or using 1=1).
   - Cloud Storage: gsutil rm or gcloud storage rm targeting production data or critical buckets.
   - Infrastructure: gcloud projects delete, deleting Spanner/BigQuery/Dataproc resources, deleting secrets, or KMS key destruction.
+capability: "Halt irreversible data-loss commands until the user gives explicit consent"
+side_effect_level: read_only
+approval_required: true
+requires_tools: "None; applies to whichever tool would run the destructive command"
+output_schema: "Impact statement, reason and an explicit consent request before any destructive action"
+risk_class: high
 license: Apache-2.0
 metadata:
   version: v1
