@@ -199,6 +199,7 @@ def check_relative_markdown_links(path: Path, rel: str, text: str, errors: list[
 GENERATED_ALIAS_MARKERS = (
     ("framework-", "Explicit framework workflow:"),
     ("project-rule-", "Explicit project rule:"),
+    ("project-", "Explicit project workflow:"),
 )
 
 

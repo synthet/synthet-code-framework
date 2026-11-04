@@ -19,6 +19,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -60,6 +61,12 @@ GLOBAL_CONFIGS = [".claude.json", ".claude/CLAUDE.md", ".claude/settings.json",
                   ".gemini/config/mcp_config.json", ".gemini/config/hooks.json",
                   ".gemini/antigravity/mcp_config.json",
                   ".gemini/antigravity-cli/settings.json"]
+PROJECT_SKILL_TREES = (".claude/skills", ".agents/skills", ".cursor/skills")
+GLOBAL_SKILL_TREES = (".claude/skills", ".agents/skills", ".gemini/config/skills", ".gemini/antigravity-cli/skills")
+# File names the installer may never touch, so a plan must not contain them.
+PROTECTED_NAMES = {"settings.json", "settings.local.json", "cli-config.json", "config.json", "hooks.json"}
+GENERATED_ALIASES = (("framework-", "Explicit framework workflow:"), ("project-rule-", "Explicit project rule:"),
+                     ("project-", "Explicit project workflow:"))
 SECRET = re.compile(r"(?i)(?:sk-[a-z0-9_-]{16,}|gh[pousr]_[a-z0-9_]{20,}|github_pat_[a-z0-9_]{20,}|Bearer\s+[^\s\"']+)")
 CREDENTIAL_DATA = re.compile(r"(?i)(?:sk-[a-z0-9_-]{20,}|gh[pousr]_[a-z0-9_]{20,}|github_pat_[a-z0-9_]{20,}|Bearer\s+(?!\$\{|<)[a-z0-9_.-]{24,})")
 
@@ -69,7 +76,12 @@ def digest(data: bytes) -> str:
 
 
 def linked(path: Path) -> bool:
-    return path.is_symlink() or bool(getattr(path, "is_junction", lambda: False)())
+    if path.is_symlink():
+        return True
+    try:  # Path.is_junction needs Python 3.12; the reparse tag works from 3.8.
+        return os.lstat(path).st_reparse_tag == stat.IO_REPARSE_TAG_MOUNT_POINT
+    except (AttributeError, OSError):
+        return False
 
 
 def frontmatter(text: str) -> dict[str, str]:
@@ -379,6 +391,17 @@ def write_json(path: Path, data: dict) -> None:
     atomic_write(path, (json.dumps(data, indent=2, ensure_ascii=False) + "\n").encode())
 
 
+def remove_empty_skill_dirs(path: Path) -> None:
+    """Remove directories a delete emptied, stopping at the skills root."""
+    parent = path.parent
+    while "skills" in parent.parts[:-1]:
+        try:
+            parent.rmdir()
+        except OSError:
+            return
+        parent = parent.parent
+
+
 def apply_operations(operations: list[dict], state: Path, allowed: list[Path]) -> Path:
     # Validate the entire destination set before the first write.
     for op in operations:
@@ -434,6 +457,7 @@ def apply_operations(operations: list[dict], state: Path, allowed: list[Path]) -
         record(entry)
         if op["action"] == "delete":
             path.unlink()
+            remove_empty_skill_dirs(path)
         else:
             atomic_write(path, base64.b64decode(op["content"]))
         entry["status"] = "written"
@@ -623,19 +647,19 @@ def skill_bundle(framework: Path, name: str, source: Path | None = None) -> dict
     return files
 
 
-def project_instructions(project: Path, info: dict, skills: list[str], canonical: str = ".claude") -> dict[str, bytes]:
+def project_instructions(project: Path, info: dict, canonical: str = ".claude") -> dict[str, bytes]:
     start, end = "<!-- BEGIN FRAMEWORK SETUP -->", "<!-- END FRAMEWORK SETUP -->"
     contract = project / "AGENTS.md"
     text = contract.read_bytes().decode("utf-8") if contract.exists() else f"# {info['name']} — agent instructions\n"
     block = "\n".join([start, "", "## Shared agent setup", "", "Project-specific instructions in this file and nested instruction files govern this workspace.",
-                       f"Reusable skills are authored in `{canonical}/skills/`; other harness trees are generated.",
+                       f"Project skills are authored in `{canonical}/skills/`; other harness trees are generated.",
                        "Run installed helpers relative to their skill directory; run project checks from this workspace.",
                        "Preserve user edits, credentials, model settings, permissions and unrelated configuration.", ""])
     commands = info.get("commands", {})
     block += "\n".join(f"- {label}: `{commands[key]}`" for key, label in [("BUILD_CMD", "Build"), ("TEST_CMD", "Test"), ("LINT_CMD", "Lint")] if key in commands)
     if not commands:
         block += "Project build/test/lint commands were not detected; consult project documentation before executing checks."
-    block += "\n\n" + f"Installed library: {len(skills)} applicable skills. Synchronize explicitly; startup hooks never install updates.\n" + end
+    block += "\n\nShared skills are installed at user level. This repository's skill trees hold project-owned skills and opted-in stack packs only. Synchronize explicitly; startup hooks never install updates.\n" + end
     if start in text and end in text:
         text = re.sub(re.escape(start) + r".*?" + re.escape(end), lambda _: block, text, flags=re.S)
     else:
@@ -840,6 +864,17 @@ def _json_bytes(value: dict) -> bytes:
     return (json.dumps(value, indent=2, ensure_ascii=False) + "\n").encode()
 
 
+def project_command(framework: Path, name: str, source: Path, text: str) -> bool:
+    """True when a repository's command differs from the shared library's."""
+    if source.is_relative_to(framework):
+        return False
+    shared = framework / ".claude/commands" / (name + ".md")
+    if not shared.is_file():
+        return True
+    expected = shared.read_bytes().decode("utf-8").replace("${PROJECT_NAME}", "the current project")
+    return expected.replace("\r\n", "\n") != text.replace("\r\n", "\n")
+
+
 def native_assets(framework: Path, skill_sources: dict[str, Path], command_sources: dict[str, Path],
                   agent_sources: dict[str, Path], rule_sources: dict[str, Path], *, global_scope: bool = False,
                   antigravity_cli: bool = True) -> dict[str, bytes]:
@@ -862,12 +897,15 @@ def native_assets(framework: Path, skill_sources: dict[str, Path], command_sourc
             text = text.replace("${PROJECT_NAME}", "the current project")
         result[f".claude/commands/{name}.md"] = text.encode()
         result[f".cursor/commands/{name}.md"] = text.encode()
-        alias = "framework-" + name
         # Explicit commands stay explicit across adapters. The namespace avoids
-        # collisions with built-in commands such as /plan and /review.
-        generated = "---\nname: " + alias + "\ndescription: " + json.dumps("Explicit framework workflow: " + name) + "\ndisable-model-invocation: true\n---\n\n" + body(text)
-        for prefix in skill_roots:
-            result[f"{prefix}/{alias}/SKILL.md"] = generated.encode()
+        # collisions with built-in commands such as /plan and /review. Shared
+        # aliases live at user level; a repository aliases only its own commands.
+        label = "framework" if global_scope else "project"
+        if global_scope or project_command(framework, name, source, text):
+            alias = label + "-" + name
+            generated = "---\nname: " + alias + "\ndescription: " + json.dumps(f"Explicit {label} workflow: " + name) + "\ndisable-model-invocation: true\n---\n\n" + body(text)
+            for prefix in skill_roots:
+                result[f"{prefix}/{alias}/SKILL.md"] = generated.encode()
     for name, source in agent_sources.items():
         text = source.read_bytes().decode("utf-8")
         if source.is_relative_to(framework):
@@ -1051,6 +1089,7 @@ def _instructions_merge(path: Path, addition: str) -> bytes:
 
 def _project_sources(framework: Path, project: Path, manifest: dict, owned: dict | None = None):
     selected = list(library_sources(framework, manifest, project.name))
+    retired = {entry["id"] for entry in manifest["skills"]} - set(selected[0])
     # Existing project canonical assets carry real project contracts. Preserve
     # these and generate missing/native mirrors from them, rather than replacing
     # project-specific versions with a generic source.
@@ -1064,10 +1103,7 @@ def _project_sources(framework: Path, project: Path, manifest: dict, owned: dict
             if kind == "skills":
                 for skill in directory.iterdir():
                     if skill.is_dir() and not linked(skill) and (skill / "SKILL.md").exists():
-                        meta = frontmatter((skill / "SKILL.md").read_text(encoding="utf-8"))
-                        if skill.name.startswith("framework-") and meta.get("description", "").startswith("Explicit framework workflow:"):
-                            continue
-                        if skill.name.startswith("project-rule-") and meta.get("description", "").startswith("Explicit project rule:"):
+                        if generated_alias(skill) or skill.name in retired:
                             continue
                         if skill.name in selected[index] and (skill / "SKILL.md").relative_to(project).as_posix() in (owned or {}):
                             continue
@@ -1081,7 +1117,88 @@ def _project_sources(framework: Path, project: Path, manifest: dict, owned: dict
     return selected
 
 
-def project_sync_contract(project: Path, files: dict, contract: dict, owned: dict, state: Path):
+def generated_alias(skill: Path) -> bool:
+    """True for a skill the installer generated from a command or rule."""
+    if not (skill / "SKILL.md").is_file():
+        return False
+    description = frontmatter((skill / "SKILL.md").read_text(encoding="utf-8", errors="replace")).get("description", "")
+    return any(skill.name.startswith(prefix) and description.startswith(marker) for prefix, marker in GENERATED_ALIASES)
+
+
+def skill_references(project: Path) -> dict[str, set[str]] | None:
+    """Map each skill name to repository files that reach into its directory.
+
+    Returns None without Git, because then nothing proves a skill is unused.
+    """
+    result = subprocess.run(["git", "-c", "core.quotepath=off", "-C", str(project), "grep", "-I", "--untracked", "-o", "-E",
+                             r"skills/[A-Za-z0-9_.-]+/"], capture_output=True, encoding="utf-8", errors="replace")
+    if result.returncode not in {0, 1}:
+        return None
+    references: dict[str, set[str]] = {}
+    for line in result.stdout.splitlines():
+        rel, _, match = line.rpartition(":")
+        references.setdefault(match.split("/")[1], set()).add(rel)
+    return references
+
+
+def _prune_blocker(root: Path, skill: Path, owned: dict, references: dict[str, set[str]] | None, retiring: tuple[str, ...]) -> str | None:
+    if not owned:
+        return "no ownership ledger"
+    if references is None:
+        return "no Git history to check references"
+    for path in sorted(skill.rglob("*")):
+        rel = path.relative_to(root).as_posix()
+        if path.name in PROTECTED_NAMES:
+            return "protected file name: " + rel
+        if linked(path):
+            return "linked path: " + rel
+        if not path.is_file() or "__pycache__" in path.parts or path.suffix in {".pyc", ".pyo"}:
+            continue
+        entry = owned.get(rel)
+        if entry is None:
+            return "unowned file: " + rel
+        data = path.read_bytes()
+        if digest(data) != entry.get("sha256") and data.replace(b"\r\n", b"\n") != base64.b64decode(entry.get("content") or "").replace(b"\r\n", b"\n"):
+            return "edited file: " + rel
+    outside = sorted(rel for rel in references.get(skill.name, ()) if not rel.startswith(retiring))
+    return "referenced by " + outside[0] if outside else None
+
+
+def prune_skills(root: Path, trees: tuple[str, ...], retired, owned: dict, references: dict[str, set[str]] | None) -> tuple[list[dict], dict[str, str]]:
+    """Plan whole-bundle deletes for retired skills; report what must stay.
+
+    A skill stays in every harness tree if any copy is blocked, so harnesses
+    never disagree about which skills a repository has.
+    """
+    candidates = [skill for tree in trees if (root / tree).is_dir() for skill in sorted((root / tree).iterdir())
+                  if skill.is_dir() and not linked(skill) and retired(skill)]
+    retiring = tuple(skill.relative_to(root).as_posix() + "/" for skill in candidates)
+    kept: dict[str, str] = {}
+    for skill in candidates:
+        blocker = _prune_blocker(root, skill, owned, references, retiring)
+        if blocker:
+            kept.setdefault(skill.name, blocker)
+    return [{"path": str(path.absolute()), "relative": path.relative_to(root).as_posix(), "action": "delete",
+             "before_sha256": digest(path.read_bytes()), "after_sha256": None, "content": "", "before_content": None}
+            for skill in candidates if skill.name not in kept for path in sorted(skill.rglob("*")) if path.is_file()], kept
+
+
+def tier_diagnostics(target: str, kept: dict[str, str], global_names: set[str]) -> list[dict]:
+    return [{"target": target, "kind": "tier-collision" if skill in global_names else "tier-review", "skill": skill, "reason": reason}
+            for skill, reason in sorted(kept.items())]
+
+
+def drop_stale_skill_disables(text: str, projects_root: Path) -> str:
+    """Drop disable entries for repository copies that no longer exist."""
+    def replace(match: re.Match) -> str:
+        path = Path(json.loads(match.group(1)))
+        return "" if path.is_relative_to(projects_root) and not path.exists() else match.group(0)
+    cleaned = re.sub(r'\r?\n\[\[skills\.config\]\]\r?\npath = ("(?:[^"\\]|\\.)*")\r?\nenabled = false(?=\r?\n)', replace, text)
+    # Match add_toml_servers, or the next plan would rewrite the file for whitespace alone.
+    return text if cleaned == text else cleaned.rstrip() + "\n"
+
+
+def project_sync_contract(project: Path, files: dict, contract: dict, owned: dict, state: Path, prune: set[str] | frozenset[str] = frozenset()):
     """Render a reviewed repo's own generator in an isolated temporary tree.
 
     Only hash-reviewed stdlib generators can run. No real destination is
@@ -1116,6 +1233,8 @@ def project_sync_contract(project: Path, files: dict, contract: dict, owned: dic
                     continue
                 rel = path.relative_to(project).as_posix()
                 existing[rel] = path.read_bytes()
+                if rel in prune:
+                    continue  # Absent from staging, so the generator cannot mirror it back.
                 dest = root / rel
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 dest.write_bytes(existing[rel])
@@ -1167,6 +1286,10 @@ def build_plan(framework: Path, projects_root: Path, user: Path, state: Path,
     operations, targets, coverage, diagnostics = [], [], [], []
     global_sources = library_sources(framework, manifest)
     global_files = native_assets(framework, *global_sources, global_scope=True)
+    library_ids = {entry["id"] for entry in manifest["skills"]}
+    # Names resolved at user level. Claude prefers personal over project, so a
+    # repository copy under one of these names would be ignored there.
+    global_names = set(global_sources[0]) | {"framework-" + name for name in global_sources[1]}
     # Bring existing personal copies onto the same portable content without
     # creating more legacy discovery roots. Only reviewed hashes can be adopted.
     reviewed = manifest.get("reviewed_global_adoptions", [])
@@ -1233,7 +1356,7 @@ def build_plan(framework: Path, projects_root: Path, user: Path, state: Path,
                 if rel not in owned and rel.startswith((".cursor/commands/", ".cursor/agents/", ".cursor/rules/", "scripts/")) and (project / rel).is_file():
                     files[rel] = (project / rel).read_bytes()
             canonical = manifest.get("project_sync_contracts", {}).get(project.name, {}).get("canonical", ".claude")
-            files.update(project_instructions(project, {**info, "commands": detect_project_commands(project)}, list(sources[0]), canonical))
+            files.update(project_instructions(project, {**info, "commands": detect_project_commands(project)}, canonical))
             # Give Codex the always-on project rules through its native contract.
             always = [name for name, source in sources[3].items() if frontmatter(source.read_text(encoding="utf-8")).get("alwaysApply", "").lower() == "true"]
             if always:
@@ -1275,10 +1398,26 @@ def build_plan(framework: Path, projects_root: Path, user: Path, state: Path,
                         if current.read_bytes().replace(b"\r\n", b"\n") == origin.read_bytes().replace(b"\r\n", b"\n"):
                             adopt.add(rel)
             deletions, exact = [], set()
+            opted_in = set(library_sources(framework, manifest, project.name)[0])
+
+            def retired(skill: Path) -> bool:
+                if skill.name in library_ids:
+                    return skill.name not in opted_in
+                return generated_alias(skill) and f".claude/skills/{skill.name}/SKILL.md" not in files
+
+            pruned, kept = prune_skills(project, PROJECT_SKILL_TREES, retired, owned, skill_references(project))
+            for tree in PROJECT_SKILL_TREES:
+                if (project / tree).is_dir():
+                    for skill in (project / tree).iterdir():
+                        if skill.is_dir() and skill.name in global_names and not retired(skill):
+                            kept.setdefault(skill.name, "project skill shares a global name")
+            diagnostics.extend(tier_diagnostics(info["name"], kept, global_names))
             contract = manifest.get("project_sync_contracts", {}).get(project.name)
             if contract:
-                generated_adopt, deletions, exact = project_sync_contract(project, files, contract, owned, state)
+                generated_adopt, deletions, exact = project_sync_contract(project, files, contract, owned, state, {op["relative"] for op in pruned})
                 adopt |= generated_adopt
+            handled = {op["relative"] for op in deletions}
+            deletions += [op for op in pruned if op["relative"] not in handled]
             target_ops = plan_files(project, files, owned, adopt)
             for op in target_ops:
                 if op["relative"] in exact:
@@ -1307,6 +1446,7 @@ def build_plan(framework: Path, projects_root: Path, user: Path, state: Path,
     # copies in workstation state; repository files remain standalone elsewhere.
     codex_rel = ".codex/config.toml"
     codex_text = global_files.get(codex_rel, (user / codex_rel).read_bytes() if (user / codex_rel).exists() else b"").decode()
+    codex_text = drop_stale_skill_disables(codex_text, projects_root)
     parsed = tomllib.loads(codex_text) if codex_text.strip() else {}
     configured = {entry.get("path") for entry in parsed.get("skills", {}).get("config", [])}
     for entry in reviewed:
@@ -1320,10 +1460,15 @@ def build_plan(framework: Path, projects_root: Path, user: Path, state: Path,
     global_adopt.add(codex_rel)
     if scope != "projects":
         operations += plan_files(user, global_files, owned_files(state, user), global_adopt)
+        pruned, kept = prune_skills(user, GLOBAL_SKILL_TREES, lambda skill: skill.name in library_ids - set(global_sources[0]), owned_files(state, user), {})
+        operations += pruned
+        diagnostics.extend(tier_diagnostics("global", kept, set()))
         targets.append(str(user.absolute()))
     summary = {"targets": len(targets), "operations": len(operations),
                **{action: sum(op["action"] == action for op in operations) for action in ["create", "update", "delete", "unchanged", "conflict"]},
-               "dependency_diagnostics": len(diagnostics)}
+               "dependency_diagnostics": sum("kind" not in item for item in diagnostics),
+               "tier_collisions": sum(item.get("kind") == "tier-collision" for item in diagnostics),
+               "tier_reviews": sum(item.get("kind") == "tier-review" for item in diagnostics)}
     return {"schema_version": SCHEMA_VERSION, "allowed_roots": [str(p.resolve()) for p in [user, projects_root]],
             "targets": targets, "operations": operations, "coverage": coverage,
             "diagnostics": diagnostics, "summary": summary,
@@ -1357,7 +1502,7 @@ def validate_plan(plan: dict, projects_root: Path, user: Path, framework: Path) 
             raise ValueError("not an agent setup destination")
         if rel.parts[0] == "scripts" and op["relative"] != "scripts/sync_assistant_trees.py" and (len(rel.parts) < 3 or rel.parts[1] not in {"agent-memory", "agent_memory", "skill_harness"}):
             raise ValueError("not a bundled runtime destination")
-        if path.name in {"settings.json", "settings.local.json", "cli-config.json", "config.json", "hooks.json"}:
+        if path.name in PROTECTED_NAMES:
             raise ValueError("installer may not replace permissions or hook settings")
         _contain(path, targets)
     return targets
