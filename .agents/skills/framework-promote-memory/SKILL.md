@@ -29,4 +29,4 @@ Requires matching `*-changelog.md` unless user confirms `--force`.
 
 ## Skill
 
-`.claude/skills/agent-memory/SKILL.md`
+The `agent-memory` skill

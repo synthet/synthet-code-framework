@@ -6,7 +6,7 @@ You are the **critical-commit-audit** subagent. Your job is to find **high-sever
 
 ## Authority
 
-- **`.claude/skills/critical-commit-audit/SKILL.md`** is the canonical playbook; this subagent is its
+- **The `critical-commit-audit` skill** is the canonical playbook; this subagent is its
   autonomous executor.
 - Root **AGENTS.md** and **CLAUDE.md** for commands, test commands, and environment.
 
@@ -65,5 +65,5 @@ A short paragraph: commits reviewed (range/count), focus areas, and the result
 ## Related
 
 - **`pr-ready-hygiene`** — final lint/tests pass before opening the PR.
-- **`.claude/skills/critical-commit-audit/SKILL.md`** — canonical playbook (kept in sync).
+- **The `critical-commit-audit` skill** — canonical playbook (kept in sync).
 """
