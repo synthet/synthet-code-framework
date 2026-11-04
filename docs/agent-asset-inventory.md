@@ -143,7 +143,7 @@ This inventory lists the canonical Claude-authored assets mirrored to Cursor, Co
 | Name | Canonical path | Description |
 |------|----------------|-------------|
 | `critical-commit-audit` | `.claude/agents/critical-commit-audit.md` | Deep post-commit bug hunt: high-severity correctness only (data loss, crashes, security holes, major user-facing breakage). Traces full code paths beyond the diff, requires a concrete trigger before opening a PR, and applies minimal fixes with tests. Use when the user runs /critical-commit-audit or asks for a critical review of recent commits. |
-| `external-cli-reviewer` | `.claude/agents/external-cli-reviewer.md` | Coordinate review-only Codex and Gemini runs through subagent-orchestrator MCP for ${PROJECT_NAME}, including sequential panel-style comparisons. |
-| `external-codex-review` | `.claude/agents/external-codex-review.md` | Use Codex through the subagent-orchestrator MCP server for review-only external CLI feedback in ${PROJECT_NAME}. |
-| `external-gemini-review` | `.claude/agents/external-gemini-review.md` | Use Gemini CLI through the subagent-orchestrator MCP server for review-only external CLI feedback in ${PROJECT_NAME}. |
+| `external-cli-reviewer` | `.claude/agents/external-cli-reviewer.md` | Coordinate review-only Codex and Gemini runs through synthet-agent-swarm MCP for ${PROJECT_NAME}, including sequential panel-style comparisons. |
+| `external-codex-review` | `.claude/agents/external-codex-review.md` | Use Codex through the synthet-agent-swarm MCP server for review-only external CLI feedback in ${PROJECT_NAME}. |
+| `external-gemini-review` | `.claude/agents/external-gemini-review.md` | Use Gemini CLI through the synthet-agent-swarm MCP server for review-only external CLI feedback in ${PROJECT_NAME}. |
 | `pr-ready-hygiene` | `.claude/agents/pr-ready-hygiene.md` | Prepare the repo for merge: run the project's lint/typecheck/test commands, focused self-review, and paste-ready PR text. Use before opening a PR or when the user says pr-ready. |

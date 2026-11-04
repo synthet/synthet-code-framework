@@ -208,7 +208,7 @@ def test_project_instructions_preserve_existing_contract(tmp_path):
     repo = tmp_path / "demo"
     repo.mkdir()
     (repo / "AGENTS.md").write_text("# My project\n\nNever change the database directly.\n")
-    files = setup.project_instructions(repo, {"name": "demo", "commands": {"TEST_CMD": "npm test"}}, [])
+    files = setup.project_instructions(repo, {"name": "demo", "commands": {"TEST_CMD": "npm test"}})
     assert b"Never change the database directly." in files["AGENTS.md"]
     assert b"npm test" in files["AGENTS.md"]
     assert files["CLAUDE.md"] == b"@AGENTS.md\n"
@@ -420,3 +420,326 @@ def sync_cursor_to_claude(check=False):
     script.write_bytes(b'unreviewed changes')
     with pytest.raises(ValueError, match='unreviewed'):
         setup.project_sync_contract(project, files, contract, {}, tmp_path / 'state')
+
+
+def _tier_workspace(tmp_path, repo_name='maintained', git=True):
+    """Install one library skill everywhere, leaving a ledger to prune from."""
+    framework, projects, user, state = [tmp_path / name for name in ['framework', 'projects', 'user', 'state']]
+    source = framework / '.claude/skills/demo'
+    (source / 'references').mkdir(parents=True)
+    (source / 'SKILL.md').write_text('---\nname: demo\ndescription: Demo\n---\n\nShared workflow\n')
+    (source / 'references/guide.md').write_text('Shared guidance\n')
+    commands = framework / '.claude/commands'
+    commands.mkdir()
+    (commands / 'spec.md').write_text('---\ndescription: Spec\n---\n\nDraft a specification.\n')
+    catalog = framework / '.agent/setup'
+    catalog.mkdir(parents=True)
+    (catalog / 'global-instructions.md').write_text('Use project instructions.\n')
+    repo = projects / repo_name
+    repo.mkdir(parents=True)
+    (repo / 'pyproject.toml').write_text('[project]\nname="maintained"\n')
+    if git:
+        subprocess.run(['git', 'init', '-q', str(repo)], check=True)
+    user.mkdir()
+    _catalog(framework, 'core', True, [])
+    plan = setup.build_plan(framework, projects, user, state)
+    _apply(plan, state, projects, user)
+    return framework, projects, user, state, repo
+
+
+def _catalog(framework, pack, is_global, projects):
+    (framework / '.agent/setup/library.json').write_text(json.dumps({'skills': [
+        {'id': 'demo', 'source': '.claude/skills/demo', 'pack': pack, 'global': is_global, 'projects': projects}]}))
+
+
+def _apply(plan, state, projects, user):
+    run = setup.apply_operations(plan['operations'], state, [projects, user])
+    assert setup.check_run(run)['ok']
+    for root in plan['targets']:
+        setup.save_ownership(state, run, Path(root))
+    return run
+
+
+def _deleted(plan, root=None):
+    return {op['relative'] for op in plan['operations']
+            if op['action'] == 'delete' and (root is None or Path(op['path']).is_relative_to(root))}
+
+
+def _tier_diagnostics(plan, kind):
+    return {item['skill']: item['reason'] for item in plan['diagnostics'] if item.get('kind') == kind}
+
+
+def test_lean_tier_prunes_unmodified_bundle_and_keeps_global_copy(tmp_path):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path)
+    _catalog(framework, 'global', True, [])
+    cache = repo / '.claude/skills/demo/__pycache__/x.pyc'
+    cache.parent.mkdir()
+    cache.write_bytes(b'cache')
+    plan = setup.build_plan(framework, projects, user, state)
+    assert {'.claude/skills/demo/SKILL.md', '.claude/skills/demo/references/guide.md',
+            '.claude/skills/demo/__pycache__/x.pyc', '.agents/skills/demo/SKILL.md'} <= _deleted(plan, repo)
+    assert not _tier_diagnostics(plan, 'tier-collision')
+    assert plan['summary']['delete'] == len(_deleted(plan))
+    run = _apply(plan, state, projects, user)
+    assert not (repo / '.claude/skills/demo').exists() and not (repo / '.agents/skills/demo').exists()
+    assert (repo / '.claude/skills').is_dir()
+    assert (user / '.claude/skills/demo/SKILL.md').is_file()
+    # The copy is gone, so the next plan drops its Codex disable entry and settles.
+    cleanup = setup.build_plan(framework, projects, user, state)
+    assert [op['relative'] for op in cleanup['operations'] if op['action'] != 'unchanged'] == ['.codex/config.toml']
+    _apply(cleanup, state, projects, user)
+    repeat = setup.build_plan(framework, projects, user, state)
+    assert not any(repeat['summary'][action] for action in ['create', 'update', 'delete', 'conflict'])
+    assert setup.rollback(run, [projects, user])['ok']
+    assert (repo / '.claude/skills/demo/references/guide.md').read_text() == 'Shared guidance\n'
+
+
+@pytest.mark.parametrize('case, reason', [('edited', 'edited'), ('unowned', 'unowned'), ('referenced', 'referenced'), ('protected', 'protected')])
+def test_prune_keeps_the_whole_bundle_when_a_guard_fails(tmp_path, case, reason):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path)
+    _catalog(framework, 'global', True, [])
+    skill = repo / '.claude/skills/demo'
+    if case == 'edited':
+        (skill / 'references/guide.md').write_text('Project guidance\n')
+    elif case == 'unowned':
+        (skill / 'notes.md').write_text('Project notes\n')
+    elif case == 'protected':
+        (skill / 'config.json').write_text('{}\n')
+    else:
+        (repo / 'README.md').write_text('Run .claude/skills/demo/scripts/run.py\n')
+        subprocess.run(['git', '-C', str(repo), 'add', 'README.md'], check=True)
+    plan = setup.build_plan(framework, projects, user, state)
+    assert not any(rel.startswith('.claude/skills/demo/') for rel in _deleted(plan, repo))
+    assert reason in _tier_diagnostics(plan, 'tier-collision')['demo']
+    assert plan['summary']['tier_collisions'] == 1
+    assert (skill / 'SKILL.md').is_file()
+
+
+def test_blocked_copy_in_one_tree_keeps_the_skill_in_every_tree(tmp_path):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path)
+    _catalog(framework, 'global', True, [])
+    (repo / '.agents/skills/demo/references/guide.md').write_text('Project guidance\n')
+    plan = setup.build_plan(framework, projects, user, state)
+    assert not any('skills/demo/' in rel for rel in _deleted(plan, repo))
+    assert 'edited' in _tier_diagnostics(plan, 'tier-collision')['demo']
+
+
+def test_references_from_other_retiring_copies_do_not_block_pruning(tmp_path):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path)
+    _catalog(framework, 'global', True, [])
+    mirror = repo / '.agents/skills/demo/references/guide.md'
+    original = (repo / '.claude/skills/demo/SKILL.md').read_bytes()
+    subprocess.run(['git', '-C', str(repo), 'add', '.claude/skills', '.agents/skills'], check=True)
+    assert mirror.is_file() and original
+    plan = setup.build_plan(framework, projects, user, state)
+    assert '.claude/skills/demo/SKILL.md' in _deleted(plan, repo)
+
+
+def test_prune_requires_a_ledger_and_git(tmp_path):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path / 'nogit', git=False)
+    _catalog(framework, 'global', True, [])
+    plan = setup.build_plan(framework, projects, user, state)
+    assert not _deleted(plan, repo)
+    assert 'Git' in _tier_diagnostics(plan, 'tier-collision')['demo']
+
+    framework, projects, user, state, repo = _tier_workspace(tmp_path / 'noledger')
+    _catalog(framework, 'global', True, [])
+    for manifest in (state / 'targets').glob('*.json'):
+        if Path(json.loads(manifest.read_text())['root']) == repo:
+            manifest.unlink()
+    plan = setup.build_plan(framework, projects, user, state)
+    assert not _deleted(plan, repo)
+    assert 'ledger' in _tier_diagnostics(plan, 'tier-collision')['demo']
+
+
+def test_stack_pack_installs_only_where_opted_in_and_leaves_global(tmp_path):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path)
+    other = projects / 'other'
+    other.mkdir()
+    (other / 'pyproject.toml').write_text('[project]\nname="other"\n')
+    _catalog(framework, 'rust', False, ['maintained'])
+    plan = setup.build_plan(framework, projects, user, state)
+    assert '.claude/skills/demo/SKILL.md' in _deleted(plan, user)
+    assert '.agents/skills/demo/SKILL.md' in _deleted(plan, user)
+    assert not _deleted(plan, repo) and (repo / '.claude/skills/demo/SKILL.md').is_file()
+    assert not any(Path(op['path']).is_relative_to(other / '.claude/skills/demo') for op in plan['operations'])
+
+
+def test_kept_project_skill_with_global_name_is_a_collision(tmp_path):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path)
+    native = repo / '.claude/skills/framework-spec/SKILL.md'
+    native.parent.mkdir(parents=True, exist_ok=True)
+    native.write_text('---\nname: framework-spec\ndescription: Our own spec flow\n---\n\nLocal\n')
+    plan = setup.build_plan(framework, projects, user, state)
+    assert 'global name' in _tier_diagnostics(plan, 'tier-collision')['framework-spec']
+
+
+def test_aliases_are_global_for_framework_commands_and_project_for_custom_ones(tmp_path):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path)
+    assert not (repo / '.claude/skills/framework-spec').exists()
+    assert (user / '.claude/skills/framework-spec/SKILL.md').is_file()
+    (repo / '.claude/commands/ship.md').write_text('---\ndescription: Ship\n---\n\nShip it our way.\n')
+    plan = setup.build_plan(framework, projects, user, state)
+    created = {op['relative'] for op in plan['operations'] if op['action'] == 'create'}
+    assert {'.claude/skills/project-ship/SKILL.md', '.agents/skills/project-ship/SKILL.md'} <= created
+    assert not any('framework-ship' in rel for rel in created)
+    shared = framework / '.claude/commands/spec.md'
+    repo_copy = repo / '.claude/commands/spec.md'
+    assert not setup.project_command(framework, 'spec', repo_copy, shared.read_text().replace('\n', '\r\n'))
+    assert setup.project_command(framework, 'spec', repo_copy, 'Our spec flow.\n')
+    assert not setup.project_command(framework, 'spec', shared, 'Anything\n')
+    _apply(plan, state, projects, user)
+    repeat = setup.build_plan(framework, projects, user, state)
+    assert not any(repeat['summary'][action] for action in ['create', 'update', 'delete', 'conflict'])
+
+
+def test_generated_framework_alias_left_in_a_repo_is_pruned(tmp_path):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path)
+    alias = repo / '.claude/skills/framework-old/SKILL.md'
+    alias.parent.mkdir(parents=True)
+    alias.write_text('---\nname: framework-old\ndescription: "Explicit framework workflow: old"\ndisable-model-invocation: true\n---\n\nOld\n')
+    ledger = next(path for path in (state / 'targets').glob('*.json') if Path(json.loads(path.read_text())['root']) == repo)
+    data = json.loads(ledger.read_text())
+    data['files']['.claude/skills/framework-old/SKILL.md'] = {'sha256': setup.digest(alias.read_bytes()), 'content': base64.b64encode(alias.read_bytes()).decode()}
+    ledger.write_text(json.dumps(data))
+    assert '.claude/skills/framework-old/SKILL.md' in _deleted(setup.build_plan(framework, projects, user, state), repo)
+
+
+def test_contract_repo_does_not_resurrect_pruned_skills(tmp_path):
+    project = tmp_path / 'project'
+    script = project / 'scripts/sync_assistant_trees.py'
+    script.parent.mkdir(parents=True)
+    script.write_text('''from pathlib import Path
+import shutil
+ROOT = Path(__file__).resolve().parents[1]
+def sync(check=False):
+    dest = ROOT / '.cursor/skills'
+    if dest.exists(): shutil.rmtree(dest)
+    shutil.copytree(ROOT / '.claude/skills', dest)
+    return 0
+''')
+    for name in ['demo', 'kept']:
+        for tree in ['.claude', '.cursor']:
+            path = project / tree / 'skills' / name / 'SKILL.md'
+            path.parent.mkdir(parents=True)
+            path.write_bytes(name.encode())
+    contract = {'sha256': setup.digest(script.read_bytes()), 'canonical': '.claude'}
+    prune = {'.claude/skills/demo/SKILL.md', '.cursor/skills/demo/SKILL.md'}
+    files = {}
+    _, deleted, _ = setup.project_sync_contract(project, files, contract, {}, tmp_path / 'state', prune)
+    assert {op['relative'] for op in deleted} == prune
+    assert '.cursor/skills/kept/SKILL.md' in files and not prune & set(files)
+
+
+def test_codex_disables_drop_only_missing_project_paths(tmp_path):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path)
+    gone = str(repo / '.agents/skills/gone/SKILL.md')
+    alive = repo / '.agents/skills/alive/SKILL.md'
+    alive.parent.mkdir(parents=True)
+    alive.write_text('---\nname: alive\ndescription: Alive\n---\n\nLocal\n')
+    elsewhere = str(tmp_path / 'elsewhere/SKILL.md')
+    config = user / '.codex/config.toml'
+    config.parent.mkdir(exist_ok=True)
+    entries = ''.join('\n[[skills.config]]\npath = ' + json.dumps(value) + '\nenabled = false\n' for value in [gone, str(alive), elsewhere])
+    config.write_text('model = "keep"\n' + entries)
+    plan = setup.build_plan(framework, projects, user, state)
+    written = next(op for op in plan['operations'] if op['path'] == str(config))
+    text = base64.b64decode(written['content']).decode()
+    assert 'model = "keep"' in text and json.dumps(str(alive)) in text and json.dumps(elsewhere) in text
+    assert json.dumps(gone) not in text
+
+
+def test_project_instructions_describe_the_tiers(tmp_path):
+    repo = tmp_path / 'demo'
+    repo.mkdir()
+    text = setup.project_instructions(repo, {'name': 'demo', 'commands': {}})['AGENTS.md'].decode()
+    assert 'user level' in text and 'Installed library' not in text
+
+
+@pytest.mark.skipif(sys.platform != 'win32', reason='NTFS junctions')
+def test_junction_is_a_link_and_not_a_second_project(tmp_path):
+    projects = tmp_path / 'projects'
+    real = projects / 'real'
+    real.mkdir(parents=True)
+    (real / 'AGENTS.md').write_text('# real\n')
+    subprocess.run(['cmd', '/c', 'mklink', '/J', str(projects / 'alias'), str(real)], check=True, capture_output=True)
+    assert setup.linked(projects / 'alias') and not setup.linked(real)
+    report = setup.inventory(projects, tmp_path / 'absent')
+    assert [item['name'] for item in report['projects']] == ['real']
+    assert report['aliases'][0]['path'].endswith('alias')
+
+
+def _own(state, repo, path):
+    ledger = next(item for item in (state / 'targets').glob('*.json') if Path(json.loads(item.read_text())['root']) == repo)
+    data = json.loads(ledger.read_text())
+    data['files'][path.relative_to(repo).as_posix()] = {'sha256': setup.digest(path.read_bytes()), 'content': base64.b64encode(path.read_bytes()).decode()}
+    ledger.write_text(json.dumps(data))
+
+
+@pytest.mark.parametrize('edited', [False, True])
+def test_only_unmodified_installer_files_stop_counting_as_references(tmp_path, edited):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path)
+    _catalog(framework, 'global', True, [])
+    doc = repo / '.agent/SKILL_COMPILATION.md'
+    doc.parent.mkdir(exist_ok=True)
+    doc.write_text('See .claude/skills/demo/scripts/harness.py\n')
+    _own(state, repo, doc)
+    if edited:
+        doc.write_text('Project note: run .claude/skills/demo/scripts/harness.py\n')
+    plan = setup.build_plan(framework, projects, user, state)
+    assert ('.claude/skills/demo/SKILL.md' in _deleted(plan, repo)) is not edited
+    assert ('referenced' in _tier_diagnostics(plan, 'tier-collision').get('demo', '')) is edited
+
+
+def test_bundled_shared_reference_copies_do_not_block_pruning(tmp_path):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path)
+    _catalog(framework, 'global', True, [])
+    shared = repo / '.claude/skills/kept/references/shared/.agent/SAFETY.md'
+    shared.parent.mkdir(parents=True)
+    shared.write_text('See .claude/skills/demo/SKILL.md\n')
+    assert '.claude/skills/demo/SKILL.md' in _deleted(setup.build_plan(framework, projects, user, state), repo)
+
+
+def test_rollback_restores_the_ownership_ledger(tmp_path):
+    framework, projects, user, state, repo = _tier_workspace(tmp_path)
+    _catalog(framework, 'global', True, [])
+    rel = '.claude/skills/demo/SKILL.md'
+    before = dict(setup.owned_files(state, repo))
+    assert rel in before
+    plan = setup.build_plan(framework, projects, user, state)
+    run = _apply(plan, state, projects, user)
+    assert rel not in setup.owned_files(state, repo)
+    result = setup.rollback(run, [projects, user])
+    assert setup.restore_ownership(state, run, result['restored']) >= 1
+    assert setup.owned_files(state, repo)[rel] == before[rel]
+    # With the ledger back, the same retirement can be planned again.
+    assert rel in _deleted(setup.build_plan(framework, projects, user, state), repo)
+
+
+def test_rollback_drops_ledger_entries_for_files_it_removes(tmp_path):
+    target = tmp_path / 'target'
+    target.mkdir()
+    state = tmp_path / 'state'
+    data = b'New'
+    path = target / 'new.md'
+    operation = {'path': str(path), 'relative': 'new.md', 'action': 'create', 'before_sha256': None, 'after_sha256': setup.digest(data),
+                 'content': base64.b64encode(data).decode(), 'before_content': None}
+    run = setup.apply_operations([operation], state, [target])
+    setup.save_ownership(state, run, target)
+    assert 'new.md' in setup.owned_files(state, target)
+    result = setup.rollback(run, [target])
+    setup.restore_ownership(state, run, result['restored'])
+    assert 'new.md' not in setup.owned_files(state, target)
+
+
+def test_old_receipts_without_a_snapshot_leave_the_ledger_alone(tmp_path):
+    target = tmp_path / 'target'
+    target.mkdir()
+    path = target / 'kept.md'
+    path.write_bytes(b'Original')
+    state = tmp_path / 'state'
+    operation = {'path': str(path), 'relative': 'kept.md', 'action': 'delete', 'before_sha256': setup.digest(b'Original'), 'after_sha256': None,
+                 'content': '', 'before_content': None}
+    run = setup.apply_operations([operation], state, [target])
+    result = setup.rollback(run, [target])
+    assert setup.restore_ownership(state, run, result['restored']) == 0

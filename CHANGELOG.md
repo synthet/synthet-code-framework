@@ -6,6 +6,17 @@ All notable changes to this framework are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Skill tiers: shared skills install at user level, and repositories keep only their own skills and
+  opted-in stack packs. `agent_setup.py plan` retires unmodified, unreferenced repository copies and
+  reports collisions with global names. See `docs/skill-tiers.md`.
+- `release-bump` covers repositories with no tag, changelog reconciliation and sub-package versions.
+
+### Fixed
+
+- NTFS junctions are treated as links on Python 3.11, so a junction is no longer a second project.
+
 ## [0.4.0] — 2026-10-25
 
 ### Added
