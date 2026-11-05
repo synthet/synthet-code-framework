@@ -6,6 +6,12 @@ All notable changes to this framework are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `/ship-pr` skill: takes one PR from open to merged. It fixes CI failures at the root cause, runs the
+  steps CI skipped after a failure, waits for green on the exact head commit, then merges and
+  verifies. It runs only when the user types it, and it never weakens a check to pass it.
+
 ## [0.5.0] — 2026-11-04
 
 ### Added
