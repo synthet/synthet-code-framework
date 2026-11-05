@@ -463,6 +463,13 @@
       "projects": []
     },
     {
+      "id": "bg-status",
+      "source": ".claude/skills/bg-status",
+      "pack": "global",
+      "global": true,
+      "projects": []
+    },
+    {
       "id": "use-jev",
       "source": ".claude/skills/use-jev",
       "pack": "global",
