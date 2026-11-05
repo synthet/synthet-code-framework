@@ -6,12 +6,20 @@ All notable changes to this framework are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-11-04
+
 ### Added
 
 - `/go` skill: takes the recommended options, settles the rest with Jev, works through open items in
   order and reports once. It runs only when the user types it, and it keeps a fixed list of actions
   it never approves. It can merge a PR it opened only when CI is green on that exact commit,
   and a PR already shown to the user in a private repository with no CI after a local check passes.
+- `use-jev` skill: hands open decisions and blocked steps to Jev in one batched call, then acts only
+  on what Jev clears.
+- `app-icons` skill: designs Synth-family icons and favicons, renders every size from vector masters
+  and wires web, Gradio, FastAPI, Electron and Expo surfaces.
+- `bg-status` skill: a read-only snapshot of background tasks, workers, peer sessions and machine
+  resources.
 
 ### Changed
 
@@ -27,10 +35,18 @@ All notable changes to this framework are documented here. The format follows
   open before pushing to it.
 - `windows-agent-tooling` covers `git show <ref>:<path>` in Git Bash, and `agent-setup` explains why
   raw hashes and empty plans don't prove installed copies match.
+- Skills gained guidance on shared checkouts, read-only WAL access, Git Bash, native addons, harness
+  hooks and adopting a foreign skill tree.
 
 ### Fixed
 
 - NTFS junctions are treated as links on Python 3.11, so a junction is no longer a second project.
+- `agent_setup.py rollback` restores the ownership ledger along with the files.
+- The Jev hook returns a valid `ask` to Cursor. Cursor rejected the empty response and blocked the
+  tool.
+- `okf_lint.py` skips git-ignored `_local/` notes by default, so local runs match CI.
+- The frontmatter check skips contract checks for generated command and rule aliases, which failed
+  in every adopting project.
 
 ## [0.4.0] — 2026-10-25
 
