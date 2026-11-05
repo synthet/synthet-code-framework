@@ -78,14 +78,14 @@ and say so explicitly — an idea being good in its source is not evidence this 
 | Candidate shape | Asset |
 |-----------------|-------|
 | Product or feature outcome to build | [`/spec`](spec.md) → `specs/<slug>.md` |
-| Reusable procedure with a recognizable trigger | Skill, via [`skill-authoring`](../skills/skill-authoring/SKILL.md) |
+| Reusable procedure with a recognizable trigger | Skill, via `skill-authoring` |
 | Workflow the user starts against a named target | Command in `.claude/commands/` |
 | Bounded delegated role needing its own context | Subagent in `.claude/agents/` |
 | Always-on constraint, a few lines at most | Rule in `.claude/rules/` — **high bar**, only a handful exist |
 | Long tables, schemas, provider detail | `references/` under an existing skill |
 | Deterministic steps repeated every run | Harness, via [`/compile-skill`](compile-skill.md) |
 | Knowledge a human reads | [`/wiki-ingest`](wiki-ingest.md) |
-| One-off signal about this session | [`eval`](../skills/eval/SKILL.md) / `/log-session` |
+| One-off signal about this session | `eval` / `/log-session` |
 
 Prefer enriching an existing asset over adding one. A new asset needs a trigger surface no current
 asset covers — name it.

@@ -28,4 +28,4 @@ Or instruct the user to reference `.agent-memory/memory.md` directly.
 
 ## Skill
 
-`.claude/skills/agent-memory/SKILL.md`
+The `agent-memory` skill

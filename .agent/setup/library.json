@@ -4,14 +4,14 @@
     {
       "id": "resume-task",
       "source": ".claude/skills/resume-task",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "agent-memory",
       "source": ".claude/skills/agent-memory",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
@@ -20,24 +20,19 @@
       "source": ".claude/skills/agent-runtime-handoff",
       "pack": "agent-tools",
       "global": true,
-      "projects": [
-        "agent-sdlc",
-        "subagent-orchestrator",
-        "jev-mcp",
-        "win-gui-mcp"
-      ]
+      "projects": []
     },
     {
       "id": "agent-setup",
       "source": ".claude/skills/agent-setup",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "architecture-decisions",
       "source": ".claude/skills/architecture-decisions",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
@@ -46,29 +41,26 @@
       "source": ".claude/skills/archive-session-transcripts",
       "pack": "knowledge",
       "global": true,
-      "projects": [
-        "synthet-llm-wiki",
-        "synthet-code-framework"
-      ]
+      "projects": []
     },
     {
       "id": "autonomous-run-contract",
       "source": ".claude/skills/autonomous-run-contract",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "backlog-queue",
       "source": ".claude/skills/backlog-queue",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "cli-tools-overview",
       "source": ".claude/skills/cli-tools-overview",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
@@ -77,26 +69,19 @@
       "source": ".claude/skills/codebase-size-audit",
       "pack": "maintenance",
       "global": true,
-      "projects": [
-        "image-scoring",
-        "image-scoring-backend",
-        "image-scoring-gallery",
-        "warp",
-        "zed",
-        "kestrel"
-      ]
+      "projects": []
     },
     {
       "id": "commit-and-push",
       "source": ".claude/skills/commit-and-push",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "commit-conventions",
       "source": ".claude/skills/commit-conventions",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
@@ -105,26 +90,19 @@
       "source": ".claude/skills/container-operations",
       "pack": "containers",
       "global": true,
-      "projects": [
-        "nwn-modules",
-        "image-scoring",
-        "image-scoring-backend",
-        "birdweather-telegram-bot",
-        "hetzner-mcp",
-        "lightroom-mcp"
-      ]
+      "projects": []
     },
     {
       "id": "critical-commit-audit",
       "source": ".claude/skills/critical-commit-audit",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "data-config-tools",
       "source": ".claude/skills/data-config-tools",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
@@ -133,35 +111,20 @@
       "source": ".claude/skills/database-backups",
       "pack": "database",
       "global": true,
-      "projects": [
-        "nwn-modules",
-        "image-scoring",
-        "image-scoring-backend",
-        "image-scoring-gallery",
-        "video-gallery",
-        "synthet-llm-wiki"
-      ]
+      "projects": []
     },
     {
       "id": "database-migrations",
       "source": ".claude/skills/database-migrations",
       "pack": "database",
       "global": true,
-      "projects": [
-        "nwn-modules",
-        "image-scoring",
-        "image-scoring-backend",
-        "image-scoring-gallery",
-        "video-gallery",
-        "birdweather-telegram-bot",
-        "synthet-llm-wiki"
-      ]
+      "projects": []
     },
     {
       "id": "electron-development",
       "source": ".claude/skills/electron-development",
       "pack": "electron",
-      "global": true,
+      "global": false,
       "projects": [
         "image-scoring",
         "image-scoring-gallery",
@@ -171,14 +134,14 @@
     {
       "id": "eval",
       "source": ".claude/skills/eval",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "export-chat",
       "source": ".claude/skills/export-chat",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
@@ -187,16 +150,12 @@
       "source": ".claude/skills/feature-flag-lifecycle",
       "pack": "rollout",
       "global": true,
-      "projects": [
-        "warp",
-        "zed",
-        "kestrel"
-      ]
+      "projects": []
     },
     {
       "id": "git-and-diff-workflows",
       "source": ".claude/skills/git-and-diff-workflows",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
@@ -204,16 +163,16 @@
       "id": "gradio-development",
       "source": ".claude/skills/gradio-development",
       "pack": "gradio",
-      "global": true,
+      "global": false,
       "projects": [
-        "image-scoring-backend",
-        "image-scoring-model"
+        "image-scoring-model",
+        "image-scoring-pipeline"
       ]
     },
     {
       "id": "graphify-knowledge-graph",
       "source": ".claude/skills/graphify-knowledge-graph",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
@@ -222,25 +181,19 @@
       "source": ".claude/skills/hook-loopback-safety",
       "pack": "agent-tools",
       "global": true,
-      "projects": [
-        "cursor-telegram-bot",
-        "mcp-agent-mailbox",
-        "subagent-orchestrator",
-        "jev-mcp",
-        "win-gui-mcp"
-      ]
+      "projects": []
     },
     {
       "id": "install-checklist",
       "source": ".claude/skills/install-checklist",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "jev-mcp",
       "source": ".claude/skills/jev-mcp",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
@@ -249,38 +202,33 @@
       "source": ".claude/skills/judge-panel",
       "pack": "vision-evaluation",
       "global": true,
-      "projects": [
-        "burstpick-re",
-        "sharp-image-scoring",
-        "image-scoring-backend",
-        "image-scoring-model"
-      ]
+      "projects": []
     },
     {
       "id": "karpathy-guidelines",
       "source": ".claude/skills/karpathy-guidelines",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "lesson-to-skill",
       "source": ".claude/skills/lesson-to-skill",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "lint-format-security",
       "source": ".claude/skills/lint-format-security",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "llm-wiki",
       "source": ".claude/skills/llm-wiki",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
@@ -289,117 +237,113 @@
       "source": ".claude/skills/logging-and-error-reporting",
       "pack": "observability",
       "global": true,
-      "projects": [
-        "warp",
-        "zed",
-        "kestrel",
-        "cursor-telegram-bot",
-        "image-scoring-backend",
-        "win-gui-mcp"
-      ]
+      "projects": []
     },
     {
       "id": "mcp-code-intelligence",
       "source": ".claude/skills/mcp-code-intelligence",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "mcp-server-design",
       "source": ".claude/skills/mcp-server-design",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "release-bump",
       "source": ".claude/skills/release-bump",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "rust-testing",
       "source": ".claude/skills/rust-testing",
-      "pack": "core",
-      "global": true,
-      "projects": []
+      "pack": "rust",
+      "global": false,
+      "projects": [
+        "warp",
+        "zed"
+      ]
     },
     {
       "id": "safe-command-patterns",
       "source": ".claude/skills/safe-command-patterns",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "search-and-navigation",
       "source": ".claude/skills/search-and-navigation",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "search-tool-selection",
       "source": ".claude/skills/search-tool-selection",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "security-review",
       "source": ".claude/skills/security-review",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "skill-authoring",
       "source": ".claude/skills/skill-authoring",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "structural-code-search",
       "source": ".claude/skills/structural-code-search",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "subagent-review",
       "source": ".claude/skills/subagent-review",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "systematic-debugging",
       "source": ".claude/skills/systematic-debugging",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "task-env-package-tools",
       "source": ".claude/skills/task-env-package-tools",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "test-driven-development",
       "source": ".claude/skills/test-driven-development",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "threat-modeling-agentic-tools",
       "source": ".claude/skills/threat-modeling-agentic-tools",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
@@ -407,22 +351,22 @@
       "id": "typescript-monorepo-quality",
       "source": ".claude/skills/typescript-monorepo-quality",
       "pack": "typescript",
-      "global": true,
+      "global": false,
       "projects": [
+        "birdweather-telegram-bot",
         "cursor-telegram-bot",
         "image-scoring",
         "image-scoring-gallery",
         "image-scoring-ui",
-        "video-gallery",
         "mcp-kanban",
-        "birdweather-telegram-bot"
+        "video-gallery"
       ]
     },
     {
       "id": "unity-testing",
       "source": ".claude/skills/unity-testing",
       "pack": "unity",
-      "global": true,
+      "global": false,
       "projects": [
         "project-twelve"
       ]
@@ -430,21 +374,21 @@
     {
       "id": "validate-implementation",
       "source": ".claude/skills/validate-implementation",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "verification-before-completion",
       "source": ".claude/skills/verification-before-completion",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "windows-agent-tooling",
       "source": ".claude/skills/windows-agent-tooling",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
@@ -453,17 +397,12 @@
       "source": ".claude/skills/windows-keep-awake",
       "pack": "windows",
       "global": true,
-      "projects": [
-        "image-scoring-backend",
-        "image-scoring-model",
-        "project-twelve",
-        "burstpick-re"
-      ]
+      "projects": []
     },
     {
       "id": "wsl2-agent-tooling",
       "source": ".claude/skills/wsl2-agent-tooling",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
@@ -472,43 +411,61 @@
       "source": ".claude/skills/consume",
       "pack": "knowledge",
       "global": true,
-      "projects": [
-        "vault",
-        "synthet-llm-wiki"
-      ]
+      "projects": []
     },
     {
       "id": "threejs-frame-conventions",
       "source": ".claude/skills/threejs-frame-conventions",
-      "pack": "core",
-      "global": true,
+      "pack": "threejs",
+      "global": false,
       "projects": []
     },
     {
       "id": "accidental-data-loss-prevention",
       "source": ".claude/skills/accidental-data-loss-prevention",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "next-steps",
       "source": ".claude/skills/next-steps",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "step-by-step",
       "source": ".claude/skills/step-by-step",
-      "pack": "core",
+      "pack": "global",
       "global": true,
       "projects": []
     },
     {
       "id": "managing-python-dependencies",
       "source": ".claude/skills/managing-python-dependencies",
-      "pack": "core",
+      "pack": "global",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "centralized-permissions",
+      "source": ".claude/skills/centralized-permissions",
+      "pack": "agent-tools",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "go",
+      "source": ".claude/skills/go",
+      "pack": "global",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "use-jev",
+      "source": ".claude/skills/use-jev",
+      "pack": "global",
       "global": true,
       "projects": []
     }
@@ -524,17 +481,17 @@
   "reviewed_global_adoptions": [
     {
       "relative": ".claude/skills/archive-session-transcripts/SKILL.md",
-      "sha256": "0e1a4252e7bece9b678acae47d73a8aefd8eb29323a4761f09899aad7f263716",
+      "sha256": "313b5ed628f4ea6049f5b921ec7ea951561df6b79f1e865b46b5b130730ae3c8",
       "skill": "archive-session-transcripts"
     },
     {
       "relative": ".claude/skills/judge-panel/SKILL.md",
-      "sha256": "9b3b58d83d4cbee8c40e1741e3ce9bd04e21144f2c15230a1a885532a382f202",
+      "sha256": "645ffed08c5266242afa680e35ae76e82b599bae734afd9d9c311a25fc82ea2e",
       "skill": "judge-panel"
     },
     {
       "relative": ".agents/skills/archive-session-transcripts/SKILL.md",
-      "sha256": "0e1a4252e7bece9b678acae47d73a8aefd8eb29323a4761f09899aad7f263716",
+      "sha256": "313b5ed628f4ea6049f5b921ec7ea951561df6b79f1e865b46b5b130730ae3c8",
       "skill": "archive-session-transcripts"
     },
     {
@@ -574,19 +531,394 @@
     },
     {
       "relative": ".gemini/config/skills/archive-session-transcripts/SKILL.md",
-      "sha256": "0e1a4252e7bece9b678acae47d73a8aefd8eb29323a4761f09899aad7f263716",
+      "sha256": "313b5ed628f4ea6049f5b921ec7ea951561df6b79f1e865b46b5b130730ae3c8",
       "skill": "archive-session-transcripts"
     },
     {
       "relative": ".gemini/antigravity-cli/skills/archive-session-transcripts/SKILL.md",
       "sha256": "0e1a4252e7bece9b678acae47d73a8aefd8eb29323a4761f09899aad7f263716",
       "skill": "archive-session-transcripts"
+    },
+    {
+      "relative": ".agents/skills/accidental-data-loss-prevention/SKILL.md",
+      "sha256": "82769e3c99fbbae081420ea62d6e3318eaf80b9c97da12a62c1cf97049826878",
+      "skill": "accidental-data-loss-prevention"
+    },
+    {
+      "relative": ".agents/skills/agent-runtime-handoff/SKILL.md",
+      "sha256": "e7ecfe5eeaae5a7dfb996b831717c444441e1357c14b36f29ded8243597070a5",
+      "skill": "agent-runtime-handoff"
+    },
+    {
+      "relative": ".agents/skills/codebase-size-audit/SKILL.md",
+      "sha256": "3df38d784e927dcff95d1123a4b675e7b6e3dbfff6304af1c80fed6604e1faf1",
+      "skill": "codebase-size-audit"
+    },
+    {
+      "relative": ".agents/skills/container-operations/SKILL.md",
+      "sha256": "65dd87b75026d8fe8216e88ce3a2102b0a70b7c00d55d9fc5f4667d7a6b603f3",
+      "skill": "container-operations"
+    },
+    {
+      "relative": ".agents/skills/database-backups/SKILL.md",
+      "sha256": "6e613f9d67d53c971516a1cc74778726471f57b674fa38b891dffd891c4c3590",
+      "skill": "database-backups"
+    },
+    {
+      "relative": ".agents/skills/database-migrations/SKILL.md",
+      "sha256": "37c889c1348c9178a9e95b559e52cbb2919d2ae688ff749cbaa112a5969636dd",
+      "skill": "database-migrations"
+    },
+    {
+      "relative": ".agents/skills/feature-flag-lifecycle/SKILL.md",
+      "sha256": "7b204f12d84645610fd693446ca6ef530d93d276b318df8fac1bf8fc29316b11",
+      "skill": "feature-flag-lifecycle"
+    },
+    {
+      "relative": ".agents/skills/hook-loopback-safety/SKILL.md",
+      "sha256": "5c86d1a11d7426f5e262ca58c439134463e5d003cf59d3ef148a3ee2dc213ed0",
+      "skill": "hook-loopback-safety"
+    },
+    {
+      "relative": ".agents/skills/logging-and-error-reporting/SKILL.md",
+      "sha256": "f3e008a20c54a0af1c7c40fadafdbc6599e9c55d4913a9acab03b24efece981c",
+      "skill": "logging-and-error-reporting"
+    },
+    {
+      "relative": ".agents/skills/managing-python-dependencies/SKILL.md",
+      "sha256": "bb79234c455f7185f1475757e1868774d23f5f21cc03afda92233f5c15c7f30e",
+      "skill": "managing-python-dependencies"
+    },
+    {
+      "relative": ".agents/skills/next-steps/SKILL.md",
+      "sha256": "73220f57adf45d7e1c720bd10da8919cd8c9f4cb7d2133a7d6915cb9b79170f5",
+      "skill": "next-steps"
+    },
+    {
+      "relative": ".agents/skills/step-by-step/SKILL.md",
+      "sha256": "04a50b57ecb8eb6dac045025d931dfbcf77e09c22b68f98c1992b86a364ca4e7",
+      "skill": "step-by-step"
+    },
+    {
+      "relative": ".agents/skills/windows-keep-awake/SKILL.md",
+      "sha256": "7a1c6e3081923038ac367d743b0edfe48644a66be574db5d0278e1562de0600d",
+      "skill": "windows-keep-awake"
+    },
+    {
+      "relative": ".claude/skills/accidental-data-loss-prevention/SKILL.md",
+      "sha256": "82769e3c99fbbae081420ea62d6e3318eaf80b9c97da12a62c1cf97049826878",
+      "skill": "accidental-data-loss-prevention"
+    },
+    {
+      "relative": ".claude/skills/agent-runtime-handoff/SKILL.md",
+      "sha256": "e7ecfe5eeaae5a7dfb996b831717c444441e1357c14b36f29ded8243597070a5",
+      "skill": "agent-runtime-handoff"
+    },
+    {
+      "relative": ".claude/skills/codebase-size-audit/SKILL.md",
+      "sha256": "3df38d784e927dcff95d1123a4b675e7b6e3dbfff6304af1c80fed6604e1faf1",
+      "skill": "codebase-size-audit"
+    },
+    {
+      "relative": ".claude/skills/container-operations/SKILL.md",
+      "sha256": "65dd87b75026d8fe8216e88ce3a2102b0a70b7c00d55d9fc5f4667d7a6b603f3",
+      "skill": "container-operations"
+    },
+    {
+      "relative": ".claude/skills/database-backups/SKILL.md",
+      "sha256": "6e613f9d67d53c971516a1cc74778726471f57b674fa38b891dffd891c4c3590",
+      "skill": "database-backups"
+    },
+    {
+      "relative": ".claude/skills/database-migrations/SKILL.md",
+      "sha256": "37c889c1348c9178a9e95b559e52cbb2919d2ae688ff749cbaa112a5969636dd",
+      "skill": "database-migrations"
+    },
+    {
+      "relative": ".claude/skills/feature-flag-lifecycle/SKILL.md",
+      "sha256": "7b204f12d84645610fd693446ca6ef530d93d276b318df8fac1bf8fc29316b11",
+      "skill": "feature-flag-lifecycle"
+    },
+    {
+      "relative": ".claude/skills/hook-loopback-safety/SKILL.md",
+      "sha256": "5c86d1a11d7426f5e262ca58c439134463e5d003cf59d3ef148a3ee2dc213ed0",
+      "skill": "hook-loopback-safety"
+    },
+    {
+      "relative": ".claude/skills/logging-and-error-reporting/SKILL.md",
+      "sha256": "f3e008a20c54a0af1c7c40fadafdbc6599e9c55d4913a9acab03b24efece981c",
+      "skill": "logging-and-error-reporting"
+    },
+    {
+      "relative": ".claude/skills/managing-python-dependencies/SKILL.md",
+      "sha256": "bb79234c455f7185f1475757e1868774d23f5f21cc03afda92233f5c15c7f30e",
+      "skill": "managing-python-dependencies"
+    },
+    {
+      "relative": ".claude/skills/next-steps/SKILL.md",
+      "sha256": "73220f57adf45d7e1c720bd10da8919cd8c9f4cb7d2133a7d6915cb9b79170f5",
+      "skill": "next-steps"
+    },
+    {
+      "relative": ".claude/skills/step-by-step/SKILL.md",
+      "sha256": "04a50b57ecb8eb6dac045025d931dfbcf77e09c22b68f98c1992b86a364ca4e7",
+      "skill": "step-by-step"
+    },
+    {
+      "relative": ".claude/skills/windows-keep-awake/SKILL.md",
+      "sha256": "7a1c6e3081923038ac367d743b0edfe48644a66be574db5d0278e1562de0600d",
+      "skill": "windows-keep-awake"
+    },
+    {
+      "relative": ".gemini/config/skills/accidental-data-loss-prevention/SKILL.md",
+      "sha256": "82769e3c99fbbae081420ea62d6e3318eaf80b9c97da12a62c1cf97049826878",
+      "skill": "accidental-data-loss-prevention"
+    },
+    {
+      "relative": ".gemini/config/skills/agent-runtime-handoff/SKILL.md",
+      "sha256": "e7ecfe5eeaae5a7dfb996b831717c444441e1357c14b36f29ded8243597070a5",
+      "skill": "agent-runtime-handoff"
+    },
+    {
+      "relative": ".gemini/config/skills/codebase-size-audit/SKILL.md",
+      "sha256": "3df38d784e927dcff95d1123a4b675e7b6e3dbfff6304af1c80fed6604e1faf1",
+      "skill": "codebase-size-audit"
+    },
+    {
+      "relative": ".gemini/config/skills/container-operations/SKILL.md",
+      "sha256": "65dd87b75026d8fe8216e88ce3a2102b0a70b7c00d55d9fc5f4667d7a6b603f3",
+      "skill": "container-operations"
+    },
+    {
+      "relative": ".gemini/config/skills/database-backups/SKILL.md",
+      "sha256": "6e613f9d67d53c971516a1cc74778726471f57b674fa38b891dffd891c4c3590",
+      "skill": "database-backups"
+    },
+    {
+      "relative": ".gemini/config/skills/database-migrations/SKILL.md",
+      "sha256": "37c889c1348c9178a9e95b559e52cbb2919d2ae688ff749cbaa112a5969636dd",
+      "skill": "database-migrations"
+    },
+    {
+      "relative": ".gemini/config/skills/feature-flag-lifecycle/SKILL.md",
+      "sha256": "7b204f12d84645610fd693446ca6ef530d93d276b318df8fac1bf8fc29316b11",
+      "skill": "feature-flag-lifecycle"
+    },
+    {
+      "relative": ".gemini/config/skills/logging-and-error-reporting/SKILL.md",
+      "sha256": "f3e008a20c54a0af1c7c40fadafdbc6599e9c55d4913a9acab03b24efece981c",
+      "skill": "logging-and-error-reporting"
+    },
+    {
+      "relative": ".gemini/config/skills/managing-python-dependencies/SKILL.md",
+      "sha256": "bb79234c455f7185f1475757e1868774d23f5f21cc03afda92233f5c15c7f30e",
+      "skill": "managing-python-dependencies"
+    },
+    {
+      "relative": ".gemini/config/skills/next-steps/SKILL.md",
+      "sha256": "73220f57adf45d7e1c720bd10da8919cd8c9f4cb7d2133a7d6915cb9b79170f5",
+      "skill": "next-steps"
+    },
+    {
+      "relative": ".gemini/config/skills/step-by-step/SKILL.md",
+      "sha256": "04a50b57ecb8eb6dac045025d931dfbcf77e09c22b68f98c1992b86a364ca4e7",
+      "skill": "step-by-step"
+    },
+    {
+      "relative": ".gemini/config/skills/windows-keep-awake/SKILL.md",
+      "sha256": "7a1c6e3081923038ac367d743b0edfe48644a66be574db5d0278e1562de0600d",
+      "skill": "windows-keep-awake"
+    },
+    {
+      "relative": ".claude/skills/commit-conventions/SKILL.md",
+      "sha256": "971a9431f1feda326af6e0ff6479289b975566fbb88f84bb29a207e8640e348b",
+      "skill": "commit-conventions"
+    },
+    {
+      "relative": ".agents/skills/commit-conventions/SKILL.md",
+      "sha256": "971a9431f1feda326af6e0ff6479289b975566fbb88f84bb29a207e8640e348b",
+      "skill": "commit-conventions"
+    },
+    {
+      "relative": ".gemini/config/skills/commit-conventions/SKILL.md",
+      "sha256": "971a9431f1feda326af6e0ff6479289b975566fbb88f84bb29a207e8640e348b",
+      "skill": "commit-conventions"
+    },
+    {
+      "relative": ".claude/skills/consume/SKILL.md",
+      "sha256": "200d85f786647d726f6bd93256962207be2b173a77d291a5127a9eb722ca6639",
+      "skill": "consume"
+    },
+    {
+      "relative": ".agents/skills/consume/SKILL.md",
+      "sha256": "200d85f786647d726f6bd93256962207be2b173a77d291a5127a9eb722ca6639",
+      "skill": "consume"
+    },
+    {
+      "relative": ".gemini/config/skills/consume/SKILL.md",
+      "sha256": "200d85f786647d726f6bd93256962207be2b173a77d291a5127a9eb722ca6639",
+      "skill": "consume"
+    },
+    {
+      "relative": ".claude/skills/critical-commit-audit/SKILL.md",
+      "sha256": "550c9df46a61b99c806ca35f48046ac66ae602200714067aeec0601de4013109",
+      "skill": "critical-commit-audit"
+    },
+    {
+      "relative": ".agents/skills/critical-commit-audit/SKILL.md",
+      "sha256": "550c9df46a61b99c806ca35f48046ac66ae602200714067aeec0601de4013109",
+      "skill": "critical-commit-audit"
+    },
+    {
+      "relative": ".gemini/config/skills/critical-commit-audit/SKILL.md",
+      "sha256": "550c9df46a61b99c806ca35f48046ac66ae602200714067aeec0601de4013109",
+      "skill": "critical-commit-audit"
+    },
+    {
+      "relative": ".agents/skills/judge-panel/SKILL.md",
+      "sha256": "645ffed08c5266242afa680e35ae76e82b599bae734afd9d9c311a25fc82ea2e",
+      "skill": "judge-panel"
+    },
+    {
+      "relative": ".gemini/config/skills/judge-panel/SKILL.md",
+      "sha256": "645ffed08c5266242afa680e35ae76e82b599bae734afd9d9c311a25fc82ea2e",
+      "skill": "judge-panel"
+    },
+    {
+      "relative": ".claude/skills/mcp-server-design/SKILL.md",
+      "sha256": "560d29879b6bb2d13fddd61ef5f520dc88e37fe00af717edd739c031a85acd54",
+      "skill": "mcp-server-design"
+    },
+    {
+      "relative": ".agents/skills/mcp-server-design/SKILL.md",
+      "sha256": "560d29879b6bb2d13fddd61ef5f520dc88e37fe00af717edd739c031a85acd54",
+      "skill": "mcp-server-design"
+    },
+    {
+      "relative": ".gemini/config/skills/mcp-server-design/SKILL.md",
+      "sha256": "560d29879b6bb2d13fddd61ef5f520dc88e37fe00af717edd739c031a85acd54",
+      "skill": "mcp-server-design"
+    },
+    {
+      "relative": ".gemini/antigravity-cli/skills/mcp-server-design/SKILL.md",
+      "sha256": "28c4b297700f4b26f28c6e4d27b6f9d75e81575b9a1c3a33628bb3d3e512d0f8",
+      "skill": "mcp-server-design"
+    },
+    {
+      "relative": ".claude/skills/security-review/SKILL.md",
+      "sha256": "a69d09e4c4f882300ba720876ddc7a9425cef8cb7c5997db1d0b6a1cbf6e9c46",
+      "skill": "security-review"
+    },
+    {
+      "relative": ".agents/skills/security-review/SKILL.md",
+      "sha256": "a69d09e4c4f882300ba720876ddc7a9425cef8cb7c5997db1d0b6a1cbf6e9c46",
+      "skill": "security-review"
+    },
+    {
+      "relative": ".gemini/config/skills/security-review/SKILL.md",
+      "sha256": "a69d09e4c4f882300ba720876ddc7a9425cef8cb7c5997db1d0b6a1cbf6e9c46",
+      "skill": "security-review"
+    },
+    {
+      "relative": ".claude/skills/subagent-review/SKILL.md",
+      "sha256": "73dc30ffa89eb2f91056167bc9399665a32ba99a58dbb7412cc6f27f5a9cd3c9",
+      "skill": "subagent-review"
+    },
+    {
+      "relative": ".agents/skills/subagent-review/SKILL.md",
+      "sha256": "73dc30ffa89eb2f91056167bc9399665a32ba99a58dbb7412cc6f27f5a9cd3c9",
+      "skill": "subagent-review"
+    },
+    {
+      "relative": ".gemini/config/skills/subagent-review/SKILL.md",
+      "sha256": "73dc30ffa89eb2f91056167bc9399665a32ba99a58dbb7412cc6f27f5a9cd3c9",
+      "skill": "subagent-review"
+    },
+    {
+      "relative": ".gemini/antigravity-cli/skills/subagent-review/SKILL.md",
+      "sha256": "73dc30ffa89eb2f91056167bc9399665a32ba99a58dbb7412cc6f27f5a9cd3c9",
+      "skill": "subagent-review"
+    },
+    {
+      "relative": ".claude/skills/threat-modeling-agentic-tools/SKILL.md",
+      "sha256": "56df3d9f9235e3c76bceab9599440ea5755e38fc4f45cded63b80a54c4db7421",
+      "skill": "threat-modeling-agentic-tools"
+    },
+    {
+      "relative": ".agents/skills/threat-modeling-agentic-tools/SKILL.md",
+      "sha256": "56df3d9f9235e3c76bceab9599440ea5755e38fc4f45cded63b80a54c4db7421",
+      "skill": "threat-modeling-agentic-tools"
+    },
+    {
+      "relative": ".gemini/config/skills/threat-modeling-agentic-tools/SKILL.md",
+      "sha256": "56df3d9f9235e3c76bceab9599440ea5755e38fc4f45cded63b80a54c4db7421",
+      "skill": "threat-modeling-agentic-tools"
+    },
+    {
+      "relative": ".claude/skills/agent-memory/SKILL.md",
+      "sha256": "70f43225e30e982e6f6ca9b7c19ad7a31cd5b16d4260873ac9f19b845a4f449b",
+      "skill": "agent-memory"
+    },
+    {
+      "relative": ".agents/skills/agent-memory/SKILL.md",
+      "sha256": "70f43225e30e982e6f6ca9b7c19ad7a31cd5b16d4260873ac9f19b845a4f449b",
+      "skill": "agent-memory"
+    },
+    {
+      "relative": ".gemini/config/skills/agent-memory/SKILL.md",
+      "sha256": "70f43225e30e982e6f6ca9b7c19ad7a31cd5b16d4260873ac9f19b845a4f449b",
+      "skill": "agent-memory"
+    },
+    {
+      "relative": ".claude/skills/backlog-queue/SKILL.md",
+      "sha256": "9fc39357ab94ec661617d8b6826e087e21cfeb4037aed5cab1feea9183219fd1",
+      "skill": "backlog-queue"
+    },
+    {
+      "relative": ".agents/skills/backlog-queue/SKILL.md",
+      "sha256": "9fc39357ab94ec661617d8b6826e087e21cfeb4037aed5cab1feea9183219fd1",
+      "skill": "backlog-queue"
+    },
+    {
+      "relative": ".gemini/config/skills/backlog-queue/SKILL.md",
+      "sha256": "9fc39357ab94ec661617d8b6826e087e21cfeb4037aed5cab1feea9183219fd1",
+      "skill": "backlog-queue"
+    },
+    {
+      "relative": ".claude/skills/export-chat/SKILL.md",
+      "sha256": "9f29f37111d9fbbc3849ae9010b645c9d494f2a002c98fb8ca109abad11a1b63",
+      "skill": "export-chat"
+    },
+    {
+      "relative": ".agents/skills/export-chat/SKILL.md",
+      "sha256": "9f29f37111d9fbbc3849ae9010b645c9d494f2a002c98fb8ca109abad11a1b63",
+      "skill": "export-chat"
+    },
+    {
+      "relative": ".gemini/config/skills/export-chat/SKILL.md",
+      "sha256": "9f29f37111d9fbbc3849ae9010b645c9d494f2a002c98fb8ca109abad11a1b63",
+      "skill": "export-chat"
+    },
+    {
+      "relative": ".agents/skills/release-bump/SKILL.md",
+      "sha256": "54348db2078de008634bbe9a8988dc2e7590daab178413cc6691340498f4a924",
+      "skill": "release-bump"
+    },
+    {
+      "relative": ".gemini/config/skills/release-bump/SKILL.md",
+      "sha256": "8bca2af12a1564e1c392c26356cc9873540568fa581f18a8ac5aef6e8ab36ff3",
+      "skill": "release-bump"
+    },
+    {
+      "relative": ".gemini/antigravity-cli/skills/release-bump/SKILL.md",
+      "sha256": "8bca2af12a1564e1c392c26356cc9873540568fa581f18a8ac5aef6e8ab36ff3",
+      "skill": "release-bump"
     }
   ],
   "reviewed_resource_adoptions": [
     {
       "relative": ".claude/skills/archive-session-transcripts/references/wiki-ingestion.md",
-      "sha256": "93ee97b3fa9e6f325256eadfe1ebb69d1d158197b0b287115756f568e5291301",
+      "sha256": "638e5c01b63930214035dc89d1915d06659fe4639bdd0f3ee9de1e7a1adc7a82",
       "reason": "Reviewed path generalization and removal of permission bypass; preserve workflow guards"
     },
     {
@@ -596,7 +928,7 @@
     },
     {
       "relative": ".agents/skills/archive-session-transcripts/references/wiki-ingestion.md",
-      "sha256": "93ee97b3fa9e6f325256eadfe1ebb69d1d158197b0b287115756f568e5291301",
+      "sha256": "638e5c01b63930214035dc89d1915d06659fe4639bdd0f3ee9de1e7a1adc7a82",
       "reason": "Reviewed path generalization and removal of permission bypass; preserve workflow guards"
     },
     {
@@ -616,13 +948,73 @@
     },
     {
       "relative": ".gemini/config/skills/archive-session-transcripts/references/wiki-ingestion.md",
-      "sha256": "93ee97b3fa9e6f325256eadfe1ebb69d1d158197b0b287115756f568e5291301",
+      "sha256": "638e5c01b63930214035dc89d1915d06659fe4639bdd0f3ee9de1e7a1adc7a82",
       "reason": "Reviewed path generalization and removal of permission bypass; preserve workflow guards"
     },
     {
       "relative": ".gemini/antigravity-cli/skills/archive-session-transcripts/references/wiki-ingestion.md",
-      "sha256": "93ee97b3fa9e6f325256eadfe1ebb69d1d158197b0b287115756f568e5291301",
+      "sha256": "7eb64e12014eec704f79fc517b8ed0a73c0e848c34488ee8833aa77594a79680",
       "reason": "Reviewed path generalization and removal of permission bypass; preserve workflow guards"
+    },
+    {
+      "relative": ".claude/skills/consume/references/workflow.md",
+      "sha256": "79b81ff7284e28f4e8a4990aa59b36d1cd0f22f93c882f4d2f8e379a88f4c2e6",
+      "reason": "User copy superseded by the library; reviewed 2026-11-03."
+    },
+    {
+      "relative": ".agents/skills/consume/references/workflow.md",
+      "sha256": "79b81ff7284e28f4e8a4990aa59b36d1cd0f22f93c882f4d2f8e379a88f4c2e6",
+      "reason": "User copy superseded by the library; reviewed 2026-11-03."
+    },
+    {
+      "relative": ".gemini/config/skills/consume/references/workflow.md",
+      "sha256": "79b81ff7284e28f4e8a4990aa59b36d1cd0f22f93c882f4d2f8e379a88f4c2e6",
+      "reason": "User copy superseded by the library; reviewed 2026-11-03."
+    },
+    {
+      "relative": ".claude/skills/subagent-review/references/mcp-tools.md",
+      "sha256": "20c50f882953e8f656f6acca8a8f41642d7b163d6adfa6b2b7b68462936cf782",
+      "reason": "User copy superseded by the library; reviewed 2026-11-03."
+    },
+    {
+      "relative": ".agents/skills/subagent-review/references/mcp-tools.md",
+      "sha256": "20c50f882953e8f656f6acca8a8f41642d7b163d6adfa6b2b7b68462936cf782",
+      "reason": "User copy superseded by the library; reviewed 2026-11-03."
+    },
+    {
+      "relative": ".gemini/config/skills/subagent-review/references/mcp-tools.md",
+      "sha256": "20c50f882953e8f656f6acca8a8f41642d7b163d6adfa6b2b7b68462936cf782",
+      "reason": "User copy superseded by the library; reviewed 2026-11-03."
+    },
+    {
+      "relative": ".gemini/antigravity-cli/skills/subagent-review/references/mcp-tools.md",
+      "sha256": "20c50f882953e8f656f6acca8a8f41642d7b163d6adfa6b2b7b68462936cf782",
+      "reason": "User copy superseded by the library; reviewed 2026-11-03."
+    },
+    {
+      "relative": ".claude/skills/export-chat/scripts/export_chat.py",
+      "sha256": "8e7217300ba2ec28989e0be1e688e936213c1b19ae113f70c5746c8d3bc48bbc",
+      "reason": "User copy superseded by the library; reviewed 2026-11-03."
+    },
+    {
+      "relative": ".agents/skills/export-chat/scripts/export_chat.py",
+      "sha256": "8e7217300ba2ec28989e0be1e688e936213c1b19ae113f70c5746c8d3bc48bbc",
+      "reason": "User copy superseded by the library; reviewed 2026-11-03."
+    },
+    {
+      "relative": ".gemini/config/skills/export-chat/scripts/export_chat.py",
+      "sha256": "bb94f9547a4adc020e2285242ce72b3bc785d2c9f1d4e1f3cfae82b6530ea4a2",
+      "reason": "User copy superseded by the library; reviewed 2026-11-03."
+    },
+    {
+      "relative": ".gemini/antigravity-cli/skills/export-chat/scripts/export_chat.py",
+      "sha256": "f2f6fa80c2f25ab46286863be429a87dd48a46e96e32f2df4a70d7f9ef3d24c9",
+      "reason": "User copy superseded by the library; reviewed 2026-11-03."
+    },
+    {
+      "relative": ".gemini/antigravity-cli/skills/archive-session-transcripts/references/export-formats.md",
+      "sha256": "886eead135378dffb005d07dec12e80307ce68c28e4bbbee4182bef082c96d90",
+      "reason": "User copy superseded by the library; reviewed 2026-11-03."
     }
   ],
   "project_sync_contracts": {

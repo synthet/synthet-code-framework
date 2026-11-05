@@ -11,6 +11,12 @@ description: |
     4. Creating a new notebook, even if just using BigQuery cells.
     5. Generating Python code that includes `import` statements for third-party libraries.
     6. Before executing Python scripts via the terminal to ensure the correct virtual environment is active.
+capability: "Detect the project package manager and install Python dependencies through it"
+side_effect_level: local_write
+approval_required: false
+requires_tools: "The package manager the project uses; see body"
+output_schema: "Detected package manager, the command used and the active environment"
+risk_class: medium
 license: Apache-2.0
 metadata:
   version: v2
