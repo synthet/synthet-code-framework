@@ -149,7 +149,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.push:
         push = subprocess.run(
-            ["git", "push", "-u", "origin", "HEAD"],
+            ["git", "push", "origin", "HEAD"],
             cwd=repo,
             capture_output=True,
             text=True,
