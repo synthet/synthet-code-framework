@@ -1,6 +1,6 @@
 # Skill inventory — ${PROJECT_NAME}
 
-**Last reviewed:** 2026-11-01. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
+**Last reviewed:** 2026-11-04. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
 and [SKILL_COMPILATION.md](SKILL_COMPILATION.md).
 Update this file (new row or **Last reviewed** date) in the same PR as any skill change.
 
@@ -19,7 +19,7 @@ commands or edit code/config as part of its procedure.
 | bg-status | Read-only snapshot of background work (Claude tasks, detached workers, GPU, Docker, logs, worktrees, peer sessions), flags first; optional per-project probes in `.claude/bg-status.json`, `docker exec` probes only with `--exec-probes` | L1 | 2026-11-02 |
 | backlog-queue | Provider-oriented backlog queue; local markdown, GitHub Issues, optional GitHub Projects | L2 | 2026-07-01 |
 | commit-conventions | Conventional Commits and PR title wording | L1 | 2026-07-01 |
-| commit-and-push | Stage, commit, and push with git safety rules; pairs with release-bump (**compiled harness**) | L2 | 2026-11-01 |
+| commit-and-push | Stage, commit, and push with git safety rules; pairs with release-bump (**compiled harness**) | L2 | 2026-11-04 |
 | critical-commit-audit | Deep post-commit hunt for high-severity bugs | L2 | 2026-07-01 |
 | eval | Capture task quality signals to agent memory (**compiled harness**) | L2 | 2026-07-21 |
 | export-chat | Export the Cursor agent transcript to Markdown or the clipboard, like Claude Code `/export` | L2 | 2026-10-01 |
@@ -37,7 +37,7 @@ commands or edit code/config as part of its procedure.
 | use-jev | Delegate pending decisions, blocked steps and triage items to Jev in one batched call; act on confident low-risk picks, hand back the rest | L2 | 2026-11-01 |
 | go | Finish every open item: take recommendations, settle the rest with Jev, execute in order, report once. User-typed only | L2 | 2026-11-03 |
 | validate-implementation | Per-AC Verified/Failed/Unknown verdicts with evidence (**compiled harness**) | L2 | 2026-07-19 |
-| verification-before-completion | Evidence-backed completion claims with fresh command proof (**compiled harness**) | L1 | 2026-11-01 |
+| verification-before-completion | Evidence-backed completion claims with fresh command proof (**compiled harness**) | L1 | 2026-11-04 |
 
 ### CLI tooling ([cli-tools-skills-spec.md](cli-tools-skills-spec.md))
 
@@ -55,7 +55,7 @@ commands or edit code/config as part of its procedure.
 | lint-format-security | ruff, eslint, clippy, trivy, shellcheck (**compiled harness**) | L2 | 2026-08-14 |
 | mcp-code-intelligence | MCP tiers; fff, Graphify, Serena, Zoekt, embeddings | L2 | 2026-07-21 |
 | graphify-knowledge-graph | Query/refresh Graphify MCP or CLI for architecture paths and communities | L2 | 2026-07-21 |
-| windows-agent-tooling | Native Windows agent workflows | L2 | 2026-11-01 |
+| windows-agent-tooling | Native Windows agent workflows | L2 | 2026-11-04 |
 | wsl2-agent-tooling | WSL2 build/test/MCP workflows | L2 | 2026-07-03 |
 
 ### Consolidated reusable setup library
@@ -65,7 +65,7 @@ Jev evidence and reviewed choices: [decision ledger](setup/decisions.json).
 
 | Skill | Purpose | Risk | Last reviewed |
 |-------|---------|------|---------------|
-| agent-setup | Inventory, review, install, check and roll back native harness setup | L2 | 2026-10-26 |
+| agent-setup | Inventory, review, install, check and roll back native harness setup | L2 | 2026-11-04 |
 | resume-task | Recover unfinished local cross-harness work with evidence and a continuation brief | L2 | 2026-10-11 |
 | architecture-decisions | Compare consequential alternatives and record ADRs | L1 | 2026-10-11 |
 | agent-runtime-handoff | Application agent-runtime contracts and handoff | L2 | 2026-10-11 |

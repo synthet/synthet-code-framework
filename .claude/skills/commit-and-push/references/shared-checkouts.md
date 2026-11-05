@@ -32,7 +32,7 @@ git reset -q                            # unstage; the commit lives on <branch>
 ```
 
 For a repo with unrelated commits on the local default branch (for example an unpushed release), branch from
-`origin/<default>` in a temporary worktree instead (`git worktree add -b <branch> <tmp> origin/<default>`), and
+`origin/<default>` in a temporary worktree instead (`git worktree add --no-track -b <branch> <tmp> origin/<default>`), and
 remove the worktree afterwards.
 
 ## 3. Stage only your hunks
@@ -53,3 +53,12 @@ git diff -- <file>            # only theirs, still unstaged
 
 **Why `sys.stdout.buffer`:** on Windows, text-mode stdout writes CRLF, and `git apply` then fails with
 "patch does not apply".
+
+## 4. Regenerate in a clean tree
+
+Generators and drift checks read the working tree, so running them in a checkout that holds someone else's
+edits copies those edits into your generated files. The result then fails in CI or anywhere else that tree
+doesn't exist.
+
+When the checkout isn't clean, apply only your change in a temporary worktree from `origin/<default>`, then run
+the generators and final checks there. `git diff --stat` should list only the paths you expected.

@@ -20,6 +20,12 @@ The library manifest assigns skills to tiers: shared skills install at user leve
 
 Use the local receipt and subsequent plan as evidence; file installation alone does not prove a remote MCP is healthy or an IDE has reloaded it.
 
+## Comparing installed copies
+
+- Use the ownership ledger in `.agent/local/setup/targets/`, not raw hashes. Installation rewrites skill content (placeholders, shared reference links, a footer), so an unedited copy hashes differently from its source.
+- An empty plan doesn't prove a copy matches the framework. The 3-way merge keeps a local edit when the framework side hasn't changed, and plans it as `unchanged`.
+- Before adding a skill to the library, compare it with any existing user copy, which may be newer than the framework's. Keep the newer text, or the install replaces it.
+
 ## Adopting a foreign skill tree
 
 Copying another repository's `.agents` or `AGENTS.md` adds skills and operating rules. It does not replace the destination project's contract, toolchain, or a ban on sibling links.
