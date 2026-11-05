@@ -33,6 +33,7 @@ python .claude/skills/verification-before-completion/scripts/harness.py --framew
 2. **Interpret output** after the final edit — exit code, warnings, skipped tests, scope.
 3. Report ✅ / ⚠️ / ❌ with the exact command; never upgrade incomplete verification to pass.
 4. **Prove the real path, not a proxy.** A native addon can import fine and still fail on first use (bindings load lazily): check it with a real call, run by the same interpreter the launcher uses, e.g. `node -e "new (require('better-sqlite3'))(':memory:')"` with the `node` an MCP config starts. An import or `--version` alone does not prove it works.
+5. **Tie CI to the exact commit.** A CI result only proves the commit it ran on, and `gh pr checks --watch` can show an earlier run right after a push. Run `gh run list --commit <sha> --json headSha,status,conclusion` for the commit you're claiming. No run yet means not passed. Before pushing to a PR, check `gh pr view <n> --json state`, because commits pushed after a merge never reach the base branch.
 
 ## Use with
 

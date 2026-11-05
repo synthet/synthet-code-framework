@@ -20,6 +20,13 @@ All notable changes to this framework are documented here. The format follows
   reports collisions with global names. See `docs/skill-tiers.md`.
 - `use-jev` is now in the library manifest, so it installs for every harness.
 - `release-bump` covers repositories with no tag, changelog reconciliation and sub-package versions.
+- `commit-and-push` no longer writes branch-tracking entries: its harness pushes without `-u`, and
+  the skill says to use `--no-track`. It also checks repository visibility before a push and
+  regenerates generated files in a clean worktree.
+- `verification-before-completion` ties CI evidence to the exact commit and checks that a PR is still
+  open before pushing to it.
+- `windows-agent-tooling` covers `git show <ref>:<path>` in Git Bash, and `agent-setup` explains why
+  raw hashes and empty plans don't prove installed copies match.
 
 ### Fixed
 
