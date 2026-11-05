@@ -16,6 +16,14 @@ Plans contain exact content and before/after hashes. Receipts, baselines and bac
 
 Claude uses .claude assets and CLAUDE.md; Codex uses .agents/skills, .codex/agents and AGENTS.md; Cursor discovers shared skills and uses .cursor rules/commands/agents; Antigravity uses .agents/skills/rules/agents and native mcp_config.json. User deployments additionally use .gemini/config for Antigravity. Existing legacy installations are retained.
 
-The library manifest selects core and specialist skills. Project-native skills take precedence in packaging. MCP adapters add missing validated registrations, never replace a conflicting user entry or copy literal credentials. Missing executables, paths, disabled sources and unsupported auth are diagnostics, not successful activation.
+The library manifest assigns skills to tiers: shared skills install at user level and stack packs only into repositories that opt in. Plans delete a retired repository copy only when its whole bundle is unmodified and unreferenced; otherwise they report `tier-collision` or `tier-review`. Refresh the user tier before pruning repositories. Project-native skills take precedence in packaging. MCP adapters add missing validated registrations, never replace a conflicting user entry or copy literal credentials. Missing executables, paths, disabled sources and unsupported auth are diagnostics, not successful activation.
 
 Use the local receipt and subsequent plan as evidence; file installation alone does not prove a remote MCP is healthy or an IDE has reloaded it.
+
+## Adopting a foreign skill tree
+
+Copying another repository's `.agents` or `AGENTS.md` adds skills and operating rules. It does not replace the destination project's contract, toolchain, or a ban on sibling links.
+
+Author the new skills under the destination's `.claude/skills/`. If that project has `scripts/sync_assistant_trees.py`, run it so `.agents/skills` and `.cursor/skills` match. If it does not, copy the same skill directories into `.claude/skills`, `.agents/skills`, and `.cursor/skills`. Leave existing skills in place.
+
+From a foreign `AGENTS.md`, keep rules that apply in the destination, such as evidence handling, provider authority, and setup approval. Leave that repository's package manager, generated guidance blocks, and links to files that exist only there.

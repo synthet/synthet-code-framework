@@ -32,10 +32,12 @@ runs on harness startup and never downloads or upgrades harnesses.
 
 ## Library and routing
 
-[The manifest](../.agent/setup/library.json) defines 55 reusable skills: 40 core
-skills and 15 specialists. All are available globally; self-contained project
-deployments receive core skills, applicable specialist packs and their existing
-project-specific skills. [The decision ledger](../.agent/setup/decisions.json)
+[The manifest](../.agent/setup/library.json) assigns each reusable skill to a
+tier: shared skills install at user level, and stack packs install only into
+repositories that opt in. Repositories otherwise keep only their own skills, so
+a clone needs the user tier for shared skills. See [Skill tiers](skill-tiers.md)
+for the rules, naming and how repository copies are retired.
+[The decision ledger](../.agent/setup/decisions.json)
 records Jev judgments and reviewed routing; [rollout judgments](../.agent/setup/rollout-decisions.json)
 cover native variants and hook portability. Jev receives sanitized, bounded
 evidence; confidence is advisory. File hashes, native schemas and project

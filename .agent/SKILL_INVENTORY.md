@@ -35,6 +35,7 @@ commands or edit code/config as part of its procedure.
 | rust-testing | Cargo/nextest unit tests beside modules | L2 | 2026-08-14 |
 | threat-modeling-agentic-tools | Threat-model MCP/tool abuse and injection | L1 | 2026-07-01 |
 | use-jev | Delegate pending decisions, blocked steps and triage items to Jev in one batched call; act on confident low-risk picks, hand back the rest | L2 | 2026-11-01 |
+| go | Finish every open item: take recommendations, settle the rest with Jev, execute in order, report once. User-typed only | L2 | 2026-11-03 |
 | validate-implementation | Per-AC Verified/Failed/Unknown verdicts with evidence (**compiled harness**) | L2 | 2026-07-19 |
 | verification-before-completion | Evidence-backed completion claims with fresh command proof (**compiled harness**) | L1 | 2026-11-01 |
 
@@ -64,7 +65,7 @@ Jev evidence and reviewed choices: [decision ledger](setup/decisions.json).
 
 | Skill | Purpose | Risk | Last reviewed |
 |-------|---------|------|---------------|
-| agent-setup | Inventory, review, install, check and roll back native harness setup | L2 | 2026-10-11 |
+| agent-setup | Inventory, review, install, check and roll back native harness setup | L2 | 2026-10-26 |
 | resume-task | Recover unfinished local cross-harness work with evidence and a continuation brief | L2 | 2026-10-11 |
 | architecture-decisions | Compare consequential alternatives and record ADRs | L1 | 2026-10-11 |
 | agent-runtime-handoff | Application agent-runtime contracts and handoff | L2 | 2026-10-11 |
@@ -76,7 +77,7 @@ Jev evidence and reviewed choices: [decision ledger](setup/decisions.json).
 | electron-development | Main/preload/renderer and desktop testing contracts | L2 | 2026-10-11 |
 | feature-flag-lifecycle | Flag promotion, rollback and removal | L2 | 2026-10-11 |
 | gradio-development | Blocks/session/event graphs and diagnostics | L2 | 2026-10-11 |
-| hook-loopback-safety | Authenticated local hook queues and event handling | L2 | 2026-10-11 |
+| hook-loopback-safety | Authenticated local hook queues and event handling | L2 | 2026-10-26 |
 | judge-panel | Authorized external vision review and Jev adjudication | L2 | 2026-10-11 |
 | logging-and-error-reporting | Bounded, redacted observability and failures | L2 | 2026-10-11 |
 | typescript-monorepo-quality | Workspace boundaries, shared schemas and checks | L2 | 2026-10-11 |
