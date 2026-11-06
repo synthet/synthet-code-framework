@@ -5,6 +5,9 @@ provider is the system of record for selectable work, ownership, status, and PR 
 
 ## Default provider order
 
+0. **agent-flow** — use it whenever `.agent-flow/config.json` exists in the repo root. It is a
+   dedicated agent tracker with a dependency-aware ready queue, atomic leased claims, evidence-backed
+   acceptance criteria and a web board; see [`providers/agent-flow.md`](providers/agent-flow.md).
 1. **Local Markdown** — simplest default for generic/offline projects; see
    [`providers/local-markdown.md`](providers/local-markdown.md).
 2. **GitHub Issues** — default when the repo is hosted on GitHub and issue tracking is enabled; see
@@ -12,7 +15,8 @@ provider is the system of record for selectable work, ownership, status, and PR 
 3. **GitHub Projects** — optional board layer for teams that need project fields/stages; see
    [`providers/github-projects.md`](providers/github-projects.md).
 
-Optional placeholders for other hosted trackers live in [`providers/linear.md`](providers/linear.md)
+Choose agent-flow when several agents share the backlog, because Local Markdown has no atomic
+claims. Optional placeholders for other hosted trackers live in [`providers/linear.md`](providers/linear.md)
 and [`providers/jira.md`](providers/jira.md).
 
 ## Generic five-step contract
