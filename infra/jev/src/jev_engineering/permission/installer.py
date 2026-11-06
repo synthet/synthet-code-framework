@@ -30,6 +30,8 @@ DANGEROUS_MCP_TOOLS = {
     "execute_sql", "run_sql", "execute_code", "create_or_update_file", "issue_write",
     "merge_pull_request", "create_pull_request", "delete_file", "delete_repository",
     "push_files", "sub_issue_write", "mailbox_claim_task", "jev_box",
+    # agent-flow: destructive / bulk ticket operations (they also require confirmed=true server-side)
+    "flow_cancel", "flow_reopen", "flow_import_tasks",
 }
 T1_ALLOW_PATTERNS = re.compile(
     r"\b(?:gh\s+(?:pr|issue|project|auth|release|repo)|docker\s+exec|curl\s+-X|rm\s+-rf|del\b|Remove-Item)\b"

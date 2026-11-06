@@ -17,6 +17,7 @@ under [`.agent/backlog/`](../../.agent/backlog/README.md).
 
 ## Default provider choices
 
+- **agent-flow** whenever `.agent-flow/config.json` exists. It gives atomic claims, a dependency-aware ready queue and evidence-backed acceptance criteria, and suits several agents working in parallel.
 - **Local Markdown** for generic/offline projects.
 - **GitHub Issues** for GitHub-hosted projects without a board.
 - **GitHub Projects** only when the project explicitly adopts a board provider.
@@ -38,6 +39,7 @@ Missing GitHub Projects board IDs are not mandatory for generic projects. Fill t
 
 | Provider | Use when | Setup |
 |----------|----------|-------|
+| agent-flow | `.agent-flow/` exists; parallel agents need atomic claims | [`.agent/backlog/providers/agent-flow.md`](../../.agent/backlog/providers/agent-flow.md) |
 | Local Markdown | Generic/offline project | [`.agent/backlog/providers/local-markdown.md`](../../.agent/backlog/providers/local-markdown.md) |
 | GitHub Issues | GitHub issue tracker is the queue | [`.agent/backlog/providers/github-issues.md`](../../.agent/backlog/providers/github-issues.md) |
 | GitHub Projects | Optional board fields/stages are needed | [`.agent/backlog/providers/github-projects.md`](../../.agent/backlog/providers/github-projects.md) |

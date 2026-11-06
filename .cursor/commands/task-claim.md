@@ -16,7 +16,7 @@ Use when starting work on a backlog item. `$ARGUMENTS` is a provider-specific it
 
 **Usage:**
 ```text
-/task-claim <item-ref> [--provider local-markdown|github-issues|github-projects] [--repo <owner/repo>]
+/task-claim <item-ref> [--provider agent-flow|local-markdown|github-issues|github-projects] [--repo <owner/repo>]
 ```
 
 If `--provider` is omitted, prefer the project's configured provider. For generic projects, default
@@ -27,6 +27,19 @@ adopts the board provider and has filled in the IDs in
 ## Action
 
 Run the provider-specific claim flow and stop on any failure.
+
+### agent-flow (when `.agent-flow/config.json` exists; atomic claims)
+
+```bash
+agent-flow claim "<item-ref>" --json      # or: agent-flow claim --next [--label agent-ok]
+```
+
+1. Exit code 2 with `CLAIM_CONFLICT`: another agent holds the item. Pick another one from `agent-flow ready`.
+2. Exit code 2 with `WIP_LIMIT`: finish (`agent-flow submit`) or release (`agent-flow release`) the item you already hold.
+3. The JSON output includes `branch` (`af/<id>-<slug>`) and a lease. Work on that branch. With the agent-flow
+   hooks installed, the first commit moves the item to In Progress and heartbeats keep the lease alive.
+
+See [`.agent/backlog/providers/agent-flow.md`](../../.agent/backlog/providers/agent-flow.md).
 
 ### Local Markdown (default for generic/offline projects)
 

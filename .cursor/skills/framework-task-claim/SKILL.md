@@ -17,6 +17,10 @@ Use when starting work on a backlog item. `$ARGUMENTS` is the issue number (and 
 
 If `--repo` is omitted, default to the current repo.
 
+> **agent-flow projects:** if `.agent-flow/config.json` exists, the board is agent-flow, not GitHub
+> Projects. Run `agent-flow claim <item-ref> --json` instead of the steps below; see
+> [`.agent/backlog/providers/agent-flow.md`](../../../.agent/backlog/providers/agent-flow.md).
+
 > **Setup:** fill the placeholders below from your GitHub Project before first use, then commit.
 > See [`docs/project/00-backlog-workflow.md`](../../docs/project/00-backlog-workflow.md) for how to
 > read the project/field/option IDs (`gh project field-list <N> --owner <OWNER>`).
