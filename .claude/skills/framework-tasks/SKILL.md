@@ -27,6 +27,15 @@ Create an implementation task list with:
    - dependency IDs,
    - exact acceptance criteria covered,
    - verification command or evidence.
+
+   Use this header, so backlog providers can import the table without guessing
+   (`agent-flow import-tasks tasks.md --spec spec.md` reads it as an epic plus tickets with dependency edges):
+
+   ```markdown
+   | ID | Task | Owner role | Files / areas | Depends on | ACs | Verification |
+   |----|------|------------|---------------|------------|-----|--------------|
+   | T-1 | … | backend | `src/…` | - | AC-1 | `npm test -- …` |
+   ```
 3. **Execution order** — Group tasks into setup, test-first scaffolding, implementation, integration, validation, and documentation.
 4. **Parallelization notes** — Identify tasks that can run concurrently and tasks that must stay serialized.
 5. **Definition of done** — Checks that must be green before `/pr-ready`.

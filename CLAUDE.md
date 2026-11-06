@@ -15,7 +15,7 @@
 
 ## Backlog & queue (read this before picking work)
 
-The canonical queue is the configured **backlog provider**, not ad hoc `TODO.md` notes. Generic projects default to Local Markdown; GitHub-hosted projects may use GitHub Issues; GitHub Projects is optional when a board is explicitly configured.
+The canonical queue is the configured **backlog provider**, not ad hoc `TODO.md` notes. Projects with `.agent-flow/config.json` use agent-flow (`agent-flow ready` / `agent-flow claim`). Generic projects default to Local Markdown; GitHub-hosted projects may use GitHub Issues; GitHub Projects is optional when a board is explicitly configured.
 
 **Mandatory contract for every agent (human or AI). Do all five steps:**
 

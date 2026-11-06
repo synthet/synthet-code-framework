@@ -16,9 +16,11 @@ notes. Provider docs live in [`.agent/backlog/`](../../../.agent/backlog/README.
 provider in this order:
 
 1. Use the provider explicitly named by the user or project docs.
-2. Otherwise use GitHub Issues for GitHub-hosted repos with issue tracking enabled.
-3. Otherwise use Local Markdown for generic/offline projects.
-4. Use GitHub Projects only when the project explicitly adopts that optional board provider.
+2. Otherwise use **agent-flow** when `.agent-flow/config.json` exists in the repo root
+   (`agent-flow ready` → `agent-flow claim <id>`; the `flow_*` MCP tools work too).
+3. Otherwise use GitHub Issues for GitHub-hosted repos with issue tracking enabled.
+4. Otherwise use Local Markdown for generic/offline projects.
+5. Use GitHub Projects only when the project explicitly adopts that optional board provider.
 
 ## When to use
 
@@ -65,6 +67,9 @@ review/done state according to that provider's rules.
 
 ## Provider references
 
+- agent-flow: [`.agent/backlog/providers/agent-flow.md`](../../../.agent/backlog/providers/agent-flow.md)
+  (atomic claims: `CLAIM_CONFLICT` means another agent won, so pick again; the first commit moves the
+  item to In Progress automatically when its hooks are installed)
 - Local Markdown: [`.agent/backlog/providers/local-markdown.md`](../../../.agent/backlog/providers/local-markdown.md)
 - GitHub Issues: [`.agent/backlog/providers/github-issues.md`](../../../.agent/backlog/providers/github-issues.md)
 - GitHub Projects: [`.agent/backlog/providers/github-projects.md`](../../../.agent/backlog/providers/github-projects.md)
