@@ -48,6 +48,7 @@ REQUIRED_FILES = [
     ".codex/agents/pr-ready-hygiene.toml",
     ".agent/SAFETY.md",
     ".agent/backlog/README.md",
+    ".agent/backlog/providers/agent-flow.md",
     ".agent/backlog/providers/local-markdown.md",
     ".agent/backlog/providers/github-issues.md",
     ".agent/backlog/providers/github-projects.md",
