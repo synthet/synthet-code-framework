@@ -32,7 +32,7 @@ def _git(repo: Path, *args: str) -> str:
         text=True,
         check=False,
     )
-    return (proc.stdout or "").strip()
+    return (proc.stdout or "").rstrip()  # keep the leading space of a " M path" status line
 
 
 def main(argv: list[str] | None = None) -> int:
