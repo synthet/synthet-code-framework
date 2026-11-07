@@ -1282,6 +1282,108 @@ def stale_files(root: Path, trees: tuple[str, ...], desired: dict[str, bytes], o
     return result
 
 
+def comparable(data: bytes, project: str, *, command: bool = False) -> str:
+    """Hash content without what the installer rewrites, so old copies still match."""
+    text = data.decode("utf-8", errors="replace").replace("\r\n", "\n")
+    if command:
+        text = body(text)
+    for word in ("${PROJECT_NAME}", "the current project", project):
+        text = text.replace(word, "@")
+    text = text.replace("Resolve helper paths from this skill directory. Run project commands from the target workspace.", "")
+    text = re.sub(r"\.claude/skills/[a-z0-9-]+/scripts/", "scripts/", text)
+    text = re.sub(r"\[([^\]]*)\]\([^)\s]*\)", r"\1", text)
+    text = re.sub(r"_ROOT = .*$", "_ROOT", text, flags=re.M)
+    return digest(re.sub(r"[ \t]+$", "", text, flags=re.M).strip().encode())
+
+
+def bundle_source(name: str, rel: str) -> str:
+    """The library path a file in an installed skill bundle came from."""
+    if "references/shared/" in rel:
+        return rel.split("references/shared/", 1)[1]
+    runtime = re.search(r"_runtime/(scripts/.+)$", rel)
+    if runtime:
+        return runtime.group(1)
+    if name in {"agent-memory", "eval"} and rel.startswith("scripts/agent-memory/"):
+        return rel
+    return f".claude/skills/{name}/{rel}"
+
+
+def _git(root: Path, *args: str) -> bytes:
+    return subprocess.run(["git", "-c", "core.quotepath=off", "-C", str(root), *args], capture_output=True).stdout
+
+
+def library_versions(framework: Path, path: str, project: str, cache: dict, command: bool = False) -> set[str]:
+    """Comparable hashes of every committed version of a library file."""
+    key = (path, command)
+    if key not in cache:
+        commits = _git(framework, "log", "--all", "--format=%H", "--", path).decode().split()
+        cache[key] = {comparable(_git(framework, "show", f"{commit}:{path}"), project, command=command) for commit in commits}
+    return cache[key]
+
+
+def _tracked_blocker(framework: Path, project: Path, skill: Path, tracked: set[str], changed: set[str], cache: dict) -> str | None:
+    alias = skill.name.startswith("framework-")
+    for path in sorted(skill.rglob("*")):
+        rel = path.relative_to(project).as_posix()
+        if linked(path):
+            return "linked path: " + rel
+        if not path.is_file() or "__pycache__" in path.parts or path.suffix in {".pyc", ".pyo"}:
+            continue
+        if path.name in PROTECTED_NAMES:
+            return "protected file name: " + rel
+        if rel not in tracked:
+            return "untracked file: " + rel
+        data = path.read_bytes()
+        if rel in changed and data.replace(b"\r\n", b"\n") != _git(project, "show", f"HEAD:{rel}").replace(b"\r\n", b"\n"):
+            return "uncommitted edit: " + rel
+        inner = path.relative_to(skill).as_posix()
+        source = f".claude/commands/{skill.name.removeprefix('framework-')}.md" if alias and inner == "SKILL.md" else bundle_source(skill.name, inner)
+        if comparable(data, project.name, command=alias) not in library_versions(framework, source, project.name, cache, alias):
+            return "differs from every library version: " + rel
+    return None
+
+
+def tracked_retirement(framework: Path, project: Path, manifest: dict) -> dict:
+    """List tracked copies of retired skills that are safe to remove. Changes nothing.
+
+    plan needs an ownership ledger, which many repositories lack. Git proves the
+    same things here: a file is committed, unedited, unreferenced, and equal to
+    some past library version. Remove the result with git rm on a branch, so
+    history is the rollback. A skill stays in every tree if any copy is blocked.
+    """
+    references = skill_references(project)
+    if references is None:
+        raise ValueError(f"no Git history to check references: {project.name}")
+    library_ids = {entry["id"] for entry in manifest["skills"]}
+    opted_in = set(library_sources(framework, manifest, project.name)[0])
+    tracked = {name for name in _git(project, "ls-files", "-z").decode("utf-8", "replace").split("\0") if name}
+    changed = {name for name in _git(project, "diff", "--name-only", "-z", "HEAD").decode("utf-8", "replace").split("\0") if name}
+
+    def retired(skill: Path) -> bool:
+        if skill.name in library_ids:
+            return skill.name not in opted_in
+        return skill.name.startswith("framework-") and generated_alias(skill)
+
+    candidates = [skill for tree in (*PROJECT_SKILL_TREES, ".agent/skills") if (project / tree).is_dir() for skill in sorted((project / tree).iterdir())
+                  if skill.is_dir() and not linked(skill) and retired(skill)
+                  and any(name.startswith(skill.relative_to(project).as_posix() + "/") for name in tracked)]
+    retiring = tuple(skill.relative_to(project).as_posix() + "/" for skill in candidates)
+    kept: dict[str, str] = {}
+    cache: dict = {}
+    for skill in candidates:
+        blocker = _tracked_blocker(framework, project, skill, tracked, changed, cache)
+        outside = sorted(rel for rel in references.get(skill.name, ()) if not rel.startswith(retiring) and "/references/shared/" not in rel)
+        blocker = blocker or ("referenced by " + outside[0] if outside else None)
+        if blocker:
+            kept.setdefault(skill.name, blocker)
+    retire: dict[str, list[str]] = {}
+    for skill in candidates:
+        if skill.name not in kept:
+            files = [path.relative_to(project).as_posix() for path in skill.rglob("*") if path.is_file() and "__pycache__" not in path.parts]
+            retire.setdefault(skill.name, []).extend(sorted(files))
+    return {"project": project.name, "retire": {name: sorted(files) for name, files in sorted(retire.items())}, "kept": dict(sorted(kept.items()))}
+
+
 def tier_diagnostics(target: str, kept: dict[str, str], global_names: set[str]) -> list[dict]:
     return [{"target": target, "kind": "tier-collision" if skill in global_names else "tier-review", "skill": skill, "reason": reason}
             for skill, reason in sorted(kept.items())]
@@ -1626,7 +1728,7 @@ def validate_plan(plan: dict, projects_root: Path, user: Path, framework: Path) 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["inventory", "plan", "apply", "check", "rollback"])
+    parser.add_argument("action", choices=["inventory", "plan", "apply", "check", "rollback", "tracked-retire"])
     parser.add_argument("--projects-root", type=Path, default=ROOT.parent)
     parser.add_argument("--user-root", type=Path, default=Path.home())
     parser.add_argument("--framework", type=Path, default=ROOT)
@@ -1657,6 +1759,15 @@ def main(argv: list[str] | None = None) -> int:
         output = args.out or args.state / "plan.json"
         write_json(output, plan)
         print(json.dumps({"plan": str(output), **plan["summary"]}))
+        return 0
+    if args.action == "tracked-retire":
+        if len(args.project) != 1:
+            parser.error("tracked-retire needs exactly one --project")
+        manifest = json.loads((args.framework / ".agent/setup/library.json").read_text(encoding="utf-8"))
+        report = tracked_retirement(args.framework, args.projects_root / args.project[0], manifest)
+        output = args.out or args.state / f"tracked-retire-{args.project[0]}.json"
+        write_json(output, report)
+        print(json.dumps({"report": str(output), "retire": len(report["retire"]), "files": sum(map(len, report["retire"].values())), "kept": len(report["kept"])}))
         return 0
     if not args.input:
         parser.error("--input plan.json is required; apply never regenerates a plan")
