@@ -21,6 +21,9 @@ All notable changes to this framework are documented here. The format follows
 - `scripts/ci/check_skill_portability.py`: CI now fails on mismatched skill names, overlong
   descriptions and machine paths. `--deny-file` adds a local list of names to reject.
 
+- `agent_setup.py tracked-retire`: lists tracked copies of retired skills that are safe to remove from a
+  repository with no ownership ledger. It changes nothing; removal goes through a normal PR.
+
 ### Changed
 
 - `bg-status` finds repositories from `PROJECTS_ROOT` or the current repository, not a fixed path.

@@ -20,6 +20,12 @@ The library manifest assigns skills to tiers: shared skills install at user leve
 
 Use the local receipt and subsequent plan as evidence; file installation alone does not prove a remote MCP is healthy or an IDE has reloaded it.
 
+## Tracked repository copies
+
+`plan` needs an ownership ledger, so it can't remove tracked copies from a repository that has none. `tracked-retire --project <name> --out <report.json>` lists them instead and changes nothing. A skill is listed only if every copy, in every tree, is committed, unedited, unreferenced by the repository, and equal to some past library version. The report says why anything else stays.
+
+Remove the listed files with `git rm` on a branch and open a PR, so history is the rollback. Check that the shared skills are installed at user level first.
+
 ## Private overlay
 
 `plan --overlay <manifest.json>` adds skills that must not live in this library. They install at user level with the same ledger, receipts and rollback. The manifest is `{"skills": [{"id": "<name>", "source": "<path>"}]}`, each source sits beside the manifest, and a name that clashes with the library stops the plan. Keep the manifest and its skills in a private location. Plans and receipts then hold their content, so keep those under ignored state too.
