@@ -439,3 +439,21 @@ def test_export_chat_cli_writes_file(tmp_path: Path) -> None:
     assert proc.returncode == 0, proc.stderr
     assert json.loads(proc.stdout)["output"] == str(out.resolve())
     assert "## User\n\nhello" in out.read_text(encoding="utf-8")
+
+
+def test_commit_and_push_keeps_the_first_path_intact(tmp_path: Path) -> None:
+    def git(*args: str) -> None:
+        subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t", *args], cwd=tmp_path, check=True, capture_output=True)
+
+    git("init", "-q")
+    (tmp_path / ".hidden").write_text("a\n", encoding="utf-8")
+    (tmp_path / "b.txt").write_text("a\n", encoding="utf-8")
+    git("add", "-A")
+    git("commit", "-q", "-m", "init")
+    (tmp_path / ".hidden").write_text("b\n", encoding="utf-8")
+    (tmp_path / "b.txt").write_text("b\n", encoding="utf-8")
+
+    proc = _run_harness("commit-and-push", "--repo", str(tmp_path), "--json")
+
+    assert proc.returncode == 0, proc.stderr
+    assert json.loads(proc.stdout)["paths"] == [".hidden", "b.txt"]

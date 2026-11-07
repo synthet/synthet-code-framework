@@ -46,6 +46,7 @@ All notable changes to this framework are documented here. The format follows
 
 ### Fixed
 
+- `commit-and-push` harness: the path list no longer loses the first character of the first path. `_git` stripped the leading space from the `git status --short` output, so a `.agent-flow/...` path came back as `agent-flow/...`.
 - NTFS junctions are treated as links on Python 3.11, so a junction is no longer a second project.
 - `agent_setup.py rollback` restores the ownership ledger along with the files.
 - The Jev hook returns a valid `ask` to Cursor. Cursor rejected the empty response and blocked the
