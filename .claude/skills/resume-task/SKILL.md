@@ -1,6 +1,6 @@
 ---
 name: resume-task
-description: Resume a previous or ongoing piece of work from wherever it was left — in Claude Code, OpenAI Codex CLI, Cursor (IDE, agent transcripts or cursor-agent), Google Antigravity (IDE or agy CLI), Grok CLI or an exported .md/.txt transcript (export-chat, SpecStory, native /export). Finds the in-flight thread across those tools, reconstructs its goal, what's done, where it stopped, files touched and what's left, checks that against the repo, and hands it back ready to continue with a resume command and a paste-ready continuation prompt. Use whenever the user types /resume-task or says "resume", "continue where I left off", "pick up the X work", "what was I doing in Codex/Cursor/Antigravity/Grok", "carry on with yesterday's task", "move this task to Claude Code", or comes back to unfinished work after a break — even if they don't say which tool it was in.
+description: "Resume unfinished work from Claude Code, Codex, Cursor, Antigravity, Grok or an exported transcript: finds the thread, rebuilds its goal, what's done and what's left, checks that against the repo, and gives a continuation prompt. Use for /resume-task, \"continue where I left off\", or returning to work after a break."
 capability: "Recover unfinished local cross-harness work and produce an evidence-backed continuation brief."
 side_effect_level: local_write
 approval_required: false
