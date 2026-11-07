@@ -1261,16 +1261,22 @@ def stale_files(root: Path, trees: tuple[str, ...], desired: dict[str, bytes], o
     """Plan deletes for unedited files an installed skill no longer ships.
 
     Whole retired skills go through prune_skills. Anything the installer did not
-    write, or that was edited since, stays.
+    write, or that was edited since, stays. So does everything in a skill whose
+    installed SKILL.md differs from the new one, because a held or conflicted
+    copy can still link to these files. They go on a later plan, once it matches.
     """
+    def current(skill_file: str) -> bool:
+        path = root / skill_file
+        return path.is_file() and path.read_bytes().replace(b"\r\n", b"\n") == desired[skill_file].replace(b"\r\n", b"\n")
+
     result = []
     for rel, record in sorted(owned.items()):
         tree = next((t for t in trees if rel.startswith(t + "/")), None)
         path = root / rel
         if not tree or rel in desired or not path.is_file() or linked(path) or path.name in PROTECTED_NAMES:
             continue
-        skill = rel[len(tree) + 1:].split("/")[0]
-        if f"{tree}/{skill}/SKILL.md" in desired and _unmodified(path, record):
+        skill_file = f"{tree}/{rel[len(tree) + 1:].split('/')[0]}/SKILL.md"
+        if skill_file in desired and current(skill_file) and _unmodified(path, record):
             result.append({"path": str(path.absolute()), "relative": rel, "action": "delete",
                            "before_sha256": digest(path.read_bytes()), "after_sha256": None, "content": "", "before_content": None})
     return result

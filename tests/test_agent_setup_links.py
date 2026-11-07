@@ -213,3 +213,23 @@ def test_a_stale_file_delete_applies_and_rolls_back(tmp_path):
     assert not target.exists()
     setup.rollback(run, [user, projects])
     assert target.exists()
+
+
+def test_a_held_skill_keeps_files_its_installed_copy_still_uses(tmp_path):
+    root, projects, user, state = installed(tmp_path)
+    skill_file = user / ".claude/skills/demo/SKILL.md"
+    skill_file.write_text(skill_file.read_text(encoding="utf-8") + "Local note.", encoding="utf-8")
+    found = deletes(setup.build_plan(root, projects, user, state))
+    assert ".claude/skills/demo/references/old.md" not in found
+    assert ".agents/skills/demo/references/old.md" in found
+
+
+def test_stale_files_wait_until_the_new_skill_file_is_installed(tmp_path):
+    root, projects, user, state = installed(tmp_path)
+    source = root / ".claude/skills/demo/SKILL.md"
+    source.write_text(source.read_text(encoding="utf-8") + "New text.", encoding="utf-8")
+    first = setup.build_plan(root, projects, user, state)
+    assert not deletes(first)
+    run = setup.apply_operations(first["operations"], state, [projects, user])
+    setup.save_ownership(state, run, user)
+    assert ".claude/skills/demo/references/old.md" in deletes(setup.build_plan(root, projects, user, state))
