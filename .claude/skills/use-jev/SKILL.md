@@ -1,6 +1,6 @@
 ---
 name: use-jev
-description: Use when the user says "use jev", "use Jev for decision making", "use Jev to make decision on each item", "use jev to assess", "use jev mcp", or types /use-jev. Hands the open decisions, blocked steps and triage items of the current work to Jev in one batched call. Then it executes what Jev clears and hands back what Jev denies, never using Jev to bypass a hook or permission.
+description: Use when the user says "use jev", "use Jev for decision making", "use Jev to make decision on each item", "use jev to assess", "use jev mcp", types /use-jev, or answers a pending question with "use jev". Hands the open decisions, blocked steps and triage items of the current work to Jev in one batched call. Then it executes what Jev clears and hands back what Jev denies, never using Jev to bypass a hook or permission.
 capability: "Resolve pending decisions and triage with Jev, act on confident low-risk picks, and hand denied or high-risk items back with exact commands."
 side_effect_level: remote_write
 approval_required: false
