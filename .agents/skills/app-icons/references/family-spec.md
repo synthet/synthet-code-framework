@@ -28,10 +28,8 @@ this skill's `templates/` and `scripts/` (canonical copy: synthet/image-scoring-
 | Driftara Gallery | image-scoring-gallery | Driftara D with a 2x2 photo grid | [`icons/projects/driftara-gallery`](https://github.com/synthet/image-scoring-ui/tree/main/icons/projects/driftara-gallery) |
 | Driftara Video | video-gallery | Driftara D with a play mark | [`icons/projects/driftara-video`](https://github.com/synthet/image-scoring-ui/tree/main/icons/projects/driftara-video) |
 | AI Quotas | ai-quotas | 270° gauge ring with a centre dot | [`icons/projects/ai-quotas`](https://github.com/synthet/image-scoring-ui/tree/main/icons/projects/ai-quotas) |
-| Kestrel | kestrel (desktop review app) | bold K with a raised-wing upper arm | [`icons/projects/kestrel`](https://github.com/synthet/image-scoring-ui/tree/main/icons/projects/kestrel) |
 | Vexlum Mobile | image-scoring-mobile | label tag with a punched hole | [`icons/projects/vexlum-mobile`](https://github.com/synthet/image-scoring-ui/tree/main/icons/projects/vexlum-mobile) |
 | Eye Quality Model | image-scoring-model | almond eye with a pupil | [`icons/projects/eye-quality-model`](https://github.com/synthet/image-scoring-ui/tree/main/icons/projects/eye-quality-model) |
-| Vexlum Skills | image-scoring-skills | four-point spark | [`icons/projects/vexlum-skills`](https://github.com/synthet/image-scoring-ui/tree/main/icons/projects/vexlum-skills) |
 | Design Tokens | image-scoring-ui | three stepped bars | [`icons/projects/design-tokens`](https://github.com/synthet/image-scoring-ui/tree/main/icons/projects/design-tokens) |
 | Zed, Warp | synthet/zed, synthet/warp | labyrinth Z, two-panel mark | in those forks (reference implementation) |
 

@@ -39,6 +39,9 @@ jobs:
       - name: Agent frontmatter contract
         run: python scripts/ci/check_agent_frontmatter.py
 
+      - name: Skill portability
+        run: python scripts/ci/check_skill_portability.py
+
       - name: Committed-secrets scan
         run: python scripts/ci/check_secrets.py
 
