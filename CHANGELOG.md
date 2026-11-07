@@ -33,7 +33,7 @@ All notable changes to this framework are documented here. The format follows
 - `framework-*` aliases point at installed skills instead of keeping a command's relative paths.
 - Installed skills no longer nest copies of sibling `SKILL.md` files under `references/shared/`.
 - Links that resolve to nothing once installed keep only their label.
-- Plans remove files an installed skill no longer ships, if the installer wrote them and they are unedited.
+- Plans remove files an installed skill no longer ships, if the installer wrote them and they are unedited. Files wait until the installed `SKILL.md` matches, so a held copy keeps what it links to.
 
 ## [0.5.0] — 2026-11-04
 
