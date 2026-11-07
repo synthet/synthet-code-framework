@@ -36,7 +36,7 @@ def test_process_buckets():
 
 
 def test_project_slug_matches_claude_code_folders():
-    assert B.project_slug(r"D:\Projects\image-scoring-skills") == "D--Projects-image-scoring-skills"
+    assert B.project_slug(r"C:\Code\my-app") == "C--Code-my-app"
 
 
 def test_false_done_needs_a_running_worker_that_names_the_status_file():
@@ -57,9 +57,9 @@ def test_age_formatting():
 
 
 def test_slug_replaces_every_non_alphanumeric_like_claude_code():
-    assert B.project_slug(r"D:\Projects\image-scoring-skills\scripts\neardupe_study") == \
-        "D--Projects-image-scoring-skills-scripts-neardupe-study"
-    assert B.project_slug(r"D:\Projects\x\.agent\scratch\wt-a") == "D--Projects-x--agent-scratch-wt-a"
+    assert B.project_slug(r"C:\Code\my-app\scripts\neardupe_study") == \
+        "C--Code-my-app-scripts-neardupe-study"
+    assert B.project_slug(r"C:\Code\x\.agent\scratch\wt-a") == "C--Code-x--agent-scratch-wt-a"
 
 
 def test_task_slugs_follow_the_resolved_path_and_aliases(tmp_path):

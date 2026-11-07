@@ -20,6 +20,10 @@ The library manifest assigns skills to tiers: shared skills install at user leve
 
 Use the local receipt and subsequent plan as evidence; file installation alone does not prove a remote MCP is healthy or an IDE has reloaded it.
 
+## Private overlay
+
+`plan --overlay <manifest.json>` adds skills that must not live in this library. They install at user level with the same ledger, receipts and rollback. The manifest is `{"skills": [{"id": "<name>", "source": "<path>"}]}`, each source sits beside the manifest, and a name that clashes with the library stops the plan. Keep the manifest and its skills in a private location. Plans and receipts then hold their content, so keep those under ignored state too.
+
 ## Comparing installed copies
 
 - Use the ownership ledger in `.agent/local/setup/targets/`, not raw hashes. Installation rewrites skill content (placeholders, shared reference links, a footer), so an unedited copy hashes differently from its source.

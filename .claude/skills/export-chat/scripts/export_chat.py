@@ -109,12 +109,12 @@ def _same_or_under(child: str | None, root: Path) -> bool:
 
 
 def workspace_slug(workspace: Path) -> str:
-    """``D:\\Projects\\my-app`` -> ``D-Projects-my-app`` (Cursor's project dir naming)."""
+    """``C:\\Code\\my-app`` -> ``C-Code-my-app`` (Cursor's project dir naming)."""
     return re.sub(r"[^A-Za-z0-9]+", "-", str(workspace)).strip("-")
 
 
 def claude_slug(workspace: Path) -> str:
-    """``D:\\Projects\\my-app`` -> ``D--Projects-my-app`` (Claude Code's project dir naming)."""
+    """``C:\\Code\\my-app`` -> ``C--Code-my-app`` (Claude Code's project dir naming)."""
     return re.sub(r"[^A-Za-z0-9]", "-", str(workspace))
 
 

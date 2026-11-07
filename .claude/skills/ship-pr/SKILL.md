@@ -29,14 +29,25 @@ linked issues, then `gh repo view` for visibility.
 - Check out the PR's branch without disturbing uncommitted work in a shared checkout. If that isn't
   possible, use a temporary worktree.
 
-## 2. Read CI
+## 2. Monitor CI
 
-Look at the checks for the **exact head commit**.
+Monitoring CI is a required step. **Never merge until a watch on the exact head commit has finished
+and passed,** even when the checks already look green. A new commit on the PR restarts this step.
 
-- **Pending:** wait with a background watch. Don't poll in a loop.
-- **An empty conclusion is not a pass.** A check with no result is still running.
-- **No checks at all is not green.** Stop and report.
-- **Failed:** read the failing step with `gh run view <run> --job <job> --log-failed`.
+1. **Wait for checks to register.** A fresh push can show no checks for a minute or two. Wait up to
+   five minutes before treating that as no checks.
+2. **Watch in the background.** Don't poll in a loop.
+
+   ```bash
+   gh pr checks <number> --watch --interval 30 > /dev/null
+   ```
+
+   The exit status is the result, so nothing may follow the watch. A trailing `echo` or a pipe to
+   `tail` reports success whatever happened.
+3. **Read the results for the exact head commit.**
+   - **An empty conclusion is not a pass.** A check with no result is still running.
+   - **No checks at all is not green.** Stop and report.
+   - **Failed:** read the failing step with `gh run view <run> --job <job> --log-failed`.
 
 ## 3. Fix
 
@@ -72,7 +83,7 @@ that it turns green: a rerun can hide a real race.
 
 Merging is the last step. Immediately before it, re-read the PR and confirm all of this:
 
-- the head commit is the one CI passed on;
+- the head commit is the one the step 2 watch passed on;
 - every required check passed on that commit;
 - the PR is mergeable with no conflicts, and no review has changed;
 - no new commits arrived.
@@ -86,8 +97,10 @@ gh pr merge <number> --merge --delete-branch --match-head-commit <sha>
 ## 5. Verify and clean up
 
 - Confirm the PR shows as merged and its linked issues closed.
-- Check CI on the base branch if the merge starts a run there. Report a failure; don't push a fix
-  without a new request.
+- Monitor CI on the base branch the same way. List the runs for the merge commit, allowing up to five
+  minutes for them to start, and watch each with `gh run watch <id> --exit-status > /dev/null`. The
+  run isn't finished until they have all completed. Report a failure; don't push a fix without a new
+  request.
 - Return a shared checkout to its default branch, and fast-forward it only if it's clean.
 - **Leave worktrees for the user.** Removing a worktree can follow links inside its `node_modules`
   and empty the real folder they point at, including another repository. Give the user the steps
@@ -128,5 +141,5 @@ Report once, at the end:
 | KeepOne test | Flaky test | abc1234: wait for the load | Forced the race; same error, then passes |
 ```
 
-Then give the merge commit, what ran on the final commit, anything skipped, and each item left with
-its reason and command. Say plainly what wasn't verified, and any cause you didn't establish.
+Then give the merge commit, what ran on the final commit, the base branch CI result, anything
+skipped, and each item left with its reason and command. Say plainly what wasn't verified, and any cause you didn't establish.

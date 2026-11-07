@@ -1,6 +1,6 @@
 ---
 name: bg-status
-description: Use when the user asks what is running in the background, for the status of watchers, background shells, detached workers or scripts, sub-agents, peer sessions, GPU jobs, containers or worktrees, or types /bg-status. Read-only. One snapshot of Claude Code background tasks (exited/killed/active/quiet), detached worker processes, recent status and log files, GPU, memory, Docker, git worktrees and peer sessions, with flags first and paste-ready commands for the user.
+description: "Use when the user asks what is running in the background or types /bg-status. Read-only snapshot of Claude tasks, detached workers, status and log files, GPU, memory, Docker, worktrees and peer sessions, with flags first and paste-ready commands."
 capability: "Read-only snapshot of all background work on this machine, with flags for reaped watchers, memory pressure, false 'done' status files and leftover merged worktrees."
 side_effect_level: read_only
 approval_required: false
@@ -24,10 +24,10 @@ python ~/.claude/skills/bg-status/scripts/bg_status.py --json     # for further 
 
 Options:
 - `--cwd <dir>`: whose Claude tasks to show.
-- `--root <glob>`: status/log roots, repeatable. The defaults are `D:/Projects/_wt-*/runs`, `D:/Projects/*/runs`
-  and `D:/Projects/*/work`.
+- `--root <glob>`: status/log roots, repeatable. The defaults are `_wt-*/runs`, `*/runs` and `*/work` under the
+  repos root.
 - `--hours N`: how far back to look for status/log files (default 48).
-- `--repos-root`: where the repos live (default `D:/Projects`).
+- `--repos-root`: where the repos live. The default is `PROJECTS_ROOT`, else the parent of the current repository.
 - `--no-worktrees`: skip the worktree section, which is the slowest.
 - `--exec-probes`: also run the project's `container_ps` and `sql` probes (`docker exec`, read-only; see Project
   probes). Pass it when the user asks about work inside containers or the database.
@@ -90,9 +90,9 @@ file, the output is exactly as above. With one, a **Project** section follows th
 Without `--exec-probes` the file **never runs commands**: probes are GETs, regex matches and file stats, so a cloned
 repo's config can't execute anything. `container_ps` and `sql` run only when the flag is passed on the command line
 (decision 2026-11-02: an explicit opt-in, never the file alone). A bad file or entry becomes a note in the section, never a crash. Code:
-`scripts/project_probes.py`, tests in `scripts/test_project_probes.py`. Example: `D:\Projects\vault\.claude\bg-status.json`
+`scripts/project_probes.py`, tests in `scripts/test_project_probes.py`. Example: a repository's `.claude/bg-status.json`
 (the AI Quotas, Agent Mailbox and Vexlum dashboards, agent-mail servers and journal, cleanup runs and catalogs).
-`D:\Projects\image-scoring-backend\.claude\bg-status.json` uses every key: the shadow scan cursor and run queue
+a repository's `.claude/bg-status.json` uses every key: the shadow scan cursor and run queue
 through HTTP `fields`, `docker exec` workers in gpu-shell, and (with `--exec-probes`) container processes, active
 jobs and long Postgres queries.
 
