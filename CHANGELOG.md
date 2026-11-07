@@ -14,6 +14,14 @@ All notable changes to this framework are documented here. The format follows
 - `agent_setup.py plan --overlay <manifest>`: installs extra user-level skills from a local manifest,
   with the same ledger, receipts and rollback. The manifest and its skills stay outside this library.
 
+- `/constitution` command and spec-layer vocabulary, folded in from agent-sdlc.
+- `synthet-repos` skill: maps a task to the public repository that owns it.
+
+### Changed
+
+- `bg-status` finds repositories from `PROJECTS_ROOT` or the current repository, not a fixed path.
+- Shorter descriptions for the five longest skills, which reduces listing cost in every harness.
+
 ### Fixed
 
 - Credential checks no longer match hyphenated words that contain `sk-`, which blocked planning.

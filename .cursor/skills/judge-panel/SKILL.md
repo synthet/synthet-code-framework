@@ -1,6 +1,6 @@
 ---
 name: judge-panel
-description: Run a blind panel of agentic CLI vision judges (Claude, Codex, Antigravity, Cursor) over rendered images, collect their votes, adjudicate with Jev (TypeSafe System One), and analyze agreement against human labels. Use when the user asks to "run CLI judges", "run a judge panel", "have the agents grade/label these images", "get LLM votes", "adjudicate with Jev", or to build consensus/final labels from human + model judgements (bbox grading, species ID, burst culling, any per-image or per-group visual judgement).
+description: "Run a blind panel of agentic CLI vision judges over rendered images, adjudicate with Jev, and compare agreement with human labels. Use for \"run a judge panel\", \"get LLM votes\", or building consensus labels for per-image or per-group visual judgements."
 capability: "Blind visual judge panel with explicit export authority"
 side_effect_level: external_export
 approval_required: true
