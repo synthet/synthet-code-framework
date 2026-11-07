@@ -37,7 +37,7 @@ commands or edit code/config as part of its procedure.
 | threat-modeling-agentic-tools | Threat-model MCP/tool abuse and injection | L1 | 2026-07-01 |
 | use-jev | Delegate pending decisions, blocked steps and triage items to Jev in one batched call; act on confident low-risk picks, hand back the rest | L2 | 2026-11-01 |
 | go | Finish every open item: take recommendations, settle the rest with Jev, execute in order, report once. User-typed only | L2 | 2026-11-03 |
-| ship-pr | Take one PR from open to merged: fix CI failures at the root cause, wait for green on the exact head commit, merge, verify. User-typed only | L2 | 2026-11-04 |
+| ship-pr | Take one PR from open to merged: fix CI failures at the root cause, wait for green on the exact head commit, merge, verify. User-typed only | L2 | 2026-11-07 |
 | validate-implementation | Per-AC Verified/Failed/Unknown verdicts with evidence (**compiled harness**) | L2 | 2026-07-19 |
 | verification-before-completion | Evidence-backed completion claims with fresh command proof (**compiled harness**) | L1 | 2026-11-04 |
 
