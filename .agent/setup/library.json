@@ -484,6 +484,69 @@
       "projects": []
     },
     {
+      "id": "agent-flow",
+      "source": ".claude/skills/agent-flow",
+      "pack": "global",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "flow-complete",
+      "source": ".claude/skills/flow-complete",
+      "pack": "global",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "flow-land",
+      "source": ".claude/skills/flow-land",
+      "pack": "global",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "flow-loop",
+      "source": ".claude/skills/flow-loop",
+      "pack": "global",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "flow-next",
+      "source": ".claude/skills/flow-next",
+      "pack": "global",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "flow-plan",
+      "source": ".claude/skills/flow-plan",
+      "pack": "global",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "flow-review",
+      "source": ".claude/skills/flow-review",
+      "pack": "global",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "flow-status",
+      "source": ".claude/skills/flow-status",
+      "pack": "global",
+      "global": true,
+      "projects": []
+    },
+    {
+      "id": "flow-work",
+      "source": ".claude/skills/flow-work",
+      "pack": "global",
+      "global": true,
+      "projects": []
+    },
+    {
       "id": "synthet-repos",
       "source": ".claude/skills/synthet-repos",
       "pack": "global",

@@ -1,0 +1,16 @@
+{
+  "id": "agent-flow-skills-stay-inside-tracked-projects",
+  "description": "Protect the user-level agent-flow skills: they apply only in tracked projects, name manual steps when hooks are absent, and never write tracking config.",
+  "target_asset": ".claude/skills/agent-flow/SKILL.md",
+  "linked_docs": [".claude/skills/flow-complete/SKILL.md", ".claude/skills/flow-land/SKILL.md", ".claude/skills/flow-work/SKILL.md"],
+  "must_contain": [
+    "Without that folder, do not use this skill.",
+    "Only in projects with an `.agent-flow/` folder.",
+    "pass `--actor <harness>:<short-id>` to every CLI call",
+    "Do **not** approve your own ticket."
+  ],
+  "must_not_contain": [
+    "git push -u",
+    "Hooks send heartbeats while you work."
+  ]
+}
