@@ -29,6 +29,11 @@ All notable changes to this framework are documented here. The format follows
 - `bg-status` finds repositories from `PROJECTS_ROOT` or the current repository, not a fixed path.
 - Shorter descriptions for the five longest skills, which reduces listing cost in every harness.
 - `use-jev` and `ship-pr` gain refinements first made in installed copies, including a required CI watch before merging.
+- `next-steps`, `step-by-step` and `go` no longer loop. All three quote a pinned goal in the user's words,
+  and none re-lists, re-checks or re-asks an unchanged item. If nothing has changed they answer in one
+  line. `next-steps` gives one next step, and it marks an item as the user's only when nobody else can do
+  it. `step-by-step` takes the typed command as the go-ahead for the shown list. It does the items it can,
+  waits on running jobs instead of stopping, asks open decisions once at the start, and runs to the end.
 
 ### Fixed
 
