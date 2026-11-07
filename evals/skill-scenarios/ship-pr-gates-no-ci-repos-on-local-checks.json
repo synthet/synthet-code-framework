@@ -1,0 +1,18 @@
+{
+  "id": "ship-pr-gates-no-ci-repos-on-local-checks",
+  "description": "Protect /ship-pr's merge gate: CI that exists but didn't run still stops the run, and only a repository with no CI at all is gated on the project's documented checks run on a clean checkout of the exact head commit.",
+  "target_asset": ".claude/skills/ship-pr/SKILL.md",
+  "linked_docs": [],
+  "must_contain": [
+    "**Never merge until a watch on the exact head commit has finished",
+    "**CI exists but didn't run.**",
+    "Go to step 2a,",
+    "`git worktree add --detach <tmp> <sha>`",
+    "If the project documents none, stop and report",
+    "**Every command must exit 0.**",
+    "the step 2a local run, passed on;"
+  ],
+  "must_not_contain": [
+    "**No checks at all is not green.** Stop and report."
+  ]
+}

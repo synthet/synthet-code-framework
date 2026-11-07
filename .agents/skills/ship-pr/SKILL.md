@@ -1,7 +1,7 @@
 ---
 name: ship-pr
-description: "Take one GitHub PR from open to merged: read its failing CI jobs, find the root cause, fix and push, wait for green on the exact head commit, merge, verify and clean up. Runs only when the user types /ship-pr, with a PR number, URL or branch; with none it uses the current branch's PR."
-capability: "Fix a pull request's CI failures and merge it once CI is green on its exact head commit, within fixed limits."
+description: "Take one GitHub PR from open to merged: read its failing CI jobs, find the root cause, fix and push, wait for green on the exact head commit (in a repository with no CI, a local run of its documented checks on that commit), merge, verify and clean up. Runs only when the user types /ship-pr, with a PR number, URL or branch; with none it uses the current branch's PR."
+capability: "Fix a pull request's CI failures and merge it once CI is green on its exact head commit (or, with no CI, once its documented checks pass locally on that commit), within fixed limits."
 side_effect_level: remote_write
 approval_required: true
 requires_tools: "git and gh; the project's own test commands."
@@ -46,8 +46,31 @@ and passed,** even when the checks already look green. A new commit on the PR re
    `tail` reports success whatever happened.
 3. **Read the results for the exact head commit.**
    - **An empty conclusion is not a pass.** A check with no result is still running.
-   - **No checks at all is not green.** Stop and report.
+   - **No checks at all is not green.** Find out which of these it is:
+     - **CI exists but didn't run.** The base or head branch has workflow files, recent base commits
+       have check runs or commit statuses, or branch protection requires checks. Stop and report:
+       the workflow may skip these paths, or be disabled or broken.
+     - **The repository has no CI.** Neither branch has workflow files, and neither the head commit
+       nor the base branch's latest commits have any check runs or commit statuses. Go to step 2a,
+       which takes the place of the watch.
    - **Failed:** read the failing step with `gh run view <run> --job <job> --log-failed`.
+
+## 2a. No CI: run the project's checks locally
+
+With no CI, the merge gate is a local run of the project's own checks on the exact head commit.
+Typing `/ship-pr` on such a repo accepts that gate.
+
+1. **Find the commands.** Use the test command the project documents (`AGENTS.md`, `CLAUDE.md`, the
+   README, or a task runner such as `package.json` scripts or a Makefile), plus any documented lint or
+   typecheck. If the project documents none, stop and report: there is nothing to gate on.
+2. **Run them on a clean checkout of the head commit,** in a temporary worktree
+   (`git worktree add --detach <tmp> <sha>`). Ignored or uncommitted files in the main checkout can
+   pass a check that the commit itself would fail. Reuse the project's existing environment, such as
+   its virtualenv, unless the PR changes dependency files; then install the documented way.
+3. **Every command must exit 0.** A failure goes through step 3 like a CI failure, with the local
+   command in place of the workflow's. A new commit means a new run.
+4. **Branch protection still applies.** If `gh pr view` shows `mergeStateStatus` `BLOCKED`, stop and
+   report: the repository requires something this run can't provide.
 
 ## 3. Fix
 
@@ -74,7 +97,7 @@ Handle every failing job, one cause at a time.
 7. **Push** with `git push origin <branch>`. If the repository is public, first scan the added lines
    for machine paths, identities and credentials. If the branch is behind and needs updating, merge
    the base branch in, because a rebase would need a force-push.
-8. **Wait for CI on the new head,** then go back to step 2.
+8. **Wait for CI on the new head,** then go back to step 2. With no CI, rerun step 2a on the new head.
 
 Stop after **three** fix-and-push rounds, and report what you learned. Don't rerun a job in the hope
 that it turns green: a rerun can hide a real race.
@@ -83,7 +106,7 @@ that it turns green: a rerun can hide a real race.
 
 Merging is the last step. Immediately before it, re-read the PR and confirm all of this:
 
-- the head commit is the one the step 2 watch passed on;
+- the head commit is the one the step 2 watch, or the step 2a local run, passed on;
 - every required check passed on that commit;
 - the PR is mergeable with no conflicts, and no review has changed;
 - no new commits arrived.
@@ -100,7 +123,7 @@ gh pr merge <number> --merge --delete-branch --match-head-commit <sha>
 - Monitor CI on the base branch the same way. List the runs for the merge commit, allowing up to five
   minutes for them to start, and watch each with `gh run watch <id> --exit-status > /dev/null`. The
   run isn't finished until they have all completed. Report a failure; don't push a fix without a new
-  request.
+  request. With no CI there is nothing to watch; say so.
 - Return a shared checkout to its default branch, and fast-forward it only if it's clean.
 - **Leave worktrees for the user.** Removing a worktree can follow links inside its `node_modules`
   and empty the real folder they point at, including another repository. Give the user the steps
@@ -143,3 +166,5 @@ Report once, at the end:
 
 Then give the merge commit, what ran on the final commit, the base branch CI result, anything
 skipped, and each item left with its reason and command. Say plainly what wasn't verified, and any cause you didn't establish.
+When step 2a was the gate, say the merge rested on a local run, list each command with its result,
+and suggest adding CI.
