@@ -8,6 +8,7 @@ All notable changes to this framework are documented here. The format follows
 
 ### Added
 
+- agent-flow skills in the global tier: `agent-flow`, `flow-next`, `flow-work`, `flow-complete`, `flow-plan`, `flow-review`, `flow-status`, `flow-land` and `flow-loop`. They apply only in projects with an `.agent-flow/` folder.
 - `/ship-pr` skill: takes one PR from open to merged. It fixes CI failures at the root cause, runs the
   steps CI skipped after a failure, waits for green on the exact head commit, then merges and
   verifies. It runs only when the user types it, and it never weakens a check to pass it.
