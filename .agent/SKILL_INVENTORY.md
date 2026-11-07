@@ -103,6 +103,15 @@ specializations remain authoritative. Review notes and trigger cases are in
 | external-codex-review | Codex-only external review | L1 | 2026-07-01 |
 | external-gemini-review | Gemini-only external review | L1 | 2026-07-01 |
 | pr-ready-hygiene | Definition-of-done checks and paste-ready PR text | L2 | 2026-07-01 |
+| agent-flow | Core rules for projects tracked by agent-flow (`.agent-flow/`): ready queue, claims, evidence, handoffs | L1 | 2026-11-06 |
+| flow-complete | Finish an agent-flow ticket: DoD, push, PR, handoff, submit for review | L2 | 2026-11-06 |
+| flow-land | End-of-session handoff for agent-flow tickets | L1 | 2026-11-06 |
+| flow-loop | Capped autonomous agent-flow ticket loop under a run contract; explicit invocation only | L2 | 2026-11-06 |
+| flow-next | Claim the next ready agent-flow ticket and set up its branch or worktree | L1 | 2026-11-06 |
+| flow-plan | Turn a request or spec into agent-flow tickets with dependencies | L1 | 2026-11-06 |
+| flow-review | Review an agent-flow ticket against its acceptance criteria | L2 | 2026-11-06 |
+| flow-status | Read-only agent-flow board summary | L1 | 2026-11-06 |
+| flow-work | Implement a claimed agent-flow ticket test-first and record evidence | L1 | 2026-11-06 |
 
 Commands (`.claude/commands/`) and rules (`.claude/rules/`) are catalogued in
 [AGENT_INFRA_INVENTORY.md](AGENT_INFRA_INVENTORY.md); they follow the same review process.
