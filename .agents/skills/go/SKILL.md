@@ -20,10 +20,18 @@ If text follows `/go`, work only on the items it names.
 
 ## 1. Collect
 
-List every open item in the conversation: the latest "left for you" list, pending questions, blocked
-steps, `/next-steps` output and any approved plan.
+Start from the pinned goal: the task list item `Goal: <request>`, or the user's first request word for
+word (see `next-steps`). Never reword it.
 
-If nothing is open, say so and stop. Don't invent work.
+Take the open items from the **latest** report only (the last "left for you" list, `/next-steps` or
+`/step-by-step` output, pending questions and any approved plan), and drop:
+
+- items that only the user can do (a judgement, their own words for a delete, a manual check) and that
+  haven't changed since you last reported them;
+- items owned by another session, and messages from other sessions that don't name this goal's work.
+
+If nothing is left, or nothing has changed since the last `/go`, say so in one line and stop. Don't
+invent work, re-check what you won't act on, or reprint the table.
 
 ## 2. Decide
 
@@ -47,8 +55,9 @@ last.
 
 Work through the items as in the `step-by-step` skill, one at a time:
 
-1. **Re-check** the state the decision assumed: fetch, confirm the target and check whether a PR has
-   already merged. If it changed materially, decide that item again.
+1. **Re-check** the state the decision assumed, only for an item you're about to execute: fetch,
+   confirm the target and check whether a PR has already merged. If it changed materially, decide that
+   item again. Items you'll leave don't get re-checked.
 2. **Check for other sessions** with `ListAgents` before touching a shared checkout.
 3. **Do** the item, keeping the user's uncommitted work out of commits.
 4. **Verify** with a real check. Passing means the check ran on this exact commit.
@@ -96,14 +105,18 @@ Carry on with independent items. Skip items that depend on a stopped one, and re
 
 ## 5. Report
 
-Report once, at the end:
+Report once, at the end. Open with the pinned goal quote, then a table of only the items this run acted
+on or found changed:
 
 ```markdown
+**Goal:** "<user's words>"
+
 | Item | Decided by | Action | Evidence |
 |------|------------|--------|----------|
 | Merge PR #52 | Recommendation | Merged as 4ea08fe | CI passed on the head commit |
 | Vault push | Jev: hold (0.88) | Left | Would publish 3 unpushed commits |
 ```
 
-Then list each item left, its reason and the exact command. Say plainly if anything was skipped or
-only partly verified.
+Then list each newly left item, its reason and the exact command. Items left in an earlier report and
+unchanged get one line in total ("2 items still waiting on you, unchanged since 19:21"). Say plainly if
+anything was skipped or only partly verified.
