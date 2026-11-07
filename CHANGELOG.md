@@ -17,6 +17,9 @@ All notable changes to this framework are documented here. The format follows
 - `/constitution` command and spec-layer vocabulary, folded in from agent-sdlc.
 - `synthet-repos` skill: maps a task to the public repository that owns it.
 
+- `scripts/ci/check_skill_portability.py`: CI now fails on mismatched skill names, overlong
+  descriptions and machine paths. `--deny-file` adds a local list of names to reject.
+
 ### Changed
 
 - `bg-status` finds repositories from `PROJECTS_ROOT` or the current repository, not a fixed path.

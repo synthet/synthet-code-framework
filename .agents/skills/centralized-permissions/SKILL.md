@@ -1,6 +1,6 @@
 ---
 name: centralized-permissions
-description: "Use when setting up, reconfiguring, auditing, or restoring the centralized AI agent permission decision gate (hook → Jev → audit → approve | ask) across Claude Code, Cursor/Grok, Codex, and Antigravity, or when reconciling global and project permission policies in D:\\Projects."
+description: "Use when setting up, reconfiguring, auditing, or restoring the centralized AI agent permission decision gate (hook → Jev → audit → approve | ask) across Claude Code, Cursor/Grok, Codex, and Antigravity, or when reconciling global and project permission policies in <projects-root>."
 capability: "Configure, audit, reconcile, apply, and restore centralized cross-harness permission review and safe command tiers."
 side_effect_level: local_write
 approval_required: true
@@ -20,18 +20,18 @@ The core path is:
 
 ## 1. Quick Reference Commands
 
-All management actions run through `scripts/manage_permissions.py` (canonical stateless source in `infra/jev/` synced with runtime `D:\Projects\_agent-infra\jev\`):
+All management actions run through `scripts/manage_permissions.py` (canonical stateless source in `infra/jev/` synced with runtime `<projects-root>\_agent-infra\jev\`):
 
 ```bash
-# 0. Bootstrap D:\Projects\_agent-infra\jev from git-tracked infra/jev (first-time machine setup)
+# 0. Bootstrap <projects-root>\_agent-infra\jev from git-tracked infra/jev (first-time machine setup)
 python -m scripts.manage_permissions bootstrap
 
-# 1. Sync stateless infra/jev code with D:\Projects\_agent-infra\jev (or --check for SHA-256 parity)
+# 1. Sync stateless infra/jev code with <projects-root>\_agent-infra\jev (or --check for SHA-256 parity)
 python -m scripts.manage_permissions sync-infra --direction to-runtime
 python -m scripts.manage_permissions sync-infra --direction from-runtime
 python -m scripts.manage_permissions sync-infra --check
 
-# 2. Preview changes across global configs and D:\Projects repos without touching disk
+# 2. Preview changes across global configs and <projects-root> repos without touching disk
 python -m scripts.manage_permissions plan
 
 # 3. Apply reviewed changes with automatic backups and receipt.json
@@ -60,8 +60,8 @@ python -m scripts.manage_permissions verify
 ### Activate when:
 - Establishing centralized permission auto-approval on a new machine or newly installed agent harness.
 - A harness has accumulated too many one-off allow rules (e.g. Codex `default.rules` > 100 entries, Cursor allowlist > 50 tokens, Antigravity allowlist > 50 entries).
-- Reconciling contradictory project-level allow rules across `D:\Projects`.
-- Tuning command classification tiers, thresholds, or regex patterns in `D:\Projects\_agent-infra\jev\config\permission-policy.json`.
+- Reconciling contradictory project-level allow rules across `<projects-root>`.
+- Tuning command classification tiers, thresholds, or regex patterns in `<projects-root>\_agent-infra\jev\config\permission-policy.json`.
 - Auditing recent permission decisions, latency, or denials across harnesses.
 - Rolling back permission settings after unexpected behavior or test failures.
 
@@ -96,7 +96,7 @@ python -m scripts.manage_permissions verify
 ---
 
 ### Workflow B: Reconfiguring Policy Tiers & Syncing `infra/jev/`
-1. Edit the canonical source of truth in `infra/jev/config/permission-policy.json` (or `D:\Projects\_agent-infra\jev\config\permission-policy.json`) and sync both trees:
+1. Edit the canonical source of truth in `infra/jev/config/permission-policy.json` (or `<projects-root>\_agent-infra\jev\config\permission-policy.json`) and sync both trees:
    ```bash
    python -m scripts.manage_permissions sync-infra --direction to-runtime
    ```
@@ -123,7 +123,7 @@ python -m scripts.manage_permissions rollback
 ```
 To roll back a specific historical receipt:
 ```bash
-python -m scripts.manage_permissions rollback D:\Projects\_agent-infra\jev\backups\<timestamp>\receipt.json
+python -m scripts.manage_permissions rollback <projects-root>\_agent-infra\jev\backups\<timestamp>\receipt.json
 ```
 Every modified file is restored to its exact byte-identical state and verified by hash.
 
