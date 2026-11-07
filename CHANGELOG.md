@@ -12,6 +12,28 @@ All notable changes to this framework are documented here. The format follows
 - `/ship-pr` skill: takes one PR from open to merged. It fixes CI failures at the root cause, runs the
   steps CI skipped after a failure, waits for green on the exact head commit, then merges and
   verifies. It runs only when the user types it, and it never weakens a check to pass it.
+- `agent_setup.py plan --overlay <manifest>`: installs extra user-level skills from a local manifest,
+  with the same ledger, receipts and rollback. The manifest and its skills stay outside this library.
+
+- `/constitution` command and spec-layer vocabulary, folded in from agent-sdlc.
+- `synthet-repos` skill: maps a task to the public repository that owns it.
+
+- `scripts/ci/check_skill_portability.py`: CI now fails on mismatched skill names, overlong
+  descriptions and machine paths. `--deny-file` adds a local list of names to reject.
+
+### Changed
+
+- `bg-status` finds repositories from `PROJECTS_ROOT` or the current repository, not a fixed path.
+- Shorter descriptions for the five longest skills, which reduces listing cost in every harness.
+- `use-jev` and `ship-pr` gain refinements first made in installed copies, including a required CI watch before merging.
+
+### Fixed
+
+- Credential checks no longer match hyphenated words that contain `sk-`, which blocked planning.
+- `framework-*` aliases point at installed skills instead of keeping a command's relative paths.
+- Installed skills no longer nest copies of sibling `SKILL.md` files under `references/shared/`.
+- Links that resolve to nothing once installed keep only their label.
+- Plans remove files an installed skill no longer ships, if the installer wrote them and they are unedited.
 
 ## [0.5.0] — 2026-11-04
 
@@ -47,6 +69,7 @@ All notable changes to this framework are documented here. The format follows
 
 ### Fixed
 
+- `commit-and-push` harness: the path list no longer loses the first character of the first path. `_git` stripped the leading space from the `git status --short` output, so a `.agent-flow/...` path came back as `agent-flow/...`.
 - NTFS junctions are treated as links on Python 3.11, so a junction is no longer a second project.
 - `agent_setup.py rollback` restores the ownership ledger along with the files.
 - The Jev hook returns a valid `ask` to Cursor. Cursor rejected the empty response and blocked the

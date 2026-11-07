@@ -75,7 +75,7 @@ def bucket(cmd: str) -> str:
 
 
 def project_slug(path: str | Path) -> str:
-    """Claude Code's folder name for a working directory, e.g. D:\\Projects\\x_y -> D--Projects-x-y.
+    """Claude Code's folder name for a working directory, e.g. C:\\Code\\x_y -> C--Code-x-y.
 
     Every character other than a letter or digit becomes '-' (so '_' and '.' do too).
     """
@@ -403,19 +403,33 @@ def markdown(s: dict, max_tasks: int = 15) -> str:
     return "\n".join(lines) + "\n"
 
 
+def default_repos_root() -> str:
+    """PROJECTS_ROOT, else the folder that holds the current repository."""
+    configured = os.environ.get("PROJECTS_ROOT")
+    if configured:
+        return configured
+    top = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+    return str(Path(top.stdout.strip() or os.getcwd()).parent)
+
+
+def default_status_roots(repos_root: str) -> list[str]:
+    return [f"{repos_root}/_wt-*/runs", f"{repos_root}/*/runs", f"{repos_root}/*/work"]
+
+
 def main():
     ap = argparse.ArgumentParser(description="Read-only snapshot of background work.")
     ap.add_argument("--cwd", default=os.getcwd(), help="project directory whose Claude tasks to show")
     ap.add_argument("--all-projects", action="store_true", help="Claude tasks from every project")
     ap.add_argument("--root", action="append", help="glob for status/log roots (repeatable)")
     ap.add_argument("--hours", type=float, default=48, help="status/log files modified within this many hours")
-    ap.add_argument("--repos-root", default="D:/Projects", help="folder whose repos' worktrees to list")
+    ap.add_argument("--repos-root", help="folder whose repos' worktrees to list (default: PROJECTS_ROOT, else the current repo's parent)")
     ap.add_argument("--no-worktrees", action="store_true")
     ap.add_argument("--exec-probes", action="store_true",
                     help="also run the project's container_ps/sql probes (docker exec, read-only, 5 s each)")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
-    a.root = a.root or ["D:/Projects/_wt-*/runs", "D:/Projects/*/runs", "D:/Projects/*/work"]
+    a.repos_root = a.repos_root or default_repos_root()
+    a.root = a.root or default_status_roots(a.repos_root)
     snap = collect(a)
     try:   # Windows consoles default to cp1252; command lines can hold any character
         import sys

@@ -1,12 +1,6 @@
 ---
 name: accidental-data-loss-prevention
-description: |
-  **STOP AND VERIFY**: Before running any command or tool that results in irreversible data loss, you MUST obtain explicit user consent.
-  When in doubt, ask. It is better to wait for confirmation than to accidentally delete production data or critical project assets.
-  Use this for:
-  - SQL: DROP TABLE/VIEW/SCHEMA/DATABASE, TRUNCATE, or broad DELETE (missing WHERE or using 1=1).
-  - Cloud Storage: gsutil rm or gcloud storage rm targeting production data or critical buckets.
-  - Infrastructure: gcloud projects delete, deleting Spanner/BigQuery/Dataproc resources, deleting secrets, or KMS key destruction.
+description: "Use before any command that irreversibly destroys data: SQL DROP, TRUNCATE or broad DELETE, deleting cloud storage, projects, secrets or keys. Stop and get explicit user consent first."
 capability: "Halt irreversible data-loss commands until the user gives explicit consent"
 side_effect_level: read_only
 approval_required: true

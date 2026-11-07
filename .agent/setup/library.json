@@ -545,6 +545,13 @@
       "pack": "global",
       "global": true,
       "projects": []
+    },
+    {
+      "id": "synthet-repos",
+      "source": ".claude/skills/synthet-repos",
+      "pack": "global",
+      "global": true,
+      "projects": []
     }
   ],
   "reviewed_project_adoptions": [

@@ -1,6 +1,6 @@
 ---
 name: use-jev
-description: Use when the user says "use jev", "use Jev for decision making", "use Jev to make decision on each item", "use jev to assess", "use jev mcp", or types /use-jev. Hands the open decisions, blocked steps and triage items of the current work to Jev in one batched call. Then it executes what Jev clears and hands back what Jev denies, never using Jev to bypass a hook or permission.
+description: Use when the user says "use jev", "use Jev for decision making", "use Jev to make decision on each item", "use jev to assess", "use jev mcp", types /use-jev, or answers a pending question with "use jev". Hands the open decisions, blocked steps and triage items of the current work to Jev in one batched call. Then it executes what Jev clears and hands back what Jev denies, never using Jev to bypass a hook or permission.
 capability: "Resolve pending decisions and triage with Jev, act on confident low-risk picks, and hand denied or high-risk items back with exact commands."
 side_effect_level: remote_write
 approval_required: false
@@ -96,6 +96,47 @@ each one's "safe".
 - Don't disable or remove a working Jev integration as a workaround.
 - Confidence is not proof. Verify with tests and checks before you claim an item is done.
 
+### "use jev" as the answer to a question
+
+You'll often see "use jev" typed into a question dialog as the answer to one or more of your questions. It
+delegates **those questions**, nothing else:
+
+- Put every delegated question into **one** batched call. Keep the question's own options and add a "none / defer"
+  option.
+- `jev_choice` and System One Choice questions **need a non-empty `criteria` object**: `{option: one-line meaning}`.
+  A bare option list is rejected with `invalid_input`.
+- Put the numbers in the state: counts, bytes, the dry-run result, reversibility, who owns the item and
+  confidence-relevant history.
+- Give each answer back in one line: `choice (p 0.96)`.
+
+### Jev picks a write, but the write still needs the user
+
+A delegated answer can choose an action that the rules or the harness still reserve for the user. Examples:
+catalog or database writes, deletes, pushes to someone else's branch, permission changes.
+
+- Do the steps common to the top choices first, usually the **dry run**, and report what it found.
+- If the permission classifier, a hook or a Stop hook blocks the write, **don't retry it in another form**. Ask
+  the user **one** explicit yes/no that names the exact scope: IDs or files, bytes, the backup location, how to
+  reverse it, and the manifest hash. That answer is the authorization; Jev's pick is not.
+- Record the provenance precisely, kept separate from Jev's original decision:
+  - `approved_by: "owner, delegated to Jev (jev-1.14.0 apply_now p=0.96)"` when the user only said "use jev";
+  - `"owner, explicit approval <date>"` once they said yes.
+- If the approval text lives inside an immutable package, rebuild the package with the new text rather than
+  editing it.
+- Hard deletes always get the user's own go-ahead, quoted verbatim into the manifest, even when Jev and every
+  earlier step agreed.
+
+### Jev inside an algorithm (tie-breaks)
+
+When deterministic code needs a judgment, such as two frames tied on every measured quality:
+
+- Export the ties as Choice questions that carry **numbers only**, never images or labels.
+- Key each answer by a stable id, for example `"|".join(sorted(tie_set))`.
+- Feed the answers back through a flag such as `--tie-answers`, and record each one as `tie_resolution: "jev"`.
+- Keep a record file (`model`, `source`, `extends`, answers with confidences) next to the run, so a re-run is
+  reproducible.
+- Without an answer, the deterministic rank decides. Jev never adds or removes candidates; it only orders a tie.
+
 ## 4. Photo and content decisions
 
 For keep/cull, near-duplicate audits, label conflicts and similar photo judgments:
@@ -140,6 +181,15 @@ If the user states a new durable rule about Jev, save it as a feedback memory.
   - activation was never offered, because its qualification gate was unmet.
 - "use jev" to triage saved work groups: noul per group. One group cleared at 0.60, three stayed
   put at 0.10–0.43, and a 0.31-confidence choice for the rest was not acted on.
+- "use jev" as the answer to "apply the soft-cull?" and "keeper swap?" (2026-11-01):
+  - Jev chose `apply_now` (p 0.96) and `swap_only_6_mixed` (p 0.60).
+  - The dry runs passed, but the permission classifier blocked `--apply`.
+  - One explicit yes/no that named the IDs, bytes and backup got approval. The package was rebuilt so it recorded
+    that approval, then applied and verified against the DB and XMP.
+- An earlier delegated question there: Jev picked `soft_cull_now` at confidence 0.35. That was too low to act on,
+  so the dry run (common to the top two choices) ran first, and the write waited for the user.
+- Algorithm tie-breaks (keep-one near-duplicates): 23 tie sets answered in one `jev_system_one` batch, numbers only,
+  then fed back with `--tie-answers` and recorded per proposal.
 - "use jev" with `jev-engineering` down:
   - `jev_system_one` chose "issue first, then a small PR" and the fix route.
   - The hook still blocked the force-push, so the user got the exact `!` command.
