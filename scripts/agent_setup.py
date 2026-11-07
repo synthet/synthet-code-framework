@@ -1257,6 +1257,25 @@ def prune_skills(root: Path, trees: tuple[str, ...], retired, owned: dict, refer
             for skill in candidates if skill.name not in kept for path in sorted(skill.rglob("*")) if path.is_file()], kept
 
 
+def stale_files(root: Path, trees: tuple[str, ...], desired: dict[str, bytes], owned: dict) -> list[dict]:
+    """Plan deletes for unedited files an installed skill no longer ships.
+
+    Whole retired skills go through prune_skills. Anything the installer did not
+    write, or that was edited since, stays.
+    """
+    result = []
+    for rel, record in sorted(owned.items()):
+        tree = next((t for t in trees if rel.startswith(t + "/")), None)
+        path = root / rel
+        if not tree or rel in desired or not path.is_file() or linked(path) or path.name in PROTECTED_NAMES:
+            continue
+        skill = rel[len(tree) + 1:].split("/")[0]
+        if f"{tree}/{skill}/SKILL.md" in desired and _unmodified(path, record):
+            result.append({"path": str(path.absolute()), "relative": rel, "action": "delete",
+                           "before_sha256": digest(path.read_bytes()), "after_sha256": None, "content": "", "before_content": None})
+    return result
+
+
 def tier_diagnostics(target: str, kept: dict[str, str], global_names: set[str]) -> list[dict]:
     return [{"target": target, "kind": "tier-collision" if skill in global_names else "tier-review", "skill": skill, "reason": reason}
             for skill, reason in sorted(kept.items())]
@@ -1552,7 +1571,7 @@ def build_plan(framework: Path, projects_root: Path, user: Path, state: Path,
     if scope != "projects":
         operations += plan_files(user, global_files, owned_files(state, user), global_adopt)
         pruned, kept = prune_skills(user, GLOBAL_SKILL_TREES, lambda skill: skill.name in library_ids - set(global_sources[0]), owned_files(state, user), {})
-        operations += pruned
+        operations += pruned + stale_files(user, GLOBAL_SKILL_TREES, global_files, owned_files(state, user))
         diagnostics.extend(tier_diagnostics("global", kept, set()))
         targets.append(str(user.absolute()))
     summary = {"targets": len(targets), "operations": len(operations),
