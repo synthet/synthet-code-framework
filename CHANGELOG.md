@@ -24,6 +24,7 @@ All notable changes to this framework are documented here. The format follows
 
 - `bg-status` finds repositories from `PROJECTS_ROOT` or the current repository, not a fixed path.
 - Shorter descriptions for the five longest skills, which reduces listing cost in every harness.
+- `use-jev` and `ship-pr` gain refinements first made in installed copies, including a required CI watch before merging.
 
 ### Fixed
 
@@ -31,6 +32,7 @@ All notable changes to this framework are documented here. The format follows
 - `framework-*` aliases point at installed skills instead of keeping a command's relative paths.
 - Installed skills no longer nest copies of sibling `SKILL.md` files under `references/shared/`.
 - Links that resolve to nothing once installed keep only their label.
+- Plans remove files an installed skill no longer ships, if the installer wrote them and they are unedited.
 
 ## [0.5.0] — 2026-11-04
 

@@ -164,3 +164,52 @@ def test_overlay_source_must_stay_beside_its_manifest(tmp_path):
     (tmp_path / "user").mkdir()
     with pytest.raises(ValueError, match="overlay source"):
         setup.build_plan(root, tmp_path / "projects", tmp_path / "user", tmp_path / "state", overlay=manifest)
+
+
+def installed(tmp_path: Path, extra: str = "references/old.md"):
+    root = framework(tmp_path)
+    write(root / ".claude/skills/demo" / extra, "Old.")
+    projects, user, state = tmp_path / "projects", tmp_path / "user", tmp_path / "state"
+    projects.mkdir()
+    user.mkdir()
+    plan = setup.build_plan(root, projects, user, state)
+    run = setup.apply_operations(plan["operations"], state, [projects, user])
+    setup.save_ownership(state, run, user)
+    (root / ".claude/skills/demo" / extra).unlink()
+    return root, projects, user, state
+
+
+def deletes(plan: dict) -> set[str]:
+    return {op["relative"] for op in plan["operations"] if op["action"] == "delete"}
+
+
+def test_files_a_skill_no_longer_ships_are_removed_from_every_tree(tmp_path):
+    root, projects, user, state = installed(tmp_path)
+    found = deletes(setup.build_plan(root, projects, user, state))
+    assert ".claude/skills/demo/references/old.md" in found
+    assert ".agents/skills/demo/references/old.md" in found
+    assert not [name for name in found if name.endswith("SKILL.md")]
+
+
+def test_an_edited_leftover_is_kept(tmp_path):
+    root, projects, user, state = installed(tmp_path)
+    (user / ".claude/skills/demo/references/old.md").write_text("My notes.", encoding="utf-8")
+    found = deletes(setup.build_plan(root, projects, user, state))
+    assert ".claude/skills/demo/references/old.md" not in found
+    assert ".agents/skills/demo/references/old.md" in found
+
+
+def test_a_file_the_installer_never_wrote_is_kept(tmp_path):
+    root, projects, user, state = installed(tmp_path)
+    write(user / ".claude/skills/demo/references/mine.md", "Mine.")
+    assert ".claude/skills/demo/references/mine.md" not in deletes(setup.build_plan(root, projects, user, state))
+
+
+def test_a_stale_file_delete_applies_and_rolls_back(tmp_path):
+    root, projects, user, state = installed(tmp_path)
+    target = user / ".claude/skills/demo/references/old.md"
+    plan = setup.build_plan(root, projects, user, state)
+    run = setup.apply_operations(plan["operations"], state, [projects, user])
+    assert not target.exists()
+    setup.rollback(run, [user, projects])
+    assert target.exists()
