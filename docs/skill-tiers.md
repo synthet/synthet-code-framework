@@ -21,6 +21,8 @@ Each skill has one home. Shared skills live at user level, and a repository hold
 
 [`library.json`](../.agent/setup/library.json) is the only source of tier assignments. A `pack: core` entry still installs into every repository, but the library no longer uses it.
 
+Skills that can't be public stay out of the library. `agent_setup.py plan --overlay <manifest>` installs them at user level from a private location.
+
 ## Why a project skill must not reuse a global name
 
 | Harness | Same-name behaviour |

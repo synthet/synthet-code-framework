@@ -17,6 +17,7 @@ import hashlib
 import io
 import json
 import os
+import posixpath
 import re
 import shutil
 import stat
@@ -67,8 +68,9 @@ GLOBAL_SKILL_TREES = (".claude/skills", ".agents/skills", ".gemini/config/skills
 PROTECTED_NAMES = {"settings.json", "settings.local.json", "cli-config.json", "config.json", "hooks.json"}
 GENERATED_ALIASES = (("framework-", "Explicit framework workflow:"), ("project-rule-", "Explicit project rule:"),
                      ("project-", "Explicit project workflow:"))
-SECRET = re.compile(r"(?i)(?:sk-[a-z0-9_-]{16,}|gh[pousr]_[a-z0-9_]{20,}|github_pat_[a-z0-9_]{20,}|Bearer\s+[^\s\"']+)")
-CREDENTIAL_DATA = re.compile(r"(?i)(?:sk-[a-z0-9_-]{20,}|gh[pousr]_[a-z0-9_]{20,}|github_pat_[a-z0-9_]{20,}|Bearer\s+(?!\$\{|<)[a-z0-9_.-]{24,})")
+# The lookbehind stops hyphenated words such as ask-before-... from matching sk-.
+SECRET = re.compile(r"(?i)(?:(?<![a-z0-9_-])sk-[a-z0-9_-]{16,}|gh[pousr]_[a-z0-9_]{20,}|github_pat_[a-z0-9_]{20,}|Bearer\s+[^\s\"']+)")
+CREDENTIAL_DATA = re.compile(r"(?i)(?:(?<![a-z0-9_-])sk-[a-z0-9_-]{20,}|gh[pousr]_[a-z0-9_]{20,}|github_pat_[a-z0-9_]{20,}|Bearer\s+(?!\$\{|<)[a-z0-9_.-]{24,})")
 
 
 def digest(data: bytes) -> str:
@@ -638,13 +640,37 @@ def skill_bundle(framework: Path, name: str, source: Path | None = None) -> dict
             text = data.decode("utf-8")
             for link in re.findall(r"\[[^\]]+\]\((\.\./[^)]+)\)", text):
                 resource = (source / Path(rel).parent / link.split("#")[0]).resolve()
+                if resource.is_relative_to((framework / ".claude/skills").resolve()):
+                    # Sibling skills install side by side, so the link already
+                    # works. Copying one would nest a duplicate SKILL.md here.
+                    continue
                 if resource.is_file() and resource.is_relative_to(framework.resolve()) and ".git" not in resource.parts:
                     target = "references/shared/" + resource.relative_to(framework.resolve()).as_posix()
                     files[target] = resource.read_bytes()
                     replacement = os.path.relpath(target, str(Path(rel).parent)).replace("\\", "/")
                     text = text.replace("](" + link + ")", "](" + replacement + ")")
             files[rel] = text.encode()
+        drop_dead_links(files, framework / ".claude/skills")
     return files
+
+
+def drop_dead_links(files: dict[str, bytes], skills_root: Path) -> None:
+    """Keep only the label of links that resolve to nothing once installed."""
+    def live(rel: str, target: str) -> bool:
+        target = target.split("#")[0]
+        if not target or re.match(r"[a-z][a-z0-9+.-]*:", target, re.I) or target.startswith(("/", "<", "$", "{")):
+            return True
+        path = posixpath.normpath(posixpath.join(posixpath.dirname(rel), target))
+        if path.startswith("../"):
+            return (skills_root / path[3:]).exists()
+        return path in files or any(name.startswith(path + "/") for name in files)
+
+    for rel, data in list(files.items()):
+        if rel.endswith(".md"):
+            # Odd pieces are fenced code, where links are examples.
+            pieces = re.split(r"(```.*?```)", data.decode("utf-8"), flags=re.S)
+            pieces[::2] = [re.sub(r"(?<!!)\[([^\]]+)\]\(([^)\s]+)\)", lambda m: m.group(0) if live(rel, m.group(2)) else m.group(1), piece) for piece in pieces[::2]]
+            files[rel] = "".join(pieces).encode()
 
 
 def project_instructions(project: Path, info: dict, canonical: str = ".claude") -> dict[str, bytes]:
@@ -875,6 +901,16 @@ def project_command(framework: Path, name: str, source: Path, text: str) -> bool
     return expected.replace("\r\n", "\n") != text.replace("\r\n", "\n")
 
 
+def alias_links(text: str, aliases: dict[str, str]) -> str:
+    """Rewrite a command's relative links for its new home in a skill folder."""
+    def fix(match: re.Match) -> str:
+        label, target, anchor = match.group(1), match.group(2), match.group(3) or ""
+        sibling = re.fullmatch(r"\.\./skills/([^/]+)/SKILL\.md", target)
+        name = sibling.group(1) if sibling else aliases.get(target.removesuffix(".md"))
+        return f"[{label}](../{name}/SKILL.md{anchor})" if name else label
+    return re.sub(r"(?<!!)\[([^\]]+)\]\((\.\./[^)#\s]+|[\w-]+\.md)(#[^)\s]*)?\)", fix, text)
+
+
 def native_assets(framework: Path, skill_sources: dict[str, Path], command_sources: dict[str, Path],
                   agent_sources: dict[str, Path], rule_sources: dict[str, Path], *, global_scope: bool = False,
                   antigravity_cli: bool = True) -> dict[str, bytes]:
@@ -891,6 +927,9 @@ def native_assets(framework: Path, skill_sources: dict[str, Path], command_sourc
         for rel, data in skill_bundle(framework, name, source).items():
             for prefix in skill_roots:
                 result[f"{prefix}/{name}/{rel}"] = data
+    label = "framework" if global_scope else "project"
+    aliases = {name: f"{label}-{name}" for name, source in command_sources.items()
+               if global_scope or project_command(framework, name, source, source.read_bytes().decode("utf-8"))}
     for name, source in command_sources.items():
         text = source.read_bytes().decode("utf-8")
         if source.is_relative_to(framework):
@@ -900,10 +939,9 @@ def native_assets(framework: Path, skill_sources: dict[str, Path], command_sourc
         # Explicit commands stay explicit across adapters. The namespace avoids
         # collisions with built-in commands such as /plan and /review. Shared
         # aliases live at user level; a repository aliases only its own commands.
-        label = "framework" if global_scope else "project"
         if global_scope or project_command(framework, name, source, text):
             alias = label + "-" + name
-            generated = "---\nname: " + alias + "\ndescription: " + json.dumps(f"Explicit {label} workflow: " + name) + "\ndisable-model-invocation: true\n---\n\n" + body(text)
+            generated = "---\nname: " + alias + "\ndescription: " + json.dumps(f"Explicit {label} workflow: " + name) + "\ndisable-model-invocation: true\n---\n\n" + alias_links(body(text), aliases)
             for prefix in skill_roots:
                 result[f"{prefix}/{alias}/SKILL.md"] = generated.encode()
     for name, source in agent_sources.items():
@@ -1316,11 +1354,28 @@ def project_sync_contract(project: Path, files: dict, contract: dict, owned: dic
         return set(rendered) | {script_rel}, deletions, exact
 
 
+def overlay_sources(path: Path, reserved: set[str]) -> dict[str, Path]:
+    """Read a local manifest of extra user-level skills kept outside this library."""
+    root = path.resolve().parent
+    sources = {}
+    for entry in json.loads(path.read_text(encoding="utf-8")).get("skills", []):
+        name, source = entry["id"], (root / entry["source"]).resolve()
+        if not source.is_relative_to(root) or not (source / "SKILL.md").is_file():
+            raise ValueError(f"overlay source must be a skill beside its manifest: {name}")
+        if name in reserved:
+            raise ValueError(f"overlay skill collides with the library: {name}")
+        sources[name] = source
+    return sources
+
+
 def build_plan(framework: Path, projects_root: Path, user: Path, state: Path,
-               selected_projects: list[str] | None = None, scope: str = "all") -> dict:
+               selected_projects: list[str] | None = None, scope: str = "all", overlay: Path | None = None) -> dict:
     manifest = json.loads((framework / ".agent/setup/library.json").read_text(encoding="utf-8"))
     operations, targets, coverage, diagnostics = [], [], [], []
     global_sources = library_sources(framework, manifest)
+    if overlay:
+        reserved = {entry["id"] for entry in manifest["skills"]} | {"framework-" + name for name in global_sources[1]}
+        global_sources[0].update(overlay_sources(overlay, reserved))
     global_files = native_assets(framework, *global_sources, global_scope=True)
     library_ids = {entry["id"] for entry in manifest["skills"]}
     # Names resolved at user level. Claude prefers personal over project, so a
@@ -1555,6 +1610,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--input", type=Path)
     parser.add_argument("--project", action="append", default=[])
     parser.add_argument("--scope", choices=["all", "global", "projects"], default="all")
+    parser.add_argument("--overlay", type=Path, help="local JSON manifest of extra user-level skills kept outside the library")
     args = parser.parse_args(argv)
     if args.action == "inventory":
         report = inventory(args.projects_root, args.user_root)
@@ -1572,7 +1628,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(result, indent=2))
         return 0 if result["ok"] else 1
     if args.action == "plan":
-        plan = build_plan(args.framework, args.projects_root, args.user_root, args.state, args.project, args.scope)
+        plan = build_plan(args.framework, args.projects_root, args.user_root, args.state, args.project, args.scope, args.overlay)
         output = args.out or args.state / "plan.json"
         write_json(output, plan)
         print(json.dumps({"plan": str(output), **plan["summary"]}))
