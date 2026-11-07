@@ -52,6 +52,8 @@ Skill aliases carry commands to harnesses that have no command concept.
 
 If any copy fails, the skill stays in every harness tree, and the plan reports why: `tier-collision` when it shares a global name, otherwise `tier-review`. To resolve one, rename it as a project skill, move its changes into the library, or remove it by hand.
 
+A repository with no ledger can't use this path. `agent_setup.py tracked-retire` lists its tracked copies that are safe to remove, and those go through a normal PR.
+
 Refresh the user tier before pruning repositories, because repositories then rely on those copies. Deleted files are restored by `rollback` from the receipt's backups.
 
 Removing a repository's copy makes its Codex disable entry stale. The next global `plan` drops entries whose path under the projects root no longer exists.
