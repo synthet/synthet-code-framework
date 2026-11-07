@@ -75,7 +75,7 @@ def bucket(cmd: str) -> str:
 
 
 def project_slug(path: str | Path) -> str:
-    """Claude Code's folder name for a working directory, e.g. D:\\Projects\\x_y -> D--Projects-x-y.
+    """Claude Code's folder name for a working directory, e.g. C:\\Code\\x_y -> C--Code-x-y.
 
     Every character other than a letter or digit becomes '-' (so '_' and '.' do too).
     """

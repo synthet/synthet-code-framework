@@ -74,7 +74,7 @@ Evaluates Jev-compatible `noul`, `choice`, and `score` questions in one turn wit
 
 ```json
 {
-  "state": { "command": "npm test", "project": "D:\\Projects\\app" },
+  "state": { "command": "npm test", "project": "C:\\Code\\app" },
   "questions": {
     "in_scope": { "type": "noul", "instructions": "Command is within approved dev/test scope." }
   },

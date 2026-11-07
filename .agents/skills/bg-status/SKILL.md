@@ -90,9 +90,9 @@ file, the output is exactly as above. With one, a **Project** section follows th
 Without `--exec-probes` the file **never runs commands**: probes are GETs, regex matches and file stats, so a cloned
 repo's config can't execute anything. `container_ps` and `sql` run only when the flag is passed on the command line
 (decision 2026-11-02: an explicit opt-in, never the file alone). A bad file or entry becomes a note in the section, never a crash. Code:
-`scripts/project_probes.py`, tests in `scripts/test_project_probes.py`. Example: `D:\Projects\vault\.claude\bg-status.json`
+`scripts/project_probes.py`, tests in `scripts/test_project_probes.py`. Example: a repository's `.claude/bg-status.json`
 (the AI Quotas, Agent Mailbox and Vexlum dashboards, agent-mail servers and journal, cleanup runs and catalogs).
-`D:\Projects\image-scoring-backend\.claude\bg-status.json` uses every key: the shadow scan cursor and run queue
+a repository's `.claude/bg-status.json` uses every key: the shadow scan cursor and run queue
 through HTTP `fields`, `docker exec` workers in gpu-shell, and (with `--exec-probes`) container processes, active
 jobs and long Postgres queries.
 
