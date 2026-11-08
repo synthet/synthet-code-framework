@@ -6,12 +6,13 @@ if the owning app holds a lock, the database is copied to a temp dir first.
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import logging
-import os
 import re
 import shutil
 import sqlite3
+import sys
 import tempfile
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -22,7 +23,27 @@ log = logging.getLogger("harness_logs")
 UTC = timezone.utc
 MAX_COMMAND = 2000
 
-HARNESSES = ("claude", "codex", "cursor", "antigravity", "grok")
+
+def _load_registry_module():
+    """Import scripts/harness_registry.py by path so every caller's sys.path works."""
+    path = Path(__file__).resolve().parents[1] / "harness_registry.py"
+    name = "_synthet_harness_registry"
+    if name in sys.modules:
+        return sys.modules[name]
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load {path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module  # dataclasses resolve annotations through sys.modules
+    spec.loader.exec_module(module)
+    return module
+
+
+_registry = _load_registry_module()
+REGISTRY = _registry.load()
+
+# Active harness ids, in registry order (claude, codex, cursor, antigravity, grok).
+HARNESSES = _registry.active_ids(REGISTRY)
 
 # Outcomes a tool call can have, as far as the transcript shows it.
 OUTCOMES = (
@@ -82,14 +103,17 @@ class Homes:
     @classmethod
     def detect(cls, home: Path | None = None) -> "Homes":
         h = home or Path.home()
-        appdata = Path(os.environ.get("APPDATA") or h / "AppData" / "Roaming")
+
+        def home_of(harness_id: str) -> Path:
+            return _registry.home_dir(_registry.resolve(REGISTRY, harness_id), home=h)
+
         return cls(
-            claude=Path(os.environ.get("CLAUDE_CONFIG_DIR") or h / ".claude"),
-            codex=Path(os.environ.get("CODEX_HOME") or h / ".codex"),
-            cursor=h / ".cursor",
-            cursor_user=appdata / "Cursor" / "User",
-            gemini=h / ".gemini",
-            grok=Path(os.environ.get("GROK_HOME") or h / ".grok"),
+            claude=home_of("claude"),
+            codex=home_of("codex"),
+            cursor=home_of("cursor"),
+            cursor_user=_registry.expand("%APPDATA%/Cursor/User", home=h),
+            gemini=home_of("gemini"),
+            grok=home_of("grok"),
         )
 
 

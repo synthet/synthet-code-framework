@@ -29,6 +29,7 @@ question.
 | Agent CLI environment (PATH, Cursor restart) | [`.claude/skills/cli-tools-overview/references/agent-environment.md`](../.claude/skills/cli-tools-overview/references/agent-environment.md) |
 | Agent assets (rules/commands/skills/agents) | [`ai-workflow/README.md`](ai-workflow/README.md) |
 | Safety rules | [`../.agent/SAFETY.md`](../.agent/SAFETY.md) |
+| Agent harness ids, CLIs, config/hook paths | [`../.agent/harnesses/registry.json`](../.agent/harnesses/registry.json) (contract: [`registry.schema.json`](../.agent/harnesses/registry.schema.json), loader: [`../scripts/harness_registry.py`](../scripts/harness_registry.py)) |
 | Wiki conventions | [`WIKI_SCHEMA.md`](WIKI_SCHEMA.md) |
 
 **Rule:** code and the written contract must never disagree. If you change one, change the other in
