@@ -150,10 +150,11 @@ def build_values(args: argparse.Namespace) -> dict[str, str]:
 BACKLOG_CHOICES = ("auto", "agent-flow", "local-markdown", "github-issues", "github-projects")
 
 
-def resolve_backlog(choice: str, which=shutil.which) -> tuple[str, bool]:
+def resolve_backlog(choice: str, which=None) -> tuple[str, bool]:
     """Return ``(provider, explicit)``. ``auto`` picks agent-flow when its CLI is on PATH."""
     if choice != "auto":
         return choice, True
+    which = which or shutil.which  # looked up per call so tests can patch it
     return ("agent-flow" if which("agent-flow") else "local-markdown"), False
 
 
@@ -161,9 +162,10 @@ def _run_cmd(argv: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(argv, cwd=cwd, capture_output=True, text=True, check=False)
 
 
-def setup_agent_flow(target: Path, run=_run_cmd, which=shutil.which) -> str | None:
+def setup_agent_flow(target: Path, run=None, which=None) -> str | None:
     """Initialise agent-flow in ``target`` and install its framework kit. Return a problem, or None."""
-    exe = which("agent-flow")
+    run = run or _run_cmd
+    exe = (which or shutil.which)("agent-flow")
     if not exe:
         return "the agent-flow CLI is not on PATH"
     if not (target / ".git").exists():
