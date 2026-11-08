@@ -16,7 +16,10 @@ provider is the system of record for selectable work, ownership, status, and PR 
    [`providers/github-projects.md`](providers/github-projects.md).
 
 Choose agent-flow when several agents share the backlog, because Local Markdown has no atomic
-claims. Optional placeholders for other hosted trackers live in [`providers/linear.md`](providers/linear.md)
+claims. `bootstrap.py --backlog auto` (the default) treats agent-flow as the default provider when the
+`agent-flow` CLI is on PATH and prints the setup command; `--backlog agent-flow` also runs
+`agent-flow init` and `agent-flow install --framework` in the seeded repo (it must already be a git
+repository). An existing Local Markdown backlog moves over with `agent-flow import-backlog`. Optional placeholders for other hosted trackers live in [`providers/linear.md`](providers/linear.md)
 and [`providers/jira.md`](providers/jira.md).
 
 ## Generic five-step contract
