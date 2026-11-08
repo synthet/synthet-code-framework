@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/synthet/synthet-code-framework/.agent/harnesses/registry.schema.json",
+  "title": "Agent harness registry",
+  "type": "object",
+  "required": ["schema_version", "harnesses"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": 1 },
+    "harnesses": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/harness" }
+    }
+  },
+  "$defs": {
+    "path": { "type": "string", "pattern": "^(~|%APPDATA%)/" },
+    "file": {
+      "type": "object",
+      "required": ["path", "format", "key"],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "$ref": "#/$defs/path" },
+        "format": { "enum": ["json", "toml", "codex-rules", "sqlite"] },
+        "key": { "type": ["string", "null"] }
+      }
+    },
+    "argv": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      ]
+    },
+    "harness": {
+      "type": "object",
+      "required": ["id", "name", "status", "aliases", "cli", "home", "instructions", "mcp_configs",
+                   "permission_files", "hooks", "transcripts", "gate"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "name": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["active", "retired"] },
+        "retired_reason": { "type": "string" },
+        "aliases": { "type": "array", "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" } },
+        "cli": {
+          "type": "object",
+          "required": ["command", "print_argv", "acp_argv"],
+          "additionalProperties": false,
+          "properties": {
+            "command": { "type": "string", "minLength": 1 },
+            "command_env": { "type": "string" },
+            "print_argv": { "$ref": "#/$defs/argv" },
+            "acp_argv": { "$ref": "#/$defs/argv" }
+          }
+        },
+        "home": {
+          "type": "object",
+          "required": ["path", "env"],
+          "additionalProperties": false,
+          "properties": {
+            "path": { "$ref": "#/$defs/path" },
+            "env": { "type": ["string", "null"] }
+          }
+        },
+        "instructions": { "type": "array", "items": { "$ref": "#/$defs/path" } },
+        "mcp_configs": { "type": "array", "items": { "$ref": "#/$defs/file" } },
+        "permission_files": { "type": "array", "items": { "$ref": "#/$defs/file" } },
+        "hooks": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "required": ["path", "format", "key", "events"],
+              "additionalProperties": false,
+              "properties": {
+                "path": { "$ref": "#/$defs/path" },
+                "format": { "const": "json" },
+                "key": { "type": "string" },
+                "events": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+              }
+            }
+          ]
+        },
+        "transcripts": { "type": "array", "items": { "$ref": "#/$defs/path" } },
+        "gate": {
+          "type": "object",
+          "required": ["supported", "can_approve"],
+          "additionalProperties": false,
+          "properties": {
+            "supported": { "type": "boolean" },
+            "can_approve": { "type": "boolean" }
+          }
+        }
+      }
+    }
+  }
+}
