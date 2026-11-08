@@ -146,6 +146,56 @@ def build_values(args: argparse.Namespace) -> dict[str, str]:
     return vals
 
 
+
+BACKLOG_CHOICES = ("auto", "agent-flow", "local-markdown", "github-issues", "github-projects")
+
+
+def resolve_backlog(choice: str, which=None) -> tuple[str, bool]:
+    """Return ``(provider, explicit)``. ``auto`` picks agent-flow when its CLI is on PATH."""
+    if choice != "auto":
+        return choice, True
+    which = which or shutil.which  # looked up per call so tests can patch it
+    return ("agent-flow" if which("agent-flow") else "local-markdown"), False
+
+
+def _run_cmd(argv: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(argv, cwd=cwd, capture_output=True, text=True, check=False)
+
+
+def setup_agent_flow(target: Path, run=None, which=None) -> str | None:
+    """Initialise agent-flow in ``target`` and install its framework kit. Return a problem, or None."""
+    run = run or _run_cmd
+    exe = (which or shutil.which)("agent-flow")
+    if not exe:
+        return "the agent-flow CLI is not on PATH"
+    if not (target / ".git").exists():
+        return "the target is not a git repository yet (agent-flow keeps its tracker at the repo root)"
+    steps = [[exe, "install", "--framework", str(target), "-C", str(target)]]
+    if not (target / ".agent-flow" / "config.json").is_file():
+        steps.insert(0, [exe, "init", "-C", str(target)])
+    for argv in steps:
+        res = run(argv, target)
+        if res.returncode != 0:
+            detail = (res.stderr or res.stdout).strip().splitlines()
+            return f"`agent-flow {argv[1]}` failed: {detail[-1] if detail else f'exit {res.returncode}'}"
+    return None
+
+
+def backlog_next_step(provider: str, explicit: bool, problem: str | None) -> str:
+    """One next-steps line describing the backlog provider outcome."""
+    setup = "`agent-flow init && agent-flow install --framework .`"
+    if provider == "agent-flow" and explicit and problem is None:
+        return "Backlog: agent-flow is set up (.agent-flow/); pick work with `agent-flow ready`."
+    if provider == "agent-flow" and explicit:
+        return f"Backlog: agent-flow was requested but not set up ({problem}). Fix that, then run {setup}."
+    if provider == "agent-flow":
+        return (f"Backlog: agent-flow is installed, so it is the default provider. Set it up with {setup} "
+                "(or rerun with --backlog agent-flow); until then Local Markdown applies.")
+    if provider == "local-markdown":
+        return ("Backlog: Local Markdown (.agent/backlog/items.md). Install agent-flow for atomic claims "
+                "and rerun with --backlog agent-flow.")
+    return f"Backlog: {provider}; fill GitHub Projects TODO(...) IDs only if you use GitHub Projects."
+
 def substitute(text: str, vals: dict[str, str]) -> str:
     return PLACEHOLDER_RE.sub(lambda m: vals.get(m.group(1), m.group(0)), text)
 
@@ -492,6 +542,13 @@ def main() -> int:
         action="store_false",
         help="Skip starter GitHub Actions workflows",
     )
+    ap.add_argument(
+        "--backlog",
+        choices=BACKLOG_CHOICES,
+        default="auto",
+        help="Backlog provider. auto (default) picks agent-flow when its CLI is on PATH, else Local Markdown; "
+        "--backlog agent-flow also runs `agent-flow init` and `agent-flow install --framework`",
+    )
     ap.add_argument("--dry-run", action="store_true", help="Print planned files without writing")
     ap.add_argument(
         "--include-boilerplate",
@@ -522,6 +579,7 @@ def main() -> int:
         return 1
 
     vals = build_values(args)
+    backlog, backlog_explicit = resolve_backlog(args.backlog)
 
     if args.dry_run:
         files = sorted(
@@ -532,6 +590,7 @@ def main() -> int:
             files.sort()
         mode = "adopt into" if args.adopt else "seed"
         print(f"DRY RUN: would {mode} '{vals['PROJECT_NAME']}' into {target}")
+        print(f"Backlog provider: {backlog} ({'chosen' if backlog_explicit else 'auto'})")
         print("Substitutions:")
         for key in sorted(vals):
             print(f"  {key} = {vals[key]}")
@@ -634,22 +693,28 @@ def main() -> int:
     if args.adopt:
         _sync_target_trees(target)
 
+    backlog_problem = None
+    if backlog == "agent-flow" and backlog_explicit:
+        backlog_problem = setup_agent_flow(target)
+    backlog_line = backlog_next_step(backlog, backlog_explicit, backlog_problem)
+
     print("\nNext steps:")
     if args.adopt:
         print("  1. Review CLAUDE.md + AGENTS.md (existing engineering guide is preserved).")
         print("  2. Keep authoring skills under .claude/skills/; run python scripts/sync_assistant_trees.py after edits.")
         print("  3. Install common-skills globally (~/.agents/skills), not into this repo's .agents/skills.")
         print("  4. Map backlog work onto the project's existing specs/issues provider.")
+        print(f"  5. {backlog_line}")
     elif not args.auto_detect:
         print("  1. cd into the target and `git init` (or push to your remote).")
         print("  2. Fill in build/test/lint commands in CLAUDE.md + AGENTS.md.")
-        print("  3. Choose a backlog provider; fill GitHub Projects TODO(...) IDs only if you use that provider.")
+        print(f"  3. {backlog_line}")
         print("  4. `python scripts/sync_assistant_trees.py` after editing .claude/ assets.")
         print("  5. Optional: rerun `python scripts/generate_project_boilerplate.py --stack <stack> --project-slug <slug> --project-desc '...'` for starter code.")
     else:
         print("  1. cd into the target and `git init` (or push to your remote).")
         print("  2. Review auto-detected commands in CLAUDE.md + AGENTS.md (marked # auto-detected).")
-        print("  3. Choose a backlog provider; fill GitHub Projects TODO(...) IDs only if you use that provider.")
+        print(f"  3. {backlog_line}")
         print("  4. `python scripts/sync_assistant_trees.py` after editing .claude/ assets.")
     return 0
 
