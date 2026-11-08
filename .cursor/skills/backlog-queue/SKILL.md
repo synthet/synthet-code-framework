@@ -18,6 +18,10 @@ provider in this order:
 1. Use the provider explicitly named by the user or project docs.
 2. Otherwise use **agent-flow** when `.agent-flow/config.json` exists in the repo root
    (`agent-flow ready` → `agent-flow claim <id>`; the `flow_*` MCP tools work too).
+   If the `agent-flow` CLI is installed but the repo has no `.agent-flow/`, agent-flow is the
+   recommended provider: propose `agent-flow init && agent-flow install --framework .` (plus
+   `agent-flow import-backlog` when `.agent/backlog/items.md` has items) and run it only after the
+   maintainer agrees. Until then fall through to the next rule.
 3. Otherwise use GitHub Issues for GitHub-hosted repos with issue tracking enabled.
 4. Otherwise use Local Markdown for generic/offline projects.
 5. Use GitHub Projects only when the project explicitly adopts that optional board provider.
