@@ -1,0 +1,165 @@
+{
+  "$schema": "./registry.schema.json",
+  "schema_version": 1,
+  "harnesses": [
+    {
+      "id": "claude",
+      "name": "Claude Code",
+      "status": "active",
+      "aliases": ["claude-code"],
+      "cli": {
+        "command": "claude",
+        "print_argv": ["claude", "-p"],
+        "acp_argv": ["claude-code-acp"]
+      },
+      "home": { "path": "~/.claude", "env": "CLAUDE_CONFIG_DIR" },
+      "instructions": ["~/.claude/CLAUDE.md"],
+      "mcp_configs": [
+        { "path": "~/.claude.json", "format": "json", "key": "mcpServers" }
+      ],
+      "permission_files": [
+        { "path": "~/.claude/settings.json", "format": "json", "key": "permissions" }
+      ],
+      "hooks": {
+        "path": "~/.claude/settings.json",
+        "format": "json",
+        "key": "hooks",
+        "events": ["PreToolUse", "PostToolUse"]
+      },
+      "transcripts": ["~/.claude/projects"],
+      "gate": { "supported": true, "can_approve": true }
+    },
+    {
+      "id": "codex",
+      "name": "Codex",
+      "status": "active",
+      "aliases": [],
+      "cli": {
+        "command": "codex",
+        "print_argv": ["codex", "exec"],
+        "acp_argv": ["codex-acp"]
+      },
+      "home": { "path": "~/.codex", "env": "CODEX_HOME" },
+      "instructions": ["~/.codex/AGENTS.md"],
+      "mcp_configs": [
+        { "path": "~/.codex/config.toml", "format": "toml", "key": "mcp_servers" }
+      ],
+      "permission_files": [
+        { "path": "~/.codex/config.toml", "format": "toml", "key": null },
+        { "path": "~/.codex/rules/default.rules", "format": "codex-rules", "key": null }
+      ],
+      "hooks": {
+        "path": "~/.codex/hooks.json",
+        "format": "json",
+        "key": "hooks",
+        "events": ["PermissionRequest"]
+      },
+      "transcripts": ["~/.codex/sessions", "~/.codex/archived_sessions"],
+      "gate": { "supported": true, "can_approve": true }
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor agent",
+      "status": "active",
+      "aliases": ["agent", "cursor-agent"],
+      "cli": {
+        "command": "agent",
+        "print_argv": ["agent"],
+        "acp_argv": ["agent", "acp"]
+      },
+      "home": { "path": "~/.cursor", "env": null },
+      "instructions": ["~/.cursor/rules"],
+      "mcp_configs": [
+        { "path": "~/.cursor/mcp.json", "format": "json", "key": "mcpServers" }
+      ],
+      "permission_files": [
+        { "path": "~/.cursor/cli-config.json", "format": "json", "key": "permissions" },
+        { "path": "~/.cursor/permissions.json", "format": "json", "key": null },
+        { "path": "%APPDATA%/Cursor/User/globalStorage/state.vscdb", "format": "sqlite", "key": null }
+      ],
+      "hooks": {
+        "path": "~/.cursor/hooks.json",
+        "format": "json",
+        "key": "hooks",
+        "events": ["beforeShellExecution", "beforeMCPExecution"]
+      },
+      "transcripts": ["~/.cursor/projects"],
+      "gate": { "supported": true, "can_approve": true }
+    },
+    {
+      "id": "antigravity",
+      "name": "Antigravity",
+      "status": "active",
+      "aliases": ["agy"],
+      "cli": {
+        "command": "agy",
+        "command_env": "AGY_BINARY",
+        "print_argv": ["agy", "-p"],
+        "acp_argv": null
+      },
+      "home": { "path": "~/.gemini", "env": null },
+      "instructions": ["~/.gemini/GEMINI.md"],
+      "mcp_configs": [
+        { "path": "~/.gemini/antigravity/mcp_config.json", "format": "json", "key": "mcpServers" },
+        { "path": "~/.gemini/config/mcp_config.json", "format": "json", "key": "mcpServers" }
+      ],
+      "permission_files": [
+        { "path": "~/.gemini/antigravity-cli/settings.json", "format": "json", "key": null },
+        { "path": "~/.gemini/config/config.json", "format": "json", "key": null }
+      ],
+      "hooks": {
+        "path": "~/.gemini/config/hooks.json",
+        "format": "json",
+        "key": "hooks",
+        "events": ["PreToolUse"]
+      },
+      "transcripts": [
+        "~/.gemini/antigravity-cli/brain",
+        "~/.gemini/antigravity/brain",
+        "~/.gemini/antigravity-ide/brain"
+      ],
+      "gate": { "supported": true, "can_approve": true }
+    },
+    {
+      "id": "grok",
+      "name": "Grok",
+      "status": "active",
+      "aliases": [],
+      "cli": {
+        "command": "grok",
+        "print_argv": null,
+        "acp_argv": ["grok", "agent", "stdio"]
+      },
+      "home": { "path": "~/.grok", "env": "GROK_HOME" },
+      "instructions": [],
+      "mcp_configs": [],
+      "permission_files": [
+        { "path": "~/.grok/config.toml", "format": "toml", "key": "permission" }
+      ],
+      "hooks": null,
+      "transcripts": ["~/.grok/sessions"],
+      "gate": { "supported": true, "can_approve": false }
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini CLI",
+      "status": "retired",
+      "retired_reason": "Google refuses personal sign-in for the Gemini CLI. Use antigravity (agy) for Gemini models.",
+      "aliases": [],
+      "cli": {
+        "command": "gemini",
+        "print_argv": ["gemini", "-p"],
+        "acp_argv": null
+      },
+      "home": { "path": "~/.gemini", "env": null },
+      "instructions": ["~/.gemini/GEMINI.md"],
+      "mcp_configs": [
+        { "path": "~/.gemini/settings.json", "format": "json", "key": "mcpServers" }
+      ],
+      "permission_files": [],
+      "hooks": null,
+      "transcripts": [],
+      "gate": { "supported": false, "can_approve": false }
+    }
+  ]
+}
