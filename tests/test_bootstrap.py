@@ -615,3 +615,84 @@ def test_private_and_working_dir_files_are_not_seeded_from_source_manifest(
             assert not (target / rel).exists(), "working-dir contents should not be seeded"
         else:
             assert not (target / rel).exists(), f"private source path seeded: {rel}"
+
+
+# --------------------------------------------------------------------------- backlog provider
+
+
+def _which(present: bool):
+    return lambda name: f"/bin/{name}" if present and name == "agent-flow" else None
+
+
+def test_resolve_backlog_prefers_agent_flow_when_installed() -> None:
+    assert bootstrap.resolve_backlog("auto", which=_which(True)) == ("agent-flow", False)
+    assert bootstrap.resolve_backlog("auto", which=_which(False)) == ("local-markdown", False)
+    assert bootstrap.resolve_backlog("github-issues", which=_which(True)) == ("github-issues", True)
+    assert bootstrap.resolve_backlog("agent-flow", which=_which(False)) == ("agent-flow", True)
+
+
+class _Recorder:
+    def __init__(self, fail_on: str | None = None) -> None:
+        self.calls: list[list[str]] = []
+        self.fail_on = fail_on
+
+    def __call__(self, argv: list[str], cwd: Path):
+        import subprocess
+
+        self.calls.append(argv)
+        code = 1 if self.fail_on and argv[1] == self.fail_on else 0
+        return subprocess.CompletedProcess(argv, code, stdout="", stderr="boom: not allowed\n" if code else "")
+
+
+def test_setup_agent_flow_runs_init_then_framework_install(tmp_path: Path) -> None:
+    (tmp_path / ".git").mkdir()
+    run = _Recorder()
+    assert bootstrap.setup_agent_flow(tmp_path, run=run, which=_which(True)) is None
+    assert [c[1] for c in run.calls] == ["init", "install"]
+    assert run.calls[1][2:4] == ["--framework", str(tmp_path)]
+
+
+def test_setup_agent_flow_skips_init_when_already_initialised(tmp_path: Path) -> None:
+    (tmp_path / ".git").mkdir()
+    (tmp_path / ".agent-flow").mkdir()
+    (tmp_path / ".agent-flow" / "config.json").write_text("{}", encoding="utf-8")
+    run = _Recorder()
+    assert bootstrap.setup_agent_flow(tmp_path, run=run, which=_which(True)) is None
+    assert [c[1] for c in run.calls] == ["install"]
+
+
+def test_setup_agent_flow_reports_missing_cli_git_and_failures(tmp_path: Path) -> None:
+    assert "not on PATH" in bootstrap.setup_agent_flow(tmp_path, run=_Recorder(), which=_which(False))
+    run = _Recorder()
+    assert "not a git repository" in bootstrap.setup_agent_flow(tmp_path, run=run, which=_which(True))
+    assert run.calls == []
+    (tmp_path / ".git").mkdir()
+    problem = bootstrap.setup_agent_flow(tmp_path, run=_Recorder(fail_on="init"), which=_which(True))
+    assert problem == "`agent-flow init` failed: boom: not allowed"
+
+
+@pytest.mark.parametrize("provider, explicit, problem, expected", [
+    ("agent-flow", True, None, "agent-flow is set up"),
+    ("agent-flow", True, "x", "requested but not set up (x)"),
+    ("agent-flow", False, None, "it is the default provider"),
+    ("local-markdown", False, None, "Local Markdown"),
+    ("github-projects", True, None, "GitHub Projects TODO"),
+])
+def test_backlog_next_step_wording(provider: str, explicit: bool, problem: str | None, expected: str) -> None:
+    assert expected in bootstrap.backlog_next_step(provider, explicit, problem)
+
+
+def test_auto_backlog_recommends_without_running_agent_flow(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.setattr(bootstrap.shutil, "which", _which(True))
+    calls: list[list[str]] = []
+    monkeypatch.setattr(bootstrap, "_run_cmd", lambda argv, cwd: calls.append(argv))
+    target = run_bootstrap(tmp_path, "generic")
+    out = capsys.readouterr().out
+    assert "agent-flow is installed, so it is the default provider" in out
+    assert calls == []
+    assert not (target / ".agent-flow").exists()
+
+
+def test_explicit_local_markdown_names_the_items_file(tmp_path: Path, capsys) -> None:
+    run_bootstrap(tmp_path, "generic", ["--backlog", "local-markdown"])
+    assert "Backlog: Local Markdown (.agent/backlog/items.md)" in capsys.readouterr().out
