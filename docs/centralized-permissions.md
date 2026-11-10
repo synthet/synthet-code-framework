@@ -19,7 +19,7 @@ A 30-day audit of cross-harness session transcripts and configuration files in `
 - **Codex:** Accumulated 1,111 persisted one-off `prefix_rule`s in `rules/default.rules` (including `git push`, `Remove-Item`, and destructive SQL calls).
 - **Cursor CLI:** Defaulted to `approvalMode: "unrestricted"` with sandbox disabled on Windows.
 - **Cursor IDE (`state.vscdb`):** 683 `yoloCommandAllowlist` entries, including dangerous tokens like raw `cmd`, `powershell`, and parse noise (`}`, `$_`).
-- **Antigravity CLI:** 1,069 allow rules (including wildcards `python:*`, `pwsh -Command:*`, `git:*`), with `trustedWorkspaces` extending to the user's home root `C:\Users\dmnsy`.
+- **Antigravity CLI:** 1,069 allow rules (including wildcards `python:*`, `pwsh -Command:*`, `git:*`), with `trustedWorkspaces` extending to the user's home root `%USERPROFILE%`.
 - **Grok CLI:** Global `permission_mode = "always-approve"`.
 - **Project Repos:** Accumulated gitignored and committed `.claude/settings.json` allowlists containing `gh pr:*`, `docker exec *`, and scratchpad paths.
 

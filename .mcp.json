@@ -4,7 +4,7 @@
     "proj-ro-graphify": {
       "command": "graphify-mcp",
       "args": [
-        "d:\\Projects\\synthet-code-framework\\graphify-out\\graph.json"
+        "graphify-out/graph.json"
       ],
       "env": {
         "WORKSPACE_ROOT": "${workspaceFolder}"

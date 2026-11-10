@@ -12,7 +12,7 @@ url = "https://developers.openai.com/mcp"
 
 [mcp_servers."proj-ro-graphify"]
 command = "graphify-mcp"
-args = ["d:\\Projects\\synthet-code-framework\\graphify-out\\graph.json"]
+args = ["graphify-out/graph.json"]
 
 [mcp_servers."proj-ro-graphify".env]
 "WORKSPACE_ROOT" = "${workspaceFolder}"
