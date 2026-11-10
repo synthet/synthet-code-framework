@@ -50,6 +50,9 @@ Use this skill for tasks that mention any of these:
    `.cursor/skills/` or `.agents/skills/` copies.
 4. **Run sync.** Execute `python scripts/sync_assistant_trees.py` so Cursor and Codex mirrors match
    the canonical Claude tree.
+   In a fresh worktree on Windows, sync can rewrite unrelated mirrors with line-ending-only changes.
+   If `git diff --ignore-cr-at-eol --stat -- <path>` is empty for a file, restore it with
+   `git checkout -- <path>`, and stage only the paths your change owns.
 5. **Validate.** Run frontmatter and sync checks. Add focused tests when changing sync behavior,
    frontmatter contracts, or deterministic helper scripts.
 6. **Review for safety.** Apply `.agent/SKILL_CHANGE_AST10_REVIEW.md`: honest metadata, no hidden

@@ -1,6 +1,6 @@
 # Skill inventory — ${PROJECT_NAME}
 
-**Last reviewed:** 2026-11-07. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
+**Last reviewed:** 2026-11-09. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
 and [SKILL_COMPILATION.md](SKILL_COMPILATION.md).
 Update this file (new row or **Last reviewed** date) in the same PR as any skill change.
 
@@ -29,15 +29,15 @@ commands or edit code/config as part of its procedure.
 | synthet-repos | Map a task to the public synthet repository that owns it | L1 | 2026-11-07 |
 | release-bump | Semver bump, changelog promotion, release commit prep (**compiled harness**) | L2 | 2026-07-19 |
 | security-review | Lightweight pre-merge security sanity check | L1 | 2026-07-01 |
-| skill-authoring | Create and improve first-party skills with progressive disclosure and eval guidance | L2 | 2026-07-14 |
+| skill-authoring | Create and improve first-party skills with progressive disclosure and eval guidance | L2 | 2026-11-09 |
 | subagent-review | Review-only external CLI orchestration and structured lightweight decisions (`swarm_decide`) via MCP | L1 | 2026-10-25 |
 | systematic-debugging | Evidence-first root-cause debugging with reproduce/minimise/hypothesis/regression loop | L2 | 2026-07-14 |
 | test-driven-development | Red-green-refactor workflow for behavior changes with practical test seams | L2 | 2026-07-14 |
 | rust-testing | Cargo/nextest unit tests beside modules | L2 | 2026-08-14 |
 | threat-modeling-agentic-tools | Threat-model MCP/tool abuse and injection | L1 | 2026-07-01 |
-| use-jev | Delegate pending decisions, blocked steps and triage items to Jev in one batched call; act on confident low-risk picks, hand back the rest | L2 | 2026-11-01 |
+| use-jev | Delegate pending decisions, blocked steps and triage items to Jev in one batched call; act on confident low-risk picks, hand back the rest | L2 | 2026-11-09 |
 | go | Finish every open item: take recommendations, settle the rest with Jev, execute in order, report once. User-typed only | L2 | 2026-11-03 |
-| ship-pr | Take one PR from open to merged: fix CI failures at the root cause, wait for green on the exact head commit, merge, verify. User-typed only | L2 | 2026-11-07 |
+| ship-pr | Take one PR from open to merged: fix CI failures at the root cause, wait for green on the exact head commit, merge, verify. User-typed only | L2 | 2026-11-09 |
 | validate-implementation | Per-AC Verified/Failed/Unknown verdicts with evidence (**compiled harness**) | L2 | 2026-07-19 |
 | verification-before-completion | Evidence-backed completion claims with fresh command proof (**compiled harness**) | L1 | 2026-11-04 |
 
@@ -48,7 +48,7 @@ commands or edit code/config as part of its procedure.
 | search-tool-selection | Choose fd vs rg vs ast-grep vs fff MCP vs Graphify vs IDE search (**compiled harness**) | L1 | 2026-07-21 |
 | safe-command-patterns | Bounded output, inspect-before-edit, confirmation gates | L1 | 2026-07-03 |
 | search-and-navigation | rg, fd, bat, tree, navigation | L1 | 2026-07-03 |
-| git-and-diff-workflows | git, gh, bounded diffs | L1 | 2026-07-03 |
+| git-and-diff-workflows | git, gh, bounded diffs | L1 | 2026-11-09 |
 | cli-tools-overview | Router for CLI skills + shared references (install-tiers, agent-environment) | L1 | 2026-07-04 |
 | task-env-package-tools | Task runners, sync/frontmatter/pytest gates (**compiled harness**) | L1 | 2026-07-21 |
 | structural-code-search | ast-grep, semgrep, ctags | L1 | 2026-07-03 |

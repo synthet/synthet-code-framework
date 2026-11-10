@@ -87,7 +87,8 @@ each one's "safe".
   `! python scripts/ci/check_secrets.py` themselves.
 - These always need the user's explicit go-ahead:
   - force-push;
-  - merging another session's PR or merging to `main`/`master`;
+  - merging another session's PR or merging to `main`/`master`. A user-typed `/go` whose merge rules the PR
+    meets counts as that go-ahead; a Jev pick alone never does;
   - edits to `.claude/settings*.json` or other permission policy;
   - deleting user data;
   - production deploys.
