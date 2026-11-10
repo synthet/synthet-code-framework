@@ -109,7 +109,7 @@ All notable changes to this framework are documented here. The format follows
 ### Fixed
 
 - Antigravity Windows terminal sandbox compatibility: expanded tilde paths in `deny_read`
-  rules to absolute Windows paths (`C:\Users\owner\.ssh`) and enforced
+  rules to absolute Windows paths (`%USERPROFILE%\.ssh`) and enforced
   `allowNonWorkspaceAccess: true` on Windows to eliminate `readonly /: non-absolute file path`.
 - Claude Code `PermissionRequest` hook ordering: placed the Jev gate hook (`timeout: 15s`)
   at index 0 ahead of notification hooks.

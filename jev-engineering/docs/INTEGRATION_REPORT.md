@@ -24,7 +24,7 @@ Explicit state is a local SQLite file under `data\` (tasks, chunks, decisions, a
 
 Read and used:
 
-- `C:\Users\owner\Downloads\Jev-Engineering-for-Coding-Agents.pdf`
+- `%USERPROFILE%\Downloads\Jev-Engineering-for-Coding-Agents.pdf`
 - `D:\Downloads\Using TypeSafe Jev to Route Claude Agents and Reduce Approval Prompts and Clarifying Questions.md`
 - `D:\Downloads\Cookbook_ Jev Engineering and Graph Engineering on Your Laptop (October 2026).md`
 - `D:\Downloads\deep-research-report (2).md`
@@ -44,17 +44,17 @@ Project tree under `D:\Projects\_agent-infra\jev`:
 
 User configuration merged, with backups in `D:\Projects\_agent-infra\jev\backups\20261019T032208927291Z`:
 
-- `C:\Users\owner\.cursor\mcp.json`
-- `C:\Users\owner\.cursor\rules\jev-engineering.mdc` (new)
-- `C:\Users\owner\.claude.json`
-- `C:\Users\owner\.claude\settings.json` (hooks only)
-- `C:\Users\owner\.claude\CLAUDE.md`
-- `C:\Users\owner\.codex\config.toml`
-- `C:\Users\owner\.codex\AGENTS.md`
-- `C:\Users\owner\.gemini\settings.json`
-- `C:\Users\owner\.gemini\GEMINI.md`
-- `C:\Users\owner\.gemini\antigravity\mcp_config.json`
-- `C:\Users\owner\.gemini\config\mcp_config.json`
+- `%USERPROFILE%\.cursor\mcp.json`
+- `%USERPROFILE%\.cursor\rules\jev-engineering.mdc` (new)
+- `%USERPROFILE%\.claude.json`
+- `%USERPROFILE%\.claude\settings.json` (hooks only)
+- `%USERPROFILE%\.claude\CLAUDE.md`
+- `%USERPROFILE%\.codex\config.toml`
+- `%USERPROFILE%\.codex\AGENTS.md`
+- `%USERPROFILE%\.gemini\settings.json`
+- `%USERPROFILE%\.gemini\GEMINI.md`
+- `%USERPROFILE%\.gemini\antigravity\mcp_config.json`
+- `%USERPROFILE%\.gemini\config\mcp_config.json`
 
 No repository under `D:\Projects` received a copied boilerplate tree. Credential values were not written into config. `JEV_ENV_FILE` still points at `D:\Projects\jev-mcp\.env`.
 

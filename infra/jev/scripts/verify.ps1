@@ -18,7 +18,7 @@ function Add-Help([string]$Title, [scriptblock]$Block) {
     Add-Content -LiteralPath $Help -Value $text
 }
 Add-Help 'claude' { & "$env:USERPROFILE\.local\bin\claude.exe" --version }
-$Codex = 'C:\Users\owner\AppData\Local\OpenAI\Codex\bin\896a0166b774037a\codex.exe'
+$Codex = if ($env:CODEX_EXE) { $env:CODEX_EXE } else { (Get-Command codex -ErrorAction SilentlyContinue).Source }
 Add-Help 'codex' { & $Codex --version }
 Add-Help 'codex-help' { & $Codex --help }
 Add-Help 'cursor' { cursor --version }

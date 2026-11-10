@@ -26,9 +26,10 @@ INSTRUCTION_TARGETS = (
 
 
 def mcp_entry(root: Path = ROOT) -> dict[str, Any]:
-    uv = shutil.which("uv") or (
-        r"C:\Users\owner\AppData\Local\Microsoft\WinGet\Packages"
-        r"\astral-sh.uv_Microsoft.Winget.Source_8wekyb3d8bbwe\uv.EXE"
+    uv = shutil.which("uv") or str(
+        Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
+        / "Microsoft" / "WinGet" / "Packages"
+        / "astral-sh.uv_Microsoft.Winget.Source_8wekyb3d8bbwe" / "uv.EXE"
     )
     return {
         "command": uv,
