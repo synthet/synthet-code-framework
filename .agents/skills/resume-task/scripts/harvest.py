@@ -329,6 +329,8 @@ def parse_claude(path: Path) -> Session | None:
             continue
         if txt.startswith("Caveat: The messages below"):
             continue
+        if typ == "assistant":
+            s.interrupted = False  # the agent replied after the interruption, so the session moved on
         s.turns.append(Turn("user" if typ == "user" else "assistant", txt, ts))
     if tasks and not s.todos:
         s.todos = [(v["subject"], v["status"]) for v in tasks.values() if v["subject"] and v["status"] != "deleted"]

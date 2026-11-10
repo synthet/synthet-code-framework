@@ -94,3 +94,22 @@ def test_ask_before_a_trailing_local_command_stays_unanswered():
 def test_skill_commands_that_share_a_prefix_still_count_as_asks():
     s = _session(('assistant', 'Done.'), ('user', '/resume-task'))
     assert [c['text'] for c in harvest.extract(s) if c['kind'] == 'unanswered-ask'] == ['/resume-task']
+
+
+def _claude_jsonl(tmp_path, rows):
+    path = tmp_path / 'session.jsonl'
+    path.write_text('\n'.join(json.dumps({'type': role, 'sessionId': 'sid', 'message': {'content': text}})
+                              for role, text in rows), encoding='utf-8')
+    return harvest.parse_claude(path)
+
+
+def test_claude_interruption_clears_once_the_agent_replies_again(tmp_path):
+    s = _claude_jsonl(tmp_path, [('user', 'Fix it.'), ('user', '[Request interrupted by user]'),
+                                 ('user', 'Carry on.'), ('assistant', 'Done and tested.')])
+    assert not s.interrupted
+
+
+def test_claude_interruption_at_the_end_is_kept(tmp_path):
+    s = _claude_jsonl(tmp_path, [('user', 'Fix it.'), ('assistant', 'Working.'),
+                                 ('user', '[Request interrupted by user]')])
+    assert s.interrupted
