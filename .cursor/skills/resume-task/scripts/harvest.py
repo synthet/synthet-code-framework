@@ -329,6 +329,8 @@ def parse_claude(path: Path) -> Session | None:
             continue
         if txt.startswith("Caveat: The messages below"):
             continue
+        if typ == "assistant":
+            s.interrupted = False  # the agent replied after the interruption, so the session moved on
         s.turns.append(Turn("user" if typ == "user" else "assistant", txt, ts))
     if tasks and not s.todos:
         s.todos = [(v["subject"], v["status"]) for v in tasks.values() if v["subject"] and v["status"] != "deleted"]
@@ -1175,8 +1177,9 @@ def extract(s: Session) -> list[dict]:
     for u in users:
         for sent in sentences_with(USER_DEFER, u.text, 3):
             add("user-deferred", sent, "user", 4, ctx=f"said {u.ts:%Y-%m-%d}" if u.ts else "")
-    if s.turns and s.turns[-1].role == "user":
-        add("unanswered-ask", s.turns[-1].text, "user", 5, ctx="session ended on this user message")
+    spoken = [t for t in s.turns if not (t.role == "user" and LOCAL_COMMAND.match(t.text.strip()))]
+    if spoken and spoken[-1].role == "user":
+        add("unanswered-ask", spoken[-1].text, "user", 5, ctx="session ended on this user message")
     if s.interrupted:
         last_u = users[-1].text if users else s.first_ask()
         add("interrupted", last_u, "user", 5, ctx="turn was interrupted/aborted")
@@ -1188,6 +1191,10 @@ def extract(s: Session) -> list[dict]:
             seen.add(k)
             uniq.append(x)
     return uniq
+
+
+# Harness-local commands get no assistant reply in the transcript, so a session ending on one is not waiting.
+LOCAL_COMMAND = re.compile(r"^/(export|clear|compact|context|cost|exit|help|login|logout|model|quit|resume|status|usage)(?:\s|$)", re.I)
 
 
 STRONG = ("unanswered-ask", "interrupted", "todo-", "user-deferred", "plan-checkbox")

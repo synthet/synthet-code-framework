@@ -68,7 +68,7 @@ Jev evidence and reviewed choices: [decision ledger](setup/decisions.json).
 | Skill | Purpose | Risk | Last reviewed |
 |-------|---------|------|---------------|
 | agent-setup | Inventory, review, install, check and roll back native harness setup | L2 | 2026-11-04 |
-| resume-task | Recover unfinished local cross-harness work with evidence and a continuation brief | L2 | 2026-10-11 |
+| resume-task | Recover unfinished local cross-harness work with evidence and a continuation brief | L2 | 2026-11-10 |
 | architecture-decisions | Compare consequential alternatives and record ADRs | L1 | 2026-10-11 |
 | agent-runtime-handoff | Application agent-runtime contracts and handoff | L2 | 2026-10-11 |
 | archive-session-transcripts | Hash-verified, privacy-reviewed transcript archiving | L2 | 2026-10-11 |
