@@ -46,6 +46,7 @@ PLACEHOLDER_RE = re.compile(r"\$\{([A-Z0-9_]+)\}")
 # Paths (relative to framework root) NOT copied into a seeded project (framework-only assets).
 EXCLUDE = {
     ".git",
+    ".agent-flow",      # the framework's own ticket tracker; seeded projects run `agent-flow init`
     ".github",          # framework CI (tests bootstrap.py, which is not shipped)
     ".github-template",  # starter CI templates copied to .github/workflows when enabled
     "tests",            # framework self-tests
