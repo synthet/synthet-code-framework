@@ -47,6 +47,7 @@ The script reads source stores without modifying their data, uses only the Pytho
 standard library and redacts common secret formats. It writes two local files:
 - `digest.md`: grouped by project. For each session it shows the state, goal, last user message, the agent's last words, plan progress, files touched, a resume command and open-item candidates.
 - `candidates.json`: the same, plus `recent_turns`, the last few exchanges of each session in fuller form. Read `recent_turns` for the thread you're resuming; that is where "where it stopped" really lives.
+  Sessions sit at `data["projects"][i]["sessions"]`. Each has `id` (match it with `startswith`), `state`, `last_user`, `resume_cmd` and `recent_turns`, a list of `{role, ts, text}`.
 
 Project-local `.specstory/history/` exports are picked up automatically. Pass other exports with `--md`. Files written by the export-chat skill (`# Chat export` header) are attributed to their harness, keep their session id and workspace, and get the native resume command back. Use `--probe` to see which tools have stores on this machine.
 
@@ -72,7 +73,7 @@ A thread is one piece of work. It often spans several sessions and tools (starte
    - The last user message and the agent's last words.
    - The state label:
      - `interrupted`: a turn was cut off, so check for half-applied edits.
-     - `awaiting-reply`: the user asked something that was never answered.
+     - `awaiting-reply`: the user asked something that was never answered. A trailing harness command such as `/export` or `/model` gets no reply in the transcript, so the harvester skips it; the stopping point is the turn before it.
      - `mid-plan`: a plan step was in progress.
 4. **What's left:**
    - Open todos and plan items.

@@ -70,3 +70,27 @@ def test_redaction_covers_metadata_and_resume_arguments_are_quoted():
         assert command == "codex resume 'session''; injected'"
     else:
         assert harvest.shlex.split(command) == ['codex', 'resume', session.sid]
+
+
+def _session(*turns):
+    s = harvest.Session('claude-code', 'sid', 'path')
+    s.turns = [harvest.Turn(role, text) for role, text in turns]
+    return s
+
+
+def test_trailing_local_command_is_not_an_unanswered_ask():
+    s = _session(('user', 'Fix the renderer.'), ('assistant', 'Fixed and tested.'), ('user', '/export'))
+    cands = harvest.extract(s)
+    assert not [c for c in cands if c['kind'] == 'unanswered-ask']
+    assert harvest.thread_state(s, cands) != 'awaiting-reply'
+
+
+def test_ask_before_a_trailing_local_command_stays_unanswered():
+    s = _session(('assistant', 'Which branch?'), ('user', 'Use the release branch.'), ('user', '/export'))
+    asks = [c for c in harvest.extract(s) if c['kind'] == 'unanswered-ask']
+    assert [c['text'] for c in asks] == ['Use the release branch.']
+
+
+def test_skill_commands_that_share_a_prefix_still_count_as_asks():
+    s = _session(('assistant', 'Done.'), ('user', '/resume-task'))
+    assert [c['text'] for c in harvest.extract(s) if c['kind'] == 'unanswered-ask'] == ['/resume-task']

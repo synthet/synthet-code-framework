@@ -37,6 +37,9 @@ All notable changes to this framework are documented here. The format follows
 
 ### Fixed
 
+- `/resume-task` no longer marks a session as waiting for a reply when it ends on a harness command
+  such as `/export` or `/model`. Those get no reply in the transcript, so the turn before them counts.
+  The skill also documents the layout of `candidates.json`.
 - Credential checks no longer match hyphenated words that contain `sk-`, which blocked planning.
 - `framework-*` aliases point at installed skills instead of keeping a command's relative paths.
 - Installed skills no longer nest copies of sibling `SKILL.md` files under `references/shared/`.
