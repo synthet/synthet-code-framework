@@ -54,6 +54,9 @@ and passed,** even when the checks already look green. A new commit on the PR re
        nor the base branch's latest commits have any check runs or commit statuses. Go to step 2a,
        which takes the place of the watch.
    - **Failed:** read the failing step with `gh run view <run> --job <job> --log-failed`.
+   - **Look runs up by the full SHA.** `gh run list --commit <short-sha>` matches nothing, so a
+     watcher built on it waits forever. Use `git rev-parse <ref>`. A watcher must also report when it
+     finds no runs at all, rather than staying silent.
 
 ## 2a. No CI: run the project's checks locally
 

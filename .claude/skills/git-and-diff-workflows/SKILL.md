@@ -58,11 +58,18 @@ gitleaks detect --source . --no-git -v 2>/dev/null | head -50
 
 - Always `git status --short` before staging.
 - Show `git diff --stat` before commit messages.
+- **Comparing against a baseline** ("do these failures exist without my change?"): check out the base in a
+  separate temporary worktree. Don't stash: `git stash` + `git stash pop` drops what you staged, including
+  `git rm` deletions, so the next commit can come out empty. If you must stash, use `git stash pop --index`.
+  Either way, confirm `git diff --cached --stat` shows your change before you commit.
 - See [bounded-output-patterns.md](../cli-tools-overview/references/bounded-output-patterns.md).
 
 ## Commands Requiring Confirmation
 
 See [commands-requiring-confirmation.md](../cli-tools-overview/references/commands-requiring-confirmation.md). — especially reset, clean, force-push, filter-repo.
+
+Removing a leaked file or folder from published history: only with the user's explicit approval, following
+[references/history-scrub.md](references/history-scrub.md).
 
 ## Troubleshooting
 

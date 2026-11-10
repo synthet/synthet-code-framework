@@ -73,7 +73,8 @@ Full diagram: [windows-wsl-split.md](../cli-tools-overview/references/windows-ws
 
 - Avoid mixing `D:\` and `/mnt/d/` in one workflow.
 - In Git Bash, prefix `MSYS_NO_PATHCONV=1` to `docker exec`/`docker run` commands that pass container paths (`-w /app`, `/data/...`); otherwise MSYS rewrites them to Windows paths ("Cwd must be an absolute path").
-- Use the same prefix for `git show <ref>:<path>`. MSYS can rewrite the argument into something like `origin\main;.agent\...`, and a pipeline can hide the failure behind a plausible result such as a `0` count.
+- Use the same prefix for `git show <ref>:<path>`. MSYS can rewrite the argument into something like `origin\main;.agent\...`, and a pipeline can hide the failure behind a plausible result such as a `0` count. With the prefix set,
+  write paths in that command as `D:/...`: MSYS no longer translates `/d/...`, so `git -C /d/...` fails.
 - See [bounded-output-patterns.md](../cli-tools-overview/references/bounded-output-patterns.md).
 
 ## Commands Requiring Confirmation
