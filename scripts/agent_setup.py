@@ -1587,7 +1587,11 @@ def build_plan(framework: Path, projects_root: Path, user: Path, state: Path,
                     agents = agents.rstrip() + "\n\n" + section + "\n"
                 files["AGENTS.md"] = agents.encode()
             ignore = (project / ".gitignore").read_bytes().decode("utf-8") if (project / ".gitignore").exists() else ""
-            for pattern in ["/.agent/local/", "/.cursor/mcp.json", "/.claude/settings.local.json", "/.agents/mcp_config.json"]:
+            for pattern in ["/.agent/local/", "/.cursor/mcp.json", "/.claude/settings.local.json", "/.agents/mcp_config.json",
+                            # Session exports and agent working files hold local paths and transcripts.
+                            "/20??-??-??-*.txt", "/20??-??-??-*.md", "codex-session-*.md", "/logs/",
+                            "/.agent/scratch/*", "/.agent/workspaces/", "/.agent-memory/raw-sessions/*",
+                            "/.agent-memory/worklogs/", "/docs/_local/"]:
                 if pattern not in ignore.splitlines():
                     ignore = ignore.rstrip() + "\n" + pattern + "\n"
             files[".gitignore"] = ignore.encode()
