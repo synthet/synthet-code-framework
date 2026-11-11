@@ -42,3 +42,12 @@ Thumbs.db
 **/_local/
 .codex/*.local.toml
 .llmwiki/
+
+# Session exports and local logs (hold machine paths and transcripts)
+/20??-??-??-*.txt
+/20??-??-??-*.md
+codex-session-*.md
+/logs/
+/.agent/workspaces/
+/.agent-memory/worklogs/
+/docs/_local/
