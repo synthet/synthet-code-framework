@@ -101,7 +101,7 @@ WORKSPACE_ROOT=<staging> node <swarm>/agent-orchestrator/dist/index.js run --req
 }
 ```
 
-Batch at most 20 files per request (the swarm `files` limit). Stop at `--max-items` or `--budget-usd`; items left
+`modelChains` and `budgetUsd` are optional. Batch at most 20 files per request (the swarm `files` limit). Stop at `--max-items` or `--budget-usd`; items left
 undescribed stay `decide` and are reported. A swarm `outcome` other than `ok` leaves the batch undescribed.
 
 The repository being judged may be the workspace instead of a staging directory only when the agent needs to read
@@ -161,10 +161,15 @@ no tool approves claims.
 `apply --apply` writes `manifest-<HHMMSS>.json` next to the backups:
 
 ```json
-{"tool": "...", "plan": "<path>", "applied": "2026-11-12T21:30:00Z",
- "approval_note": "...", "done": [{"id": "T0003", "action": "ingest_summary", "backup": "...", "result": {}}],
- "skipped": [{"id": "T0004", "reason": "changed since scan"}]}
+{"tool": "...", "version": 1, "plan": "<path>", "applied": "2026-11-12T21:30:00Z",
+ "approval_note": "...",
+ "<records>": [{"id": "T0003", "mode": "ingest_summary", "backup": "...", "...": "..."}],
+ "skipped": [{"id": "T0004", "why": "changed since scan"}]}
 ```
+
+`tool`, `version`, `plan`, `applied`, `approval_note` and `skipped` are common. Each tool keeps its done records
+in its own lists (the git harness uses `worktrees`, `branches` and `folders`); every record carries the item `id`
+and enough to verify and undo it.
 
 ## Exit codes
 
