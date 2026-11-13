@@ -50,7 +50,7 @@ deterministic check or a human approval.
 {
   "tool": "llmwiki-housekeep-transcripts",
   "version": 1,
-  "root": "D:/Projects",
+  "root": "<projects-root>",
   "scanned": "2026-11-12T21:00:00Z",
   "items": [
     {
@@ -186,7 +186,7 @@ and enough to verify and undo it.
 
 ```json
 {
-  "roots": ["D:/Projects"],
+  "roots": ["<projects-root>"],
   "tasks": {
     "git": {"enabled": true, "recent_days": 2},
     "transcripts": {"enabled": true, "min_age_days": 7},
@@ -195,10 +195,10 @@ and enough to verify and undo it.
     "issues": {"enabled": false, "stale_days": 60}
   },
   "tools": {
-    "git": "python -I D:/Projects/vault/.claude/skills/projects-housekeeping/scripts/harness.py",
-    "llmwiki": "llmwiki --root D:/Projects/synthet-llm-wiki",
+    "git": "python -I <projects-root>/vault/.claude/skills/projects-housekeeping/scripts/harness.py",
+    "llmwiki": "llmwiki --root <projects-root>/synthet-llm-wiki",
     "agent_flow": "agent-flow",
-    "swarm": "D:/Projects/synthet-agent-swarm/agent-orchestrator/dist/index.js"
+    "swarm": "<projects-root>/synthet-agent-swarm/agent-orchestrator/dist/index.js"
   },
   "describe": {"max_items": 40, "budget_usd": 2},
   "decide": {"min_confidence": 0.5}
