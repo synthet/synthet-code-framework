@@ -26,6 +26,11 @@ All notable changes to this framework are documented here. The format follows
 
 ### Changed
 
+- `/next-steps` keeps every open item from its report as an action item in the harness task list, with
+  the owner in the title, or as an `A1..An` checklist when there is no task list. `/step-by-step` takes
+  its steps from those items. It keeps one item in progress at a time, closes each only after its check
+  passes, and loops until no item of its own is pending. It also asks another session with `SendMessage`
+  before making a small change in a checkout that session holds.
 - `bg-status` finds repositories from `PROJECTS_ROOT` or the current repository, not a fixed path.
 - Shorter descriptions for the five longest skills, which reduces listing cost in every harness.
 - `use-jev` and `ship-pr` gain refinements first made in installed copies, including a required CI watch before merging.
