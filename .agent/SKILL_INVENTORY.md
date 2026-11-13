@@ -1,6 +1,6 @@
 # Skill inventory — ${PROJECT_NAME}
 
-**Last reviewed:** 2026-11-07. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
+**Last reviewed:** 2026-11-13. Companion to [SKILL_CHANGE_AST10_REVIEW.md](SKILL_CHANGE_AST10_REVIEW.md)
 and [SKILL_COMPILATION.md](SKILL_COMPILATION.md).
 Update this file (new row or **Last reviewed** date) in the same PR as any skill change.
 

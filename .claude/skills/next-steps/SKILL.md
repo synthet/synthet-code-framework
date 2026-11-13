@@ -1,11 +1,11 @@
 ---
 name: next-steps
-description: Use when the user asks what to do next, what remains, asks for next steps, summarizes progress, or types /next-steps. Reports where the current work stands against the user's pinned goal, with evidence, and recommends one next step.
-capability: "Report conversation status against the pinned goal, audit verification evidence, and recommend one next step."
+description: Use when the user asks what to do next, what remains, asks for next steps, summarizes progress, or types /next-steps. Reports where the current work stands against the user's pinned goal, with evidence, keeps every open item as an action item in the task list for /step-by-step, and recommends one next step.
+capability: "Report conversation status against the pinned goal, audit verification evidence, record open items as action items, and recommend one next step."
 side_effect_level: read_only
 approval_required: false
 requires_tools: "git status, git diff, project test/lint commands; the harness task list when available."
-output_schema: "Pinned goal quote, compact status table with evidence and owner, one next step."
+output_schema: "Pinned goal quote, compact status table with evidence and owner, one next step; open items kept as task-list action items (or an A1..An checklist)."
 risk_class: low
 ---
 
@@ -79,6 +79,29 @@ item, not theirs. List it as yours, so `/step-by-step` picks it up.
 Pick the next step in this order: whatever unblocks other work, then finishing or verifying work in
 progress, then the most valuable remaining item. If the only open items are the user's, say so in one line;
 that's the next step.
+
+## Keep the action items
+
+A report that lives only in chat is forgotten by the next turn. Every row that isn't Done becomes an
+action item, so `/step-by-step` and `/go` work from the same list and the next `/next-steps` updates it
+instead of starting over.
+
+- **One task-list item per open row** (Claude Code `TaskCreate`/`TaskUpdate` or `TodoWrite`, Codex
+  `update_plan`, Cursor todos). Title it as an action someone can start without rereading the chat: verb
+  first, naming the file, command, PR or ticket.
+- **Owner in the title when it isn't you:** `[you] Merge PR #26`, `[blocked: CI run 1234] Re-run e2e`,
+  `[other session] Finish the dashboard ticket`. Untagged items are yours, and `/step-by-step` takes them.
+- **Update, don't duplicate.** Match existing items by title first. Mark an item `completed` only with
+  evidence from this report (put the evidence in its description). Delete an item the user dropped, and
+  record it as `Dropped` in the report.
+- Keep the `Goal:` item first and open until the goal is met.
+- The **Next step** you recommend is the first pending item of yours, so the report and the list agree.
+- **No task list:** end the report with a numbered checklist, one line per open item,
+  `A1. [ ] <action> (owner)`, and tick the items you finished. `/step-by-step` reads the latest checklist,
+  and the next `/next-steps` carries it forward with the same numbers.
+
+In a repo with `.agent-flow/`, an item that is new work outside the current ticket is also filed as a
+ticket (see the `agent-flow` skill); the action item then names the ticket id.
 
 For a standalone status request, stop after the report. During a run the user already authorised, answer
 briefly and carry on with it. A request to carry out the remaining work goes to `step-by-step`.
