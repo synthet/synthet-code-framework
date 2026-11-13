@@ -20,6 +20,7 @@ okf_version: 0.1
 - [ai-workflow/README.md](ai-workflow/README.md) — asset map & SDLC loop
 - [EXTERNAL_CLI_REVIEWS.md](EXTERNAL_CLI_REVIEWS.md) — external CLI review setup
 - [synthet-agent-swarm-setup.md](synthet-agent-swarm-setup.md) — build, user MCP, and skill install for the judge swarm
+- [housekeeping-protocol.md](housekeeping-protocol.md) — contract for the per-domain housekeeping tools and `/housekeeping`
 - [agent-observability.md](agent-observability.md) — JSONL trace artifacts for agent workflow observability
 - [security.md](security.md) — security model & checklist
 
