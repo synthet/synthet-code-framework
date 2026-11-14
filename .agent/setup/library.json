@@ -435,6 +435,13 @@
       "projects": []
     },
     {
+      "id": "housekeeping",
+      "source": ".claude/skills/housekeeping",
+      "pack": "global",
+      "global": true,
+      "projects": []
+    },
+    {
       "id": "step-by-step",
       "source": ".claude/skills/step-by-step",
       "pack": "global",
