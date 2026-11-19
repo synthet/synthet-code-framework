@@ -204,6 +204,21 @@ def test_new_from_file_is_atomic_and_checked(share, tmp_path, capsys):
     assert "pong" in (share / "alpha-to-beta" / "hello-2026-11-18" / "README.md").read_text(encoding="utf-8")
 
 
+def test_empty_or_titleless_draft_is_refused(share, tmp_path, capsys):
+    # An unquoted shell heredoc can expand a Markdown draft to nothing; the share must not get a blank note.
+    (share / "beta-to-alpha" / "ping-2026-11-18.md").write_text("# ping\n", encoding="utf-8")
+    draft = tmp_path / "draft.md"
+    for text in ("", "  \n\n", "just a line, no title\n"):
+        draft.write_text(text, encoding="utf-8")
+        with pytest.raises(SystemExit):
+            mail.main(["new", "--to", "beta", "--topic", "blank", "--note", "--date", "2026-11-18", "--from-file", str(draft)])
+    assert not (share / "alpha-to-beta" / "blank-2026-11-18.md").exists()
+    draft.write_text(" \n", encoding="utf-8")
+    with pytest.raises(SystemExit):
+        mail.main(["reply", "--to", "beta", "--re", "ping-2026-11-18.md", "--kind", "ack", "--body-file", str(draft)])
+    assert not (share / "alpha-to-beta" / "ping-2026-11-18-ack.md").exists()
+
+
 def test_watch_once_reports_new_file_and_ignores_partial_downloads(share, capsys):
     inbox = share / "beta-to-alpha"
 
