@@ -128,5 +128,3 @@ Unknown criterion, then from cleaning up drift.
   briefly and continue with the corrected plan.
 - If nothing changed since the last step-back (same HEAD, same tree, same ticket version), say so in one
   line and give the same next step.
-
-Resolve helper paths from this skill directory. Run project commands from the target workspace.
