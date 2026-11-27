@@ -10,6 +10,10 @@ you to act on the other PC directly rather than through the shared folder.
 - Pipe secrets in on **stdin**, never as arguments: arguments show up in process lists and logs.
 - PowerShell progress records come back as `#< CLIXML` noise on stderr. That's not an error; set
   `$ProgressPreference = 'SilentlyContinue'` in the script to drop it.
+- `python` over SSH may be the Microsoft Store alias (`...\WindowsApps\python.exe`), which fails with
+  "Access is denied" outside an interactive logon. Don't rely on Python on the other PC: do the remote step in
+  PowerShell, or pull the files and run Python locally. Don't search the disk for an interpreter; a recursive
+  search over SSH runs for minutes.
 
 ## Long-running processes
 
@@ -34,6 +38,13 @@ you to act on the other PC directly rather than through the shared folder.
   Use PowerShell for SMB paths, and read the copy back to confirm it went where you meant.
 - `robocopy` exit codes 0–7 are success (1 = files copied). Compare file counts and sizes per path afterwards.
   Watch for tracked repo files it overwrote with different line endings.
+- `scp` uses the SFTP protocol by default, so the remote path is not parsed by a shell. Quotes inside it are
+  taken literally and give "No such file or directory". Pass `host:C:/path with spaces/file` unquoted as one
+  argument, and compare SHA-256 on both ends afterwards.
+- Copying an app's SQLite database while the app runs: use the SQLite backup API when the other PC has a
+  working interpreter. Otherwise copy only when the `-wal` file is 0 bytes and the `.db`, `-wal` and `-shm`
+  timestamps are the same before and after the copy, and never copy `-wal`/`-shm` on their own. On the
+  receiving PC, `pragma integrity_check` must return `ok`.
 
 ## What stays with the user
 
