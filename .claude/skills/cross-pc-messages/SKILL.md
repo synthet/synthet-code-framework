@@ -90,7 +90,14 @@ lines included) counts in those threads too, so one reply can answer several top
 - **Correct a posted message that turned out wrong** with a new file in the same thread
   (e.g. `<topic>-<what>-warning.md`). Say plainly what was wrong and what the receiver should do,
   rather than burying it in a later report.
+  `reply --re` accepts only an incoming item, and each `--kind` writes one file. To correct your own message, use
+  `new --to <peer> --topic <topic>-warning --from-file <draft> --note`, with a full header whose **Replies to**
+  links the message being corrected.
 - Don't edit the other PC's files. Edit your own only if it hasn't been acted on, and say so in your next message.
+- **The owner often asks every PC the same thing.** Before starting work that spans PCs, run `status --since 1`, then
+  read the incoming threads from the last hour. If a peer already started the same work (a thread, a branch, a PR),
+  join its thread and agree on **one coordinator** before writing anything of your own. If the owner gave different
+  sessions conflicting answers, post the conflict to every peer and hold that part until the owner picks one.
 
 ## Same version on every PC
 

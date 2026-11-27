@@ -237,3 +237,14 @@ def test_check_flags_secrets_without_echoing_them(tmp_path, capsys):
     clean = tmp_path / "ok.md"
     clean.write_text("Point to private/auth/env/ for the token.\n", encoding="utf-8")
     assert mail.main(["check", str(clean)]) == 0
+
+
+def test_print_survives_a_cp1252_console(share):
+    """A Windows console with a legacy code page must not crash on the template's arrow."""
+    import subprocess
+    import sys
+    env = {**os.environ, "PYTHONIOENCODING": "cp1252", "PYTHONUTF8": "0"}
+    run = subprocess.run([sys.executable, str(Path(mail.__file__)), "new", "--to", "beta", "--topic", "enc-test", "--print"],
+                         capture_output=True, env=env)
+    assert run.returncode == 0, run.stderr.decode("utf-8", "replace")
+    assert "→" in run.stdout.decode("utf-8")
