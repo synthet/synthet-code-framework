@@ -204,6 +204,17 @@ def test_new_from_file_is_atomic_and_checked(share, tmp_path, capsys):
     assert "pong" in (share / "alpha-to-beta" / "hello-2026-11-18" / "README.md").read_text(encoding="utf-8")
 
 
+def test_new_print_survives_a_cp1252_console(share):
+    # The header has a non-ASCII arrow; a cp1252 stdout used to raise UnicodeEncodeError.
+    import subprocess
+    import sys as _sys
+    env = {**os.environ, "PYTHONIOENCODING": "cp1252", "PYTHONUTF8": "0"}
+    r = subprocess.run([_sys.executable, str(Path(mail.__file__)), "new", "--to", "beta", "--topic", "hello",
+                        "--date", "2026-11-18", "--print"], env=env, capture_output=True, timeout=60)
+    assert r.returncode == 0, r.stderr.decode("utf-8", "replace")
+    assert "ALPHA " + chr(0x2192) + " BETA" in r.stdout.decode("utf-8")
+    assert not (share / "alpha-to-beta" / "hello-2026-11-18").exists()
+
 def test_watch_once_reports_new_file_and_ignores_partial_downloads(share, capsys):
     inbox = share / "beta-to-alpha"
 

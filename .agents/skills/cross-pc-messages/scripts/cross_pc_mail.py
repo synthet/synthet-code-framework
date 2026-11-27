@@ -34,7 +34,7 @@ import sys
 import time
 from pathlib import Path
 
-VERSION = "2"  # equals the share's private/guides/cross-pc-messages/v<N>/; bump on any change
+VERSION = "3"  # equals the share's private/guides/cross-pc-messages/v<N>/; bump on any change
 SKILL_DIR = Path(__file__).resolve().parents[1]
 RELEASES = Path("private/guides/cross-pc-messages")  # relative to the share root
 # Global skill trees, as installed by the framework's agent_setup.py.
@@ -493,6 +493,9 @@ def scan(lines: list[str], text_file: bool = True) -> list[tuple[int, str]]:
 
 
 def main(argv=None) -> int:
+    for stream in (sys.stdout, sys.stderr):  # a cp1252 console can't encode the header arrow
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--root", help="share root (default: CROSS_PC_SHARE, config file, common locations)")
     ap.add_argument("--host", help="this host's id (default: CROSS_PC_HOST, then COMPUTERNAME)")
