@@ -40,6 +40,10 @@ Remove the listed files with `git rm` on a branch and open a PR, so history is t
 
 `plan --overlay <manifest.json>` adds skills that must not live in this library. They install at user level with the same ledger, receipts and rollback. The manifest is `{"skills": [{"id": "<name>", "source": "<path>"}]}`, each source sits beside the manifest, and a name that clashes with the library stops the plan. Keep the manifest and its skills in a private location. Plans and receipts then hold their content, so keep those under ignored state too.
 
+## State folder
+
+`--state` decides where the ownership ledger and receipts live, and its default is the running checkout's own `.agent/local/setup`. A plan made from a worktree or a temporary folder must pass `--state <main checkout>/.agent/local/setup` on `plan`, `apply` and `rollback`. Otherwise the ledger lands outside the main checkout, and the next plan treats the installed files as unmanaged conflicts. Check that the receipt path `apply` prints is under the main checkout.
+
 ## Comparing installed copies
 
 - Use the ownership ledger in `.agent/local/setup/targets/`, not raw hashes. Installation rewrites skill content (placeholders, shared reference links, a footer), so an unedited copy hashes differently from its source.

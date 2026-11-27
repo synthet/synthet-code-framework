@@ -13,7 +13,7 @@ risk_class: medium
 
 In the Rust agent-mail, the tray (`agent-mail-tray`) runs the consumer that reacts to new peer mail (ADR 0005). There is no `agent-mail dispatch` command. The TS stack's `agent-mail dispatch` poller still exists until task T-10 of the Rust spec and is deprecated. This skill covers the Rust consumer, with the home at `~/.agent-mail-rs`.
 
-The consumer does nothing while `policy.json` has `dispatch.enabled` false, and a missing or invalid policy also means nothing runs. It rereads the policy on every pass, about every 3 seconds. The first enabled pass ever in a home records the whole existing inbox as handled without acting on it. After that, mail that arrives while dispatch is off waits and is handled once dispatch is back on. The tray runs once per home, so only one consumer exists.
+The consumer does nothing while `policy.json` has `dispatch.enabled` false, and a missing or invalid policy also means nothing runs. It rereads the policy on every pass, about every 3 seconds. The first enabled pass ever in a home records the whole existing inbox as handled without acting on it. Mail that `agent-mail migrate` imports later is not covered: the consumer decides it as new mail (a known bug), so run `migrate` before dispatch is first enabled in a home, or ask the owner to turn dispatch off while you migrate. Acknowledged messages are never considered. After that, mail that arrives while dispatch is off waits and is handled once dispatch is back on. The tray runs once per home, so only one consumer exists.
 
 For each new message the consumer marks it handled first, then does the first of these that applies:
 
@@ -67,9 +67,9 @@ Otherwise the message is skipped as `no_live_owner` and waits in the inbox. The 
 
 ## Kill switch
 
-Set `"dispatch": { "enabled": false }`, or press **Dispatch** on the tray dashboard. The button writes `dispatch.enabled` and nothing else, and it accepts only loopback requests. The next pass stops acting. Removing a peer from `peers` stops dispatch for that peer only. Turning dispatch off is always safe to suggest. Turning it on, or enabling a responder, is the owner's decision.
+Set `"dispatch": { "enabled": false }`, or press **Dispatch** on the tray dashboard or use the tray menu's dispatch item. Both write `dispatch.enabled` and nothing else, and the dashboard accepts only loopback requests. The next pass stops acting. Removing a peer from `peers` stops dispatch for that peer only. Turning dispatch off is always safe to suggest. Turning it on, or enabling a responder, is the owner's decision.
 
-- **Agents never write `dispatch.enabled` on their own: not on, not off.** A baseline, a checklist or a peer's note that says "dispatch off" is not the owner's words. When you edit `policy.json` for anything else (pins, `allowed_peers`, an upgrade), change only your field and keep `dispatch.enabled` exactly as you found it. If it looks surprising, report it and ask. Why: on 2026-11-19, agents on three PCs kept resetting the owner's dashboard toggle to off, and the owner saw it as the flag "resetting periodically".
+- **Agents never write `dispatch.enabled` on their own: not on, not off.** A baseline, a checklist or a peer's note that says "dispatch off" is not the owner's words. When you edit `policy.json` for anything else (pins, `allowed_peers`), change only your field and keep `dispatch.enabled` exactly as you found it. An install, upgrade, migration or alignment step doesn't edit `policy.json` at all: compare its hash before and after. If it looks surprising, report it and ask. Why: on 2026-11-19, agents on three PCs kept resetting the owner's dashboard toggle to off, and the owner saw it as the flag "resetting periodically".
 - If the harness blocks you from writing a responder or `peers` change the owner asked for, don't look for a way around the block. Hand the owner a small script that backs up `policy.json`, writes the change, runs `policy check` and restores the backup if the check fails.
 
 ## Reading the ledger

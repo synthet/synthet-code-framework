@@ -45,6 +45,10 @@ reaches the other PC before you finish it.
    - numbered asks, each one answerable;
    - what you'll do after the reply.
 
+   Write the draft with the editor's file-write tool or a quoted heredoc (`<<'EOF'`). An unquoted heredoc
+   runs every backtick in the Markdown as a command and can leave the draft empty. `new` and `reply` refuse
+   an empty draft, but not a mangled one.
+
    Add `- **Reply needed:** no` to the header of a pure status note, so the thread shows as `fyi`.
 2. `python $M new --to <peer> --topic <topic> --from-file draft.md [--note]` writes
    `<me>-to-<peer>/<topic>-<date>/README.md` (or one `.md` with `--note`) **only if `check` would pass**:
@@ -85,6 +89,8 @@ lines included) counts in those threads too, so one reply can answer several top
 
 ## Keep the other PC informed
 
+- **Reread the peer's latest notes in a thread before taking work in it.** If one says the work is in
+  progress there, offer to review it instead of starting a second copy.
 - **Post an interim status note** when you'll be busy, or waiting on the user, for more than a few minutes.
   Otherwise the other side concludes you went silent and stops watching.
 - **Correct a posted message that turned out wrong** with a new file in the same thread
